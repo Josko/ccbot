@@ -1,0 +1,37 @@
+# $Id: Makefile.in 62 2005-03-09 21:11:53Z gyunaev $
+CC = @CC@
+CFLAGS = -Wall -DIN_BUILDING_LIBIRC @CFLAGS@
+AR=@AR@ cr
+RANLIB=@RANLIB@
+INCLUDES=-I../include
+
+
+OBJS = libircclient.o
+
+all:	lib
+
+lib:	libircclient.a
+
+install: lib
+	-mkdir @prefix@/include
+	-mkdir @prefix@/lib
+	cp ../include/libircclient.h @prefix@/include/libircclient.h
+	cp ../include/libirc_errors.h @prefix@/include/libirc_errors.h
+	cp ../include/libirc_events.h  @prefix@/include/libirc_events.h 
+	cp libirc.a @prefix@/include/lib/libirc.a
+
+$(OBJS): utils.c dcc.c errors.c portable.c sockets.c colors.c
+
+libircclient.a: $(OBJS)
+	$(AR) libircclient.a $(OBJS)
+	$(RANLIB) libircclient.a
+
+clean:
+	rm -f libircclient.a $(OBJS)
+
+distclean: clean
+	-rm -f Makefile
+
+.c.o:
+	@echo "Compiling  $<"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
