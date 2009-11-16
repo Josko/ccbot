@@ -246,6 +246,7 @@ Version 0.27 ( 13.11.2009. )
 - Rewrote !setaccess, !setcommand
 - Instead of just "storm.dll" the bot searches for "Storm.dll" too - important only on Linux systems
 - Fixed the timing issue on sending "accept"s or "decline"s to clan invitations (when creating a clan and normal invitations)
+- Swear kicking now kicks users who aren't safelisted and have access lower then 5
 
 Version 0.26 ( 10.11.2009. )
 

@@ -1322,16 +1322,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		{
 			transform( Message.begin( ), Message.end( ), Message.begin( ), (int(*)(int))tolower );
 
-			// only kick non-root admin users, non-admins and non-safelisted users when not using the unban,ban and kick commands
-			if( !Message.empty( ) && ( Message[0] != m_CommandTrigger ) && ( Message.find( "unban" ) == string :: npos ) && ( Message.find( "ban" ) == string :: npos ) && ( Message.find( "kick" ) == string :: npos ) && !Match( User, m_HostbotName ) &&  !m_GHost->m_DB->SafelistCheck( m_Server, User ) && IsInChannel( User ) )
-			{	
-
+			if( !Message.empty( ) && !Match( User, m_HostbotName ) && !m_GHost->m_DB->SafelistCheck( m_Server, User ) && IsInChannel( User ) && Access < 5 )
+			{
 				for( int i = 0; i < m_GHost->m_SwearList.size( ); i++)
 					if( Message.find( m_GHost->m_SwearList[i] ) != string :: npos )
 						QueueChatCommand( m_GHost->m_Language->SwearKick( User, m_GHost->m_SwearList[i] ) );							
 			}
 		}
-
 	}
 
 	else if( Event == CBNETProtocol :: EID_INFO )
@@ -1365,15 +1362,15 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 		// check if the user joined has been banned if yes ban him again and send him the reason the first time he tries to join
 		CDBBan *Ban = m_GHost->m_DB->BanCheck( m_Server, User );
+
 		if( Ban )
 		{
 			SendChatCommand( "/ban " + User );
-			string GetReasonString = Ban->GetReason( );
 
-			if ( GetReasonString.empty( ) )
+			if ( Ban->GetReason( ).empty( ) )
 				QueueWhisperCommand( "You were banned on " + Ban->GetDate( ) + " by " + Ban->GetAdmin( ), User );
 			else
-				QueueWhisperCommand( "You were banned on " + Ban->GetDate( ) + " because \"" + GetReasonString + "\" by " + Ban->GetAdmin( ), User );
+				QueueWhisperCommand( "You were banned on " + Ban->GetDate( ) + " because \"" + Ban->GetReason( ) + "\" by " + Ban->GetAdmin( ), User );
 
 			delete Ban;
 			Ban = NULL;
