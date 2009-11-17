@@ -400,22 +400,22 @@ void CGHost :: UpdateSwearList( )
 			if( !line.empty( ) )
 			{
 				if( find( m_SwearList.begin( ), m_SwearList.end( ), line ) != m_SwearList.end( ) && line.substr(0,1) != "#" )
-					CONSOLE_Print( "[GHOST] duplicate swear: " + line );			
+					CONSOLE_Print( "[CONFIG] duplicate swear: " + line );			
 				else if( line.substr(0,1) != "#" )
 					m_SwearList.push_back( line );
 			}
 		}
-		CONSOLE_Print( "[GHOST] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
+		CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
 	}
 	else
 	{		
 		ofstream file( filestr.c_str( ), ios :: app );
 
 		if( file.fail( ) )
-			CONSOLE_Print( "[GHOST] error updating swears from swear list" );
+			CONSOLE_Print( "[CONFIG] error updating swears from swear list" );
 		else
 		{
-			CONSOLE_Print( "[GHOST] creating a new, blank swears.txt file" );
+			CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
 			file << "#############################################################################################################" << endl;
 			file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! WRITE EVERYTHING HERE IN lowercase OR IT WONT WORK! ####" << endl;
 			file << "#############################################################################################################" << endl;
@@ -425,6 +425,32 @@ void CGHost :: UpdateSwearList( )
 	}
 	file.close( );
 	file.clear( );
+}
+
+void CGHost :: ReloadConfigs( )
+{
+#ifdef WIN32
+		string CFGFile = "cfg\\ghost.cfg";
+#else
+		string CFGFile = "cfg/ghost.cfg";
+#endif
+	CConfig CFG;
+	CFG.Read( CFGFile );
+	SetConfigs( &CFG );
+}
+
+void CGHost :: SetConfigs( CConfig *CFG )
+{
+	// this doesn't set EVERY config value since that would potentially require reconfiguring the battle.net connections
+	// it just set the easily reloadable values
+
+#ifdef WIN32
+	m_Language = new CLanguage( "cfg\\language.cfg" );
+#else
+	m_Language = new CLanguage( "cfg/language.cfg" );
+#endif
+	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
+	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;	
 }
 
 void CGHost :: UpdateCommandAccess( )

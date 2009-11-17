@@ -473,3 +473,27 @@ BYTEARRAY UTIL_DecodeStatString( BYTEARRAY &data )
 
 	return Result;
 }
+vector<string> UTIL_Tokenize( string s, char delim )
+{
+	vector<string> Tokens;
+	string Token;
+
+	for( string :: iterator i = s.begin( ); i != s.end( ); i++ )
+	{
+		if( *i == delim )
+		{
+			if( Token.empty( ) )
+				continue;
+
+			Tokens.push_back( Token );
+			Token.clear( );
+		}
+		else
+			Token += *i;
+	}
+
+	if( !Token.empty( ) )
+		Tokens.push_back( Token );
+
+	return Tokens;
+}

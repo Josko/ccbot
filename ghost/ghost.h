@@ -100,8 +100,7 @@ public:
 
 	// processing functions
 
-	bool Update( long usecBlock );
-	void UpdateSwearList( );
+	bool Update( long usecBlock );	
 	void UpdateCommandAccess( );
 	void CreateNewLanguage( );
 
@@ -114,6 +113,9 @@ public:
 	void EventBNETConnectTimedOut( CBNET *bnet );
 
 	// other functions
+	void UpdateSwearList( );
+	void SetConfigs( CConfig *CFG );	
+	void ReloadConfigs( );
 
 	
 };

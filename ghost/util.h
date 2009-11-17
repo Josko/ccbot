@@ -71,4 +71,8 @@ string UTIL_FileSafeName( string fileName );
 BYTEARRAY UTIL_EncodeStatString( BYTEARRAY &data );
 BYTEARRAY UTIL_DecodeStatString( BYTEARRAY &data );
 
+// other
+
+vector<string> UTIL_Tokenize( string s, char delim );
+
 #endif

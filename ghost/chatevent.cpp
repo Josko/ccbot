@@ -885,6 +885,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					m_GHost->UpdateSwearList( );
 					SendGetClanList( );
+					m_GHost->ReloadConfigs( );
 					QueueChatCommand( "CFG settings and clan list reloaded.", User, Whisper );
 				}
 
@@ -896,12 +897,53 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					if( Access > 8 )
 						QueueChatCommand( Payload );
+					else if( Payload[0] != '/' )
+						QueueChatCommand( Payload );
 					else
+						QueueChatCommand( "Using B.NET commands is not allowed via say command.", User, Whisper );					
+				}
+
+				//
+				// !SAYBNET
+				//
+
+				if( Command == "saybnet" && !Payload.empty( ) && Access >= m_GHost->m_DB-> CommandAccess( "say" ) )
+				{
+					vector<string> Tokens = UTIL_Tokenize( Payload, ' ' );
+
+					for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
 					{
-						if( Payload.find( "/" ) == string :: npos )
-							QueueChatCommand( Payload );
+						if( Access > 8 && Match( (*i)->GetServer( ), Tokens[0] ) )
+							(*i)->QueueChatCommand( Tokens[1] );
+						else if( Tokens[1][0] != '/' && Match( (*i)->GetServer( ), Tokens[0] ) )
+							(*i)->QueueChatCommand( Tokens[1] );
+						else if( !Match( (*i)->GetServer( ), Tokens[0] ) && (*i)->GetServer( ) == m_Server )
+							QueueChatCommand( "That server doesn't exist.", User, Whisper );
 						else
-							QueueChatCommand( "Using / is not allowed via say command.", User, Whisper );
+						{
+							if( (*i)->GetServer( ) == m_Server )
+							QueueChatCommand( "Using B.NET commands is not allowed via say command.", User, Whisper );
+						}
+					}
+				}
+
+				//
+				// !SAYBNETS
+				//
+
+				if( Command == "saybnets" && !Payload.empty( ) && Access >= m_GHost->m_DB-> CommandAccess( "say" ) )
+				{
+					for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
+					{
+						if( Access > 8 )
+							(*i)->QueueChatCommand( Payload );
+						else if( Payload[0] != '/' )
+							(*i)->QueueChatCommand( Payload );
+						else
+						{
+							if( (*i)->GetServer( ) == m_Server )
+							QueueChatCommand( "Using B.NET commands is not allowed via say command.", User, Whisper );
+						}
 					}
 				}
 
@@ -1029,17 +1071,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( Command == "checkban" && Access >= m_GHost->m_DB->CommandAccess( "checkban" ) )
 				{
-					if ( Payload.empty( ) )
+					if( Payload.empty( ) )
 					User = Payload;
 					CDBBan *Ban = m_GHost->m_DB->BanCheck( m_Server, Payload );
 					
 					if( Ban )
 					{	
-						string GetReasonString = Ban->GetReason( );
-						if ( GetReasonString.empty( ) )
+						if( Ban->GetReason( ).empty( ) )
 							QueueChatCommand( "User [" + Payload + "] was banned on " + Ban->GetDate( ) + " by " + Ban->GetAdmin( ) + ".", User, Whisper );
 						else
-							QueueChatCommand( "User [" + Payload + "] was banned on " + Ban->GetDate( ) + " because \"" + GetReasonString + "\" by " + Ban->GetAdmin( ) + ".", User, Whisper );
+							QueueChatCommand( "User [" + Payload + "] was banned on " + Ban->GetDate( ) + " because \"" + Ban->GetReason( ) + "\" by " + Ban->GetAdmin( ) + ".", User, Whisper );
 						delete Ban;
 						Ban = NULL;
 					}
@@ -1061,7 +1102,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( Command == "invite" && !Payload.empty( ) && Access >= m_GHost->m_DB->CommandAccess( "invite" )  && m_ClanCommandsEnabled && IsInChannel( Payload ) )
 				{
 
-					if ( !IsClanMember( Payload ) )
+					if( !IsClanMember( Payload ) )
 					{
 						if( IsClanShaman( m_UserName ) || IsClanChieftain( m_UserName ) )
 						{

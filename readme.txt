@@ -117,6 +117,11 @@ Commands
 
 In battle.net (via local chat or whisper at any time).
 
+Definitons: 
+<name> - needed input - command won't work if left out
+[name] - optional input
+
+
 !addaccess <access <name>	sets the users access from 0-10
 !countaccess <access>		counts how many people have # access
 !checkaccess <name>		checks the users access
@@ -126,31 +131,31 @@ In battle.net (via local chat or whisper at any time).
 !channel <name>          	change battle.net channel
 !countbans               	display the total number of bans for this realm
 !delban <name>           	remove a ban from the database for all realms
-!exit	                 	shutdown ghost++ - Root admin only
+!exit	                 	shutdown ccbot
 !getclan                 	refresh the internal copy of the clan members list
 !quit	                 	alias to !exit
 !say <text>              	send <text> to battle.net as a chat command
 !unban <name>            	alias to !delban
-!version                 	display version information (can be used by non admins but returns lesser information)
+!version                 	display version information
 !clanlist		 	lists the clan members by clan ranks (Peon, Grunt, Shaman, Chieftain - Recruits who are less then 7 days in the clan are considered Peons)
 !shaman <name>			promotes a grunt or peon to shaman rank (bot needs chieftain rank for that - not recommended!)
 !grunt <name>		 	promotes a peon to grunt rank (bot needs at least a Shaman rank for that)
 !peon <name>		 	demotes a grunt to a peon rank (bot needs at least a Shaman rank for that)
 !remove <name>		 	removes a peon/grunt from the clan (bot needs at least a Shaman rank for that)
-!games <off>|<on>	 	bot does not announce The Black Road games by scanning GameNames by default, but it has the feature
+!games <off>|<on>	 	announces the games users from the channel enter
 !kick <name>		 	kicks the user from the channel
 !squelch <name>		 	squelches a user
 !ignore <name>			alias to !squelch
 !unsquelch <name>	 	unsquelches a user
 !unignore <name>		alias to !unsquelch
-!clearqueue		 	clears the message queue if it starts to flood or any similar use
+!clearqueue		 	clears the message queue
 !cq			 	alias to !clearqueue
-!announce <interval> <text>	prints the set text every XYZ seconds in channel (can be used as anti-idle or "adverstising)
-!announce <off>                 disables the announce if it was previously turned on by the !announce <interval> <text>
+!announce <interval> <text>	prints the set text every X seconds in channel
+!announce <off>                 turns off announce
 !greet <off|on>			enables or disables the greet message(s) on user join
 !squelchlist			lists names of squelched users
 !sl				alias to !squelchlist
-!addsafelist <name>		adds a user to the safelist for all realms
+!addsafelist <name>		adds a user to the safelist
 !adds <name>			alias to !addsafelist
 !delsafelist <name>		removes a user from the safelist for all realms
 !dels <name>			alias to !delsafelist
@@ -163,7 +168,7 @@ In battle.net (via local chat or whisper at any time).
 !match <text>			tries to partially match the entered text to a user currently in the channel (used for testing)
 !check <name>			checks the user if he is banned, if he in the clan, if yes - which rank and does he have admin access
 !motd <text>			sets the clan MOTD to the set text
-!reload				reloads the text CFG files, clan list...
+!reload				reloads the text CFG files and clan list
 !uptime				shows the uptime of the bot
 !online                  	lists current online clan members
 !o			 	alias to !online
@@ -171,16 +176,17 @@ In battle.net (via local chat or whisper at any time).
 !spit <name>		 	spits a user, print random text
 !join			 	sends a clan invite to the user who sent the command
 !checkban <name>         	check if a user is banned on this realm
-!version                 	display lesser version information
-!gn8			 	prints a good night text with courtesy of the User who sent the command
-!invite <name>			invites a user to the clan - can be used by clan members of grunts and higher
+!gn8			 	prints a good night text
+!invite <name>			invites a user to the clan
 !command <name>			shows the access needed for the set command
 !setcommand <access> <name> 	sets the access for the set command (use full names for commands - !clearqueue instead of !cq)
-!accept				accepts the last (and active) clan invitation
-!ping <name>			shows users ping (to server), if <name> empty shows your own ping
+!accept				accepts a active clan invitation
+!ping [name]			shows users ping (to server)
 !restart			closes and starts the bot again - ONLY FOR WINDOWS - DO NOT RENAME ghost.exe TO ANYTHING ELSE or it won't work
-!lockdown <access>		activates lockdown mode - everyone with a lower access then set will get banned until you deactivate lockdown
+!lockdown <access>		activates lockdown mode - everyone with a lower access cannot enter
 !lockdown off			deactivates lockdown mode and everyone banned during lockdown gets unbanned
+!saybnets <text>		sends the chat command to every BNET we're connected to
+!saybnet <bnet>	<text>		sends the chat command just to the specified BNET we're connected to
 
 ============================
 Compiling CC Bot on Windows
@@ -247,6 +253,8 @@ Version 0.27 ( 13.11.2009. )
 - Instead of just "storm.dll" the bot searches for "Storm.dll" too - important only on Linux systems
 - Fixed the timing issue on sending "accept"s or "decline"s to clan invitations (when creating a clan and normal invitations)
 - Swear kicking now kicks users who aren't safelisted and have access lower then 5
+- Added !saybnets, !saybnet
+- !reload now reloads all CFGs (but only easily reloadable variables, for most of them a full CCBot restart is needed)
 
 Version 0.26 ( 10.11.2009. )
 
