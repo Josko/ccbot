@@ -875,8 +875,8 @@ bool CBNET :: Match( string string1, string string2 )
 
 	if ( string1 == string2 )
 		return true;
-	else
-		return false;
+
+	return false;
 }
 
 //

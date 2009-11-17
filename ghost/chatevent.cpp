@@ -910,19 +910,24 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( Command == "saybnet" && !Payload.empty( ) && Access >= m_GHost->m_DB-> CommandAccess( "say" ) )
 				{
 					vector<string> Tokens = UTIL_Tokenize( Payload, ' ' );
+					Payload = Payload.substr( Tokens[0].size( ) + 1 );				
 
 					for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
 					{
 						if( Access > 8 && Match( (*i)->GetServer( ), Tokens[0] ) )
-							(*i)->QueueChatCommand( Tokens[1] );
-						else if( Tokens[1][0] != '/' && Match( (*i)->GetServer( ), Tokens[0] ) )
-							(*i)->QueueChatCommand( Tokens[1] );
-						else if( !Match( (*i)->GetServer( ), Tokens[0] ) && (*i)->GetServer( ) == m_Server )
-							QueueChatCommand( "That server doesn't exist.", User, Whisper );
-						else
 						{
-							if( (*i)->GetServer( ) == m_Server )
-							QueueChatCommand( "Using B.NET commands is not allowed via say command.", User, Whisper );
+							(*i)->QueueChatCommand( Payload );
+						}
+						else if( Payload[0] != '/' && Match( (*i)->GetServer( ), Tokens[0] ) )
+						{
+							(*i)->QueueChatCommand( Payload );
+						}
+						else
+						{	if( !Match( (*i)->GetServer( ), Tokens[0] ) && (*i)->GetServer( ) == m_Server )
+								QueueChatCommand( "That server doesn't exist.", User, Whisper );
+
+							if( (*i)->GetServer( ) == m_Server && Payload[0] == '/' )
+								QueueChatCommand( "Using B.NET commands is not allowed via say command.", User, Whisper );
 						}
 					}
 				}
@@ -936,9 +941,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					for( vector<CBNET *> :: iterator i = m_GHost->m_BNETs.begin( ); i != m_GHost->m_BNETs.end( ); i++ )
 					{
 						if( Access > 8 )
+						{
 							(*i)->QueueChatCommand( Payload );
+						}
 						else if( Payload[0] != '/' )
+						{
 							(*i)->QueueChatCommand( Payload );
+						}
 						else
 						{
 							if( (*i)->GetServer( ) == m_Server )
@@ -1139,8 +1148,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						SendGetClanList( );
 					}
 					else
-						QueueChatCommand( "This feature has been disabled.", User, Whisper );           
-                                      	
+						QueueChatCommand( "This feature has been disabled.", User, Whisper ); 	
 				}
 
 				//
@@ -1177,7 +1185,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 							SendChatCommand( "/w " + User + " " + Online.substr(155,Online.size( )-157) );
 						}
 					}
-					
 				}
  
 				//
