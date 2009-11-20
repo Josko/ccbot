@@ -2,7 +2,7 @@
 Clan & Channel Bot - Version 0.27
 =================================
 
-CC Bot is a heavily modified GHost++ project made by Varlock. Author of the modified version is h4x0rz88 from Eurobattle.net. The original GHost++ project can be found here: http://forum.codelain.com/
+CCBot is a heavily modified GHost++ project made by Varlock. Author of the modified version is h4x0rz88 from Eurobattle.net. The original GHost++ project can be found here: http://forum.codelain.com/
 You can compile and run GHost++ on Windows and Linux with this release although the code should be mostly portable to other operating systems such as OS X with only very minor changes.
 Since it is written in native code (C++) you do NOT need to install the .NET framework on Windows or Mono on Linux.
 
@@ -12,12 +12,12 @@ Works best on Eurobattle.net - as it's esclusively written for it. Fawkz.com (or
 Configuration
 =============
 
-CC Bot is configured via the configuration files - ghost.cfg and language.cfg located in the "cfg" folder.
+CCBot is configured via the configuration files - ghost.cfg and language.cfg located in the "cfg" folder.
 The program itself runs in console mode and does not take any console input (it outputs messages to the console for information purposes only).
 
-***You need to edit ghost.cfg before running CC Bot***
-***You need to edit ghost.cfg before running CC Bot***
-***You need to edit ghost.cfg before running CC Bot***
+***You need to edit ccbot.cfg before running CC Bot***
+***You need to edit ccbot.cfg before running CC Bot***
+***You need to edit ccbot.cfg before running CC Bot***
 
 There is also swears.cfg in the "cfg" folder in which you configure banned words and/or phrases.
 
@@ -189,7 +189,7 @@ Definitons:
 !saybnet <bnet>	<text>		sends the chat command just to the specified BNET we're connected to
 
 ============================
-Compiling CC Bot on Windows
+Compiling CCBot on Windows
 ============================
 
 1. Download Visual C++ 2008 Express Edition at http://www.microsoft.com/express/
@@ -200,7 +200,7 @@ Compiling CC Bot on Windows
 Notes:
 
 An already compiled BNSCUtil.dll is supplied but BNSCUtil project and source are still here. Users just need to compile
-the ghost project and replace the current binary if they do not experience any problem with the current libs, if problems occur try compiling all of the librares yourself, then GHost then try again.
+the ccbot project and replace the current binary if they do not experience any problem with the current libs, if problems occur try compiling all of the librares yourself, then CCBot then try again.
 
 
 ==========================
@@ -213,25 +213,25 @@ You will need a few libraries, all of which are installed, if you have apt, with
 
 Then, assuming you extracted this archive to your home dir (~):
 
-2. cd ~/ghost/bncsutil/src/bncsutil/
+2. cd ~/ccbot/bncsutil/src/bncsutil/
 3. make
 4. sudo make install
 
 Once it's built you can continue:
 
-5. cd ~/ghost/ghost/
+5. cd ~/ccbot/ccbot/
 6. make
 (ignore the sqlite3.c warnings)
 
-The binary will be located in ~/ghost/ghost from where you can move it anywhere you need to.
+The binary will be located in ~/ccbot/ccbot from where you can move it anywhere you need to.
 
 ========================
 Running GHost++ on Linux
 ========================
 
-You will need to copy ~/ghost/bncsutil/src/bncsutil/libbncutil.so to /usr/local/lib/ or otherwise set LD_LIBRARY_PATH so it can find the bncsutil library. (Install bncsutil)
-You will also need to copy game.dll, Storm.dll, and war3.exe from a valid Warcraft III installation to the location specified in your ghost.cfg 
-Then when in the GHost++ binary directory just type in terminal "./ghost++" without the quotes, to run it.
+You will need to copy ~/ccbot/bncsutil/src/bncsutil/libbncutil.so to /usr/local/lib/ or otherwise set LD_LIBRARY_PATH so it can find the bncsutil library. (Install bncsutil)
+You will also need to copy game.dll, Storm.dll, and war3.exe from a valid Warcraft III installation to the location specified in your ccbot.cfg 
+Then when in the CCBot binary directory just type in terminal "./ccbot" without the quotes, to run it.
 
 =========
 CHANGELOG
@@ -255,6 +255,7 @@ Version 0.27 ( 13.11.2009. )
 - Swear kicking now kicks users who aren't safelisted and have access lower then 5
 - Added !saybnets, !saybnet
 - !reload now reloads all CFGs (but only easily reloadable variables, for most of them a full CCBot restart is needed)
+- Much renaming in the source and filenames
 
 Version 0.26 ( 10.11.2009. )
 
