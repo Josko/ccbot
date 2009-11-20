@@ -95,16 +95,8 @@ void SignalCatcher( int signal )
 // main
 //
 
-int main( int argc, char **argv )
+int main( )
 {
-#ifdef WIN32
-		string CFGFile = "cfg\\ccbot.cfg";
-#else
-		string CFGFile = "cfg/ccbot.cfg";
-#endif
-
-	if( argc > 1 && argv[1] )
-		CFGFile = argv[1];
 
 	// read config file
 
@@ -156,7 +148,7 @@ int main( int argc, char **argv )
 
 	while( 1 )
 	{
-		// block for 50ms on all sockets - if you intend to perform any timed actions more frequently you should change this
+		// block for 100ms on all sockets - if you intend to perform any timed actions more frequently you should change this
 		// that said it's likely we'll loop more often than this due to there being data waiting on one of the sockets but there aren't any guarantees
 
 		if( gCCBot->Update( 10000 ) )
@@ -239,16 +231,10 @@ CCCBot :: CCCBot( CConfig *CFG )
 {
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Exiting = false;
-	m_Version = "0.27";
-#ifdef WIN32
-	m_Language = new CLanguage( "cfg\\language.cfg" );
-#else
-	m_Language = new CLanguage( "cfg/language.cfg" );
-#endif
+	m_Version = "0.28";
+	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
-	string BotCommandTrigger = CFG->GetString( "bot_commandtrigger", "!" );
 	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;	
-	
 
 	// load the battle.net connections
 	// we're just loading the config data and creating the CBNET classes here, the connections are established later (in the Update function)
@@ -307,7 +293,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 
 	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + " - by h4x0rz88" );
 
-	// Update the .txt configuration file(s)
+	// Update the swears.cfg file
 	UpdateSwearList( );	
 	
 	// Check for the default access system values
@@ -382,11 +368,7 @@ bool CCCBot :: Update( long usecBlock )
 void CCCBot :: UpdateSwearList( )
 {
 
-#ifdef WIN32
-	string line, filestr = "cfg\\swears.cfg";
-#else
-	string line, filestr = "cfg/swears.cfg";
-#endif
+	string line, filestr = SwearsFile;
 
 	ifstream file( filestr.c_str( ) );
 
@@ -429,11 +411,6 @@ void CCCBot :: UpdateSwearList( )
 
 void CCCBot :: ReloadConfigs( )
 {
-#ifdef WIN32
-		string CFGFile = "cfg\\ccbot.cfg";
-#else
-		string CFGFile = "cfg/ccbot.cfg";
-#endif
 	CConfig CFG;
 	CFG.Read( CFGFile );
 	SetConfigs( &CFG );
@@ -444,11 +421,8 @@ void CCCBot :: SetConfigs( CConfig *CFG )
 	// this doesn't set EVERY config value since that would potentially require reconfiguring the battle.net connections
 	// it just set the easily reloadable values
 
-#ifdef WIN32
-	m_Language = new CLanguage( "cfg\\language.cfg" );
-#else
-	m_Language = new CLanguage( "cfg/language.cfg" );
-#endif
+	m_Language = new CLanguage( LanguageFile );
+
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
 	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;	
 }
@@ -512,8 +486,7 @@ void CCCBot :: UpdateCommandAccess( )
 		{
 			m_DB->CommandSetAccess( (*i).first, (*i).second );
 			CONSOLE_Print( "[ACCESS] no value found for command [" + (*i).first + "] - setting default value of [" + UTIL_ToString( (*i).second ) + "]" );			
-		}
-		
+		}		
 }
 
 void CCCBot :: EventBNETConnecting( CBNET *bnet )

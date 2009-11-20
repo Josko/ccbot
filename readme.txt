@@ -1,5 +1,5 @@
 =================================
-Clan & Channel Bot - Version 0.27
+Clan & Channel Bot - Version 0.28
 =================================
 
 CCBot is a heavily modified GHost++ project made by Varlock. Author of the modified version is h4x0rz88 from Eurobattle.net. The original GHost++ project can be found here: http://forum.codelain.com/
@@ -236,6 +236,11 @@ Then when in the CCBot binary directory just type in terminal "./ccbot" without 
 =========
 CHANGELOG
 =========
+
+Version 0.27 ( 20.11.2009. )
+
+- Refined some parts of the code
+- Removed arguments when running ccbot since .cfg file placement is fixed
 
 Version 0.27 ( 13.11.2009. )
 

@@ -883,8 +883,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( Command == "reload" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "reload" ) )
 				{
-					m_CCBot->UpdateSwearList( );
 					SendGetClanList( );
+					m_CCBot->UpdateSwearList( );					
 					m_CCBot->ReloadConfigs( );
 					QueueChatCommand( "CFG settings and clan list reloaded.", User, Whisper );
 				}

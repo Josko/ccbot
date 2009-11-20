@@ -47,12 +47,11 @@ void CConfig :: Read( string file )
 	{
 		CONSOLE_Print( "[CONFIG] warning - unable to read file [" + file + "]" );
 
-		if( file == "cfg\\language.cfg"  || file == "cfg/language.cfg" )
+		if( file == LanguageFile )
 			CreateNewLanguage( );
 
-		if( file == "cfg\\ccbot.cfg"  || file == "cfg/ccbot.cfg" )
+		if( file == CFGFile )
 			CreateConfig( );
-
 	}
 	else
 	{
@@ -110,11 +109,8 @@ string CConfig :: GetString( string key, string x )
 void CConfig :: CreateNewLanguage( )
 {
 
-#ifdef WIN32
-	string line, filestr = "cfg\\language.cfg";
-#else
-	string line, filestr = "cfg/language.cfg";
-#endif
+
+	string line, filestr = LanguageFile;
 
 	ofstream file( filestr.c_str( ), ios :: app );
 
@@ -133,11 +129,8 @@ void CConfig :: CreateNewLanguage( )
 void CConfig :: CreateConfig( )
 {
 
-#ifdef WIN32
-	string line, filestr = "cfg\\ccbot.cfg";
-#else
-	string line, filestr = "cfg/ccbot.cfg";
-#endif
+
+	string line, filestr = CFGFile;
 
 	ifstream file( filestr.c_str( ) );
 

@@ -53,8 +53,14 @@ uint32_t GetTicks( );		// milliseconds since computer startup usually, overflows
 
 #ifdef WIN32
  #define MILLISLEEP( x ) Sleep( x )
+ #define CFGFile "cfg\\ccbot.cfg"
+ #define LanguageFile "cfg\\language.cfg"
+ #define SwearsFile "cfg\\swears.cfg"
 #else
  #define MILLISLEEP( x ) usleep( ( x ) * 1000 )
+ #define CFGFile "cfg/ccbot.cfg"
+ #define LanguageFile "cfg/language.cfg"
+ #define SwearsFile "cfg/swears.cfg"
 #endif
 
 // network
