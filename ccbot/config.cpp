@@ -46,7 +46,12 @@ void CConfig :: Read( string file )
 	if( in.fail( ) )
 	{
 		CONSOLE_Print( "[CONFIG] warning - unable to read file [" + file + "]" );
-		CreateNewLanguage( );
+
+		if( file == "cfg\\language.cfg"  || file == "cfg/language.cfg" )
+			CreateNewLanguage( );
+
+		if( file == "cfg\\ccbot.cfg"  || file == "cfg/ccbot.cfg" )
+			CreateConfig( );
 
 	}
 	else
@@ -119,12 +124,79 @@ void CConfig :: CreateNewLanguage( )
 	{
 		CONSOLE_Print( "[CONFIG] creating a new lanuage.cfg with default values" );
 		file << "" << endl;
-		file << "" << endl;
-		file << "" << endl;
-		file << "" << endl;
-
 	}
 
+	file.close( );
+	file.clear( );
+}
+
+void CConfig :: CreateConfig( )
+{
+
+#ifdef WIN32
+	string line, filestr = "cfg\\ccbot.cfg";
+#else
+	string line, filestr = "cfg/ccbot.cfg";
+#endif
+
+	ifstream file( filestr.c_str( ) );
+
+	if( file.fail( ) )
+	{		
+		ofstream file( filestr.c_str( ), ios :: app );
+
+		if( file.fail( ) )
+			CONSOLE_Print( "[CONFIG] error making ccbot.cfg" );
+		else
+		{
+			CONSOLE_Print( "[CONFIG] creating a new, blank ccbot.cfg file" );
+
+			file << "# This file is used to configure CCBot options" << endl;
+			file << "" << endl;
+			file << "# Starting here are the global variables which are valid for every b" << endl;
+			file << "" << endl;
+			file << "bot_log = logs\\" << endl;
+			file << "bot_language = language.cfg" << endl;
+			file << "bot_war3path = C:\\Program Files\\Warcraft III\\" << endl;			
+			file << "tcp_nodelay = 0" << endl;
+			file << "db_type = sqlite3" << endl;
+			file << "db_sqlite3_file = ccbot.dbs" << endl;
+			file << "" << endl;
+			file << "# Starting here are the per server variables" << endl;
+			file << "" << endl;
+			file << "bnet_server = server.eurobattle.net" << endl;
+			file << "bnet_cdkeyroc = FFFFFFFFFFFFFFFFFFFFFFFFFF" << endl;
+			file << "bnet_cdkeytft = FFFFFFFFFFFFFFFFFFFFFFFFFF" << endl;
+			file << "bnet_username = <bots bnet account name>" << endl;
+			file << "bnet_password = <bots bnet password>" << endl;
+			file << "bnet_firstchannel = <first channel the bot joins>" << endl;
+			file << "bnet_rootadmin = <your bnet name>" << endl;
+			file << "bnet_commandtrigger = !" << endl;		
+			file << "bnet_greetusers = 0" << endl;
+			file << "bnet_swearingkick = 1" << endl;
+			file << "bnet_selfinvite = 0" << endl;
+			file << "bnet_announcegames = 1" << endl;
+			file << "bnet_banchat = 0" << endl;
+			file << "" << endl;
+			file << "# These variables are blank if not used" << endl;
+			file << "" << endl;
+			file << "bnet_clantag = " << endl;
+			file << "bnet_clandefaultaccess = " << endl;
+			file << "bnet_hostbotname = " << endl;
+			file << "bnet_countryabbrev = HRV" << endl;
+			file << "bnet_country = Croatia" << endl;
+			file << "" << endl;
+			file << "# These variables are used when connecting to a PvPGN - how to fill them can be found on forum.codelain.com and eurobattle.net" << endl;
+			file << "" << endl;		
+			file << "bnet_custom_war3version = 24" << endl;
+			file << "bnet_custom_exeversion = " << endl;
+			file << "bnet_custom_exeversionhash = " << endl;
+			file << "bnet_custom_passwordhashtype = pvpgn" << endl;
+			file << "" << endl;
+			file << "# You can add more servers (upto 9) - using \"bnet2_\" prefix instead of \"bnet_\" and so on" << endl;
+			file << "" << endl;		
+		}
+	}
 	file.close( );
 	file.clear( );
 }

@@ -111,11 +111,10 @@ public:
 	void EventBNETLoggedIn( CBNET *bnet );
 	void EventBNETConnectTimedOut( CBNET *bnet );
 
-	// other functions
-	void UpdateSwearList( );
-	void SetConfigs( CConfig *CFG );	
+	// other functions	
+	void SetConfigs( CConfig *CFG );
 	void ReloadConfigs( );
-
+	void UpdateSwearList( );
 	
 };
 

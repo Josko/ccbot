@@ -256,6 +256,7 @@ Version 0.27 ( 13.11.2009. )
 - Added !saybnets, !saybnet
 - !reload now reloads all CFGs (but only easily reloadable variables, for most of them a full CCBot restart is needed)
 - Much renaming in the source and filenames
+- Create a new ccbot.cfg with the default values if a existing one isn't found
 
 Version 0.26 ( 10.11.2009. )
 

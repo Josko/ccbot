@@ -381,6 +381,7 @@ bool CCCBot :: Update( long usecBlock )
 
 void CCCBot :: UpdateSwearList( )
 {
+
 #ifdef WIN32
 	string line, filestr = "cfg\\swears.cfg";
 #else
