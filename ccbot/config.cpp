@@ -167,7 +167,7 @@ void CConfig :: CreateConfig( )
 			file << "bnet_commandtrigger = !" << endl;		
 			file << "bnet_greetusers = 0" << endl;
 			file << "bnet_swearingkick = 1" << endl;
-			file << "bnet_selfinvite = 0" << endl;
+			file << "bnet_selfjoin = 0" << endl;
 			file << "bnet_announcegames = 1" << endl;
 			file << "bnet_banchat = 0" << endl;
 			file << "" << endl;

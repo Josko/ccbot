@@ -126,6 +126,7 @@ public:
 	void SetConfigs( CConfig *CFG );
 	void ReloadConfigs( );
 	void UpdateSwearList( );
+	string GetServerFromNamePartial( string name );
 	
 };
 

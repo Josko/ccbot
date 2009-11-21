@@ -87,23 +87,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				/**********************
 				******* COMMANDS ******
 				**********************/
-
-				//
-				// !TEST
-				//
-
-				if( Command == "test" && !Payload.empty( ) && Access >= 9 )
-				{
-					CChannel *Result = GetUserByName( Payload );
-
-					if( Result && !Result->GetClan( ).empty( ) )
-						QueueChatCommand( "User is in a uber-clan with a clan tag of: " + Result->GetClan( ), User, Whisper );
-					else if( Result && Result->GetClan( ).empty( ) )
-						QueueChatCommand( "User is lame and doesn't have a clan.", User, Whisper );
-					else
-						QueueChatCommand( "User not in channel.", User, Whisper );
-					
-				}			
+	
 				
 				//
 				// !ACCEPT
@@ -817,21 +801,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					for( vector<string> :: iterator i = LockdownNames.begin( ); i != LockdownNames.end( ); i++ )
 						ImmediateChatCommand( "/unban " + *i );
 					LockdownNames.clear( );
-				}
-
-				//
-				// !MATCH
-				// (command for testing purposes)
-				//
-
-				if( Command == "match" && !Payload.empty( ) && Access >= 8 )
-				{			
-
-					if( GetUserFromNamePartial( Payload ).size( ) >= 2 )
-						QueueChatCommand( "Match found: " + GetUserFromNamePartial( Payload ) + ".", User, Whisper );
-					else 					
-						QueueChatCommand( "No matches or more then one match found.", User, Whisper );
-						
 				}
 
 				//

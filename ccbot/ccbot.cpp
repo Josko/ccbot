@@ -224,15 +224,15 @@ void DEBUG_Print( BYTEARRAY b )
 	cout << "}" << endl;
 }
 
-void * readStdIn(void* in)
+void * readStdIn( void* in )
 {
-    CCCBot* ccbot=(CCCBot*) in;
+    CCCBot* ccbot = ( CCCBot* ) in;
 
     while( true )
     {
         string s;
 
-        getline( std::cin,s );
+        getline( std::cin, s );
 
         if( pthread_mutex_lock( &( ccbot->stdInMutex ) ) == 0 )
         {
@@ -242,29 +242,43 @@ void * readStdIn(void* in)
     }
 }
 
-void CCCBot::readStdInMessages()
+void CCCBot::readStdInMessages( )
 {
     if( pthread_mutex_trylock( &stdInMutex ) == 0 )
     {
 
         for( vector<string> :: iterator i = stdInputMessages.begin( ); i !=stdInputMessages.end( ); i++ )
-        {
-            string s = *i;
+        {            
 
-            if( m_BNETs.size( )> 0 )
-            {
-                CBNET *bnt = m_BNETs.front( );
+		string s = *i;
 
-                if( bnt!=NULL && !bnt->GetExiting( ) )
-                {
-                    CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0,bnt->GetRootAdmin( ), bnt->GetCommandTrigger( )+s );
+		if( s.find( " " ) != string::npos )
+		{
+			vector<string> Tokens = UTIL_Tokenize( *i, ' ' );
+			s = s.substr( Tokens[0].size( ) + 1 );
 
-                    bnt->ProcessChatEvent(&event);
-                }
-            }
+			if( GetServerFromNamePartial( Tokens[0] ).size( ) > 1 )
+			Tokens[0] = GetServerFromNamePartial( Tokens[0] );
+		
+           
+			for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
+			{
+                		if( !(*i)->GetExiting( ) && Tokens[0] == (*i)->GetServer( ) )
+                		{
+                		    CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, (*i)->GetRootAdmin( ), (*i)->GetCommandTrigger( ) + s );
+	
+                		    (*i)->ProcessChatEvent( &event );
+                		}            
+			}
+		}
+		else
+		{
+			DEBUG_Print( "Invalid number of parameters - usage: <server, partial matching> <command, without command trigger>" );
+			DEBUG_Print( "Example: euro ban h4x0rz88 -> this will partial match to server.eurobattle.net and ban h4x0rz88 from the channel" );
+		}		
         }
 
-        stdInputMessages.clear();
+        stdInputMessages.clear( );
         pthread_mutex_unlock( &stdInMutex);
      }
 }
@@ -297,13 +311,16 @@ CCCBot :: CCCBot( CConfig *CFG )
 		string Server = CFG->GetString( Prefix + "server", string( ) );
 		string CDKeyROC = CFG->GetString( Prefix + "cdkeyroc", string( ) );
 		string CDKeyTFT = CFG->GetString( Prefix + "cdkeytft", string( ) );
-		string CountryAbbrev = CFG->GetString( Prefix + "countryabbrev", "RU" );
-		string Country = CFG->GetString( Prefix + "country", "Russia" );
+		string CountryAbbrev = CFG->GetString( Prefix + "countryabbrev", "HRV" );
+		string Country = CFG->GetString( Prefix + "country", "Croatia" );
 		string UserName = CFG->GetString( Prefix + "username", string( ) );
 		string UserPassword = CFG->GetString( Prefix + "password", string( ) );
 		string FirstChannel = CFG->GetString( Prefix + "firstchannel", "The Void" );
 		string RootAdmin = CFG->GetString( Prefix + "rootadmin", string( ) );
-		string BNETCommandTrigger = CFG->GetString( Prefix + "commandtrigger", "-" );
+		string BNETCommandTrigger = CFG->GetString( Prefix + "commandtrigger", "!" );
+
+		if( BNETCommandTrigger.empty( ) )
+			BNETCommandTrigger = "!";
 
 		string ClanTag = CFG->GetString( Prefix + "clantag", "" );
 		string HostbotName = CFG->GetString( Prefix + "hostbotname", "" );
@@ -313,11 +330,9 @@ CCCBot :: CCCBot( CConfig *CFG )
 		bool SelfJoin = CFG->GetInt( Prefix + "selfjoin", 0 ) == 0 ? false : true;
 		bool BanChat = CFG->GetInt( Prefix + "banchat", 0 ) == 0 ? false : true;		
 		uint32_t ClanDefaultAccess = CFG->GetInt( Prefix + "clanmembersdefaultaccess", 4 );
-		if( ClanDefaultAccess > 9)
-			ClanDefaultAccess = 9;
 
-		if( BNETCommandTrigger.empty( ) )
-			BNETCommandTrigger = "!";
+		if( ClanDefaultAccess > 9 )
+			ClanDefaultAccess = 9;
 
 		unsigned char War3Version = CFG->GetInt( Prefix + "custom_war3version", 24 );
 		BYTEARRAY EXEVersion = UTIL_ExtractNumbers( CFG->GetString( Prefix + "custom_exeversion", string( ) ), 4 );
@@ -543,6 +558,41 @@ void CCCBot :: UpdateCommandAccess( )
 			m_DB->CommandSetAccess( (*i).first, (*i).second );
 			CONSOLE_Print( "[ACCESS] no value found for command [" + (*i).first + "] - setting default value of [" + UTIL_ToString( (*i).second ) + "]" );			
 		}		
+}
+
+string CCCBot :: GetServerFromNamePartial( string name )
+{
+
+	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
+	uint32_t PartialMatches = 0;
+	uint32_t DirectMatches = 0;
+	string DirectMatch;
+	string PartialMatch;
+
+	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
+	{
+		string servername = (*i)->GetServer( );
+		transform( servername.begin( ), servername.end( ), servername.begin( ), (int(*)(int))tolower );
+
+			if( servername == name )
+			{
+				DirectMatches++;
+				DirectMatch = (*i)->GetServer( );
+			}
+
+			if( servername.find( name ) != string :: npos )
+			{
+				PartialMatches++;
+				PartialMatch = (*i)->GetServer( );
+			}		
+	}
+
+	if ( DirectMatches == 1 )
+		return DirectMatch;
+	else if ( PartialMatches == 1 )
+		return PartialMatch;
+
+	return "";
 }
 
 void CCCBot :: EventBNETConnecting( CBNET *bnet )
