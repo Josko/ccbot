@@ -27,6 +27,7 @@
 #include "ccbotdb.h"
 #include "ccbotdbsqlite.h"
 #include "bnet.h"
+#include "bnetprotocol.h"
 #include <time.h>
 
 #include <signal.h>
@@ -223,6 +224,51 @@ void DEBUG_Print( BYTEARRAY b )
 	cout << "}" << endl;
 }
 
+void * readStdIn(void* in)
+{
+    CCCBot* ccbot=(CCCBot*) in;
+
+    while( true )
+    {
+        string s;
+
+        getline( std::cin,s );
+
+        if( pthread_mutex_lock( &( ccbot->stdInMutex ) ) == 0 )
+        {
+            ccbot->stdInputMessages.push_back( s );
+            pthread_mutex_unlock( &( ccbot->stdInMutex ) );
+        }
+    }
+}
+
+void CCCBot::readStdInMessages()
+{
+    if( pthread_mutex_trylock( &stdInMutex ) == 0 )
+    {
+
+        for( vector<string> :: iterator i = stdInputMessages.begin( ); i !=stdInputMessages.end( ); i++ )
+        {
+            string s = *i;
+
+            if( m_BNETs.size( )> 0 )
+            {
+                CBNET *bnt = m_BNETs.front( );
+
+                if( bnt!=NULL && !bnt->GetExiting( ) )
+                {
+                    CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0,bnt->GetRootAdmin( ), bnt->GetCommandTrigger( )+s );
+
+                    bnt->ProcessChatEvent(&event);
+                }
+            }
+        }
+
+        stdInputMessages.clear();
+        pthread_mutex_unlock( &stdInMutex);
+     }
+}
+
 //
 // CCBot
 //
@@ -290,6 +336,8 @@ CCCBot :: CCCBot( CConfig *CFG )
 	if( m_BNETs.empty( ) )
 		CONSOLE_Print( "[CCBOT] warning - no battle.net connections found in config file" );
 
+	pthread_mutex_init(&stdInMutex, NULL);
+	pthread_create( &stdInThread, NULL, readStdIn,(void *) this);
 
 	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + " - by h4x0rz88" );
 
@@ -306,6 +354,12 @@ CCCBot :: ~CCCBot( )
 {
 	delete m_DB;
 	delete m_Language;
+
+	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
+                delete *i;
+
+	pthread_cancel( stdInThread );
+	pthread_mutex_destroy( &stdInMutex );
 	
 }
 
@@ -361,6 +415,8 @@ bool CCCBot :: Update( long usecBlock )
 		if( (*i)->Update( &fd, &send_fd ) )
 			BNETExit = true;
 	}
+
+	readStdInMessages();
 
 	return m_Exiting || BNETExit;
 }
