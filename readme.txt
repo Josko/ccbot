@@ -91,7 +91,7 @@ DOESN'T SUPPORT ORIGINAL B.NET! But it is possible to make it work on B.Net but 
 
 Here's how:
 
-1.) When CC Bot starts up it reads up to 9 sets of battle.net connection information from ghost.cfg.
+1.) When CCBot starts up it reads up to 9 sets of battle.net connection information from ghost.cfg.
 2.) A set of battle.net connection information contains the following keys:
  a.) *_server (required)
  b.) *_cdkeyroc
@@ -105,10 +105,10 @@ Here's how:
  j.) *_custom_exeversion
  k.) *_custom_exeversionhash
  l.) *_custom_passwordhashtype
-3.) CC Bot will search for battle.net connection information by replacing the "*" in each key above with "bnet_" then "bnet2_" then "bnet3_" and so on until "bnet9_".
- a.) Note that CC Bot doesn't search for "bnet1_" for backwards compatibility reasons.
+3.) CCBot will search for battle.net connection information by replacing the "*" in each key above with "bnet_" then "bnet2_" then "bnet3_" and so on until "bnet9_".
+ a.) Note that CCBot doesn't search for "bnet1_" for backwards compatibility reasons.
 4.) If CC Bot doesn't find a *_server key it stops searching for any further battle.net connection information.
-5.) If any of the required keys are missing CC Bot will skip that set of battle.net connection information and start searching for the next one.
+5.) If any of the required keys are missing CCBot will skip that set of battle.net connection information and start searching for the next one.
 
 
 ========
@@ -223,7 +223,7 @@ Once it's built you can continue:
 6. make
 (ignore the sqlite3.c warnings)
 
-The binary will be located in ~/ccbot/ccbot from where you can move it anywhere you need to.
+The binary will be located in ~/ccbot/ccbot.
 
 ========================
 Running GHost++ on Linux
@@ -231,16 +231,18 @@ Running GHost++ on Linux
 
 You will need to copy ~/ccbot/bncsutil/src/bncsutil/libbncutil.so to /usr/local/lib/ or otherwise set LD_LIBRARY_PATH so it can find the bncsutil library. (Install bncsutil)
 You will also need to copy game.dll, Storm.dll, and war3.exe from a valid Warcraft III installation to the location specified in your ccbot.cfg 
-Then when in the CCBot binary directory just type in terminal "./ccbot" without the quotes, to run it.
+Then when in the CCBot binary directory just type in terminal "./ccbot++" without the quotes, to run it.
 
 =========
 CHANGELOG
 =========
 
-Version 0.27 ( 20.11.2009. )
+Version 0.28 ( 20.11.2009. )
 
 - Refined some parts of the code
 - Removed arguments when running ccbot since .cfg file placement is fixed
+- Print a few messages when creating a new ccbot.cfg so the user doesn't forget to edit it and restart the bot
+- Renamed ccbot Linux binary to ccbot++
 
 Version 0.27 ( 13.11.2009. )
 

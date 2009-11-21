@@ -187,7 +187,12 @@ void CConfig :: CreateConfig( )
 			file << "bnet_custom_passwordhashtype = pvpgn" << endl;
 			file << "" << endl;
 			file << "# You can add more servers (upto 9) - using \"bnet2_\" prefix instead of \"bnet_\" and so on" << endl;
-			file << "" << endl;		
+			file << "" << endl;
+
+			CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
+			CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
+			CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
+			CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
 		}
 	}
 	file.close( );
