@@ -40,7 +40,7 @@
 // CBNET
 //
 
-CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotName )
+CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotName, bool nAntiSpam )
 {
 	// todotodo: append path seperator to Warcraft3Path if needed
 
@@ -84,8 +84,8 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_LastAnnounceTime = 0;
 	m_LastInvitationTime = 0;
 	m_WaitingToConnect = true;
-	m_DeclineInvitation = false;
-	m_ClanCreation = false;
+	m_ActiveInvitation = false;
+	m_ActiveCreation = false;
 	m_LoggedIn = false;
 	m_InChat = false;
 	m_Lockdown = false;
@@ -99,6 +99,7 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_SwearingKick = nSwearingKick;
 	m_SelfJoin = nSelfJoin;
 	m_ClanDefaultAccess = nClanDefaultAccess;
+	m_AntiSpam = nAntiSpam;
 }
 
 CBNET :: ~CBNET( )
@@ -224,19 +225,18 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 
 		// if we didn't accept a clan invitation send a decline after 29 seconds (to be on the safe side it doesn't cross over 30 seconds )
-		if( GetTime( ) >= ( m_LastInvitationTime + 29 ) && m_DeclineInvitation && m_LoggedIn )
+		if( GetTime( ) >= ( m_LastInvitationTime + 29 ) && m_ActiveInvitation && m_LoggedIn )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_InvitationClanTag, m_InvitationInviter, false ) );
-			m_DeclineInvitation = false;
+			m_ActiveInvitation = false;
 		}
 
 		// wait 5 seconds before accepting the invitation otherwise the clan can get created but you would need to wait 30 seconds and get an error
-		if( GetTime( ) >= ( m_LastInvitationTime + 5 ) && m_ClanCreation && m_LoggedIn )
+		if( GetTime( ) >= ( m_LastInvitationTime + 5 ) && m_ActiveCreation && m_LoggedIn )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANCREATIONINVITATION( m_ClanTagCreation, m_ClanCreator )  );
-			m_ClanCreation = false;
+			m_ActiveCreation = false;
 		}
-
 
 		m_Socket->DoSend( (fd_set*)send_fd );
 		return m_Exiting;
@@ -522,7 +522,7 @@ void CBNET :: ProcessPackets( )
 					break;
 
 					default:
-					CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANINVITATION value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANINVITATION( Packet->GetData( ) ) ) + "]" );
+						CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANINVITATION value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANINVITATION( Packet->GetData( ) ) ) + "]" );
 					break;
 
 				}
@@ -536,10 +536,11 @@ void CBNET :: ProcessPackets( )
 					m_InvitationClanTag = BYTEARRAY( TempPacket.begin( ) + 8, TempPacket.begin( ) + 12 );
 					m_InvitationClanName = UTIL_ExtractCString( TempPacket, 12 );
 					m_InvitationInviter = BYTEARRAY( TempPacket.begin( ) + 12 + m_InvitationClanName.size( ), TempPacket.end( ) - 1);
-					m_DeclineInvitation = true;
+					m_ActiveInvitation = true;
 					m_LastInvitationTime = GetTime( );
 
-					QueueChatCommand( "Clan invitation received: type !accept to accept the invitation" );		
+					string Response = "Clan invitation received: type !accept to accept the invitation";
+					QueueChatCommand( Response );
 				}
 				break;
 
@@ -554,9 +555,8 @@ void CBNET :: ProcessPackets( )
 
 					QueueChatCommand( "Clan creation received - accepting..." );
 
-					m_ClanCreation = true;
+					m_ActiveCreation = true;
 					m_LastInvitationTime = GetTime( );
-
 				}
 				break;
 

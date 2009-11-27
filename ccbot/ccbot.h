@@ -101,18 +101,22 @@ public:
 	vector<string> m_SwearList;				// vector of words for swear kicking
 	bool tcp_nodelay;					// config value: if set to 1 - improves performance, else saves bandwidth and traffic
 
+#ifndef WIN32
 	vector<string> stdInputMessages;
   	pthread_t stdInThread;
 	pthread_mutex_t stdInMutex;
+#endif
 
 	CCCBot( CConfig *CFG );
 	~CCCBot( );
 
 	// processing functions
 
-	bool Update( long usecBlock );
-	void readStdInMessages( );
+	bool Update( long usecBlock );	
 	void UpdateCommandAccess( );
+#ifndef WIN32
+	void readStdInMessages( );
+#endif
 
 	// events
 

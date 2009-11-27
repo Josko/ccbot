@@ -224,6 +224,7 @@ void DEBUG_Print( BYTEARRAY b )
 	cout << "}" << endl;
 }
 
+#ifndef WIN32
 void * readStdIn( void* in )
 {
     CCCBot* ccbot = ( CCCBot* ) in;
@@ -248,8 +249,7 @@ void CCCBot::readStdInMessages( )
     {
 
         for( vector<string> :: iterator i = stdInputMessages.begin( ); i !=stdInputMessages.end( ); i++ )
-        {            
-
+        {
 		string s = *i;
 
 		if( s.find( " " ) != string::npos )
@@ -273,8 +273,8 @@ void CCCBot::readStdInMessages( )
 		}
 		else
 		{
-			DEBUG_Print( "Invalid number of parameters - usage: <server, partial matching> <command, without command trigger>" );
-			DEBUG_Print( "Example: euro ban h4x0rz88 -> this will partial match to server.eurobattle.net and ban h4x0rz88 from the channel" );
+			DEBUG_Print( "Usage: <server, partial matching> <command, without command trigger>" );
+			DEBUG_Print( "Example: eur ban h4x0rz88" );
 		}		
         }
 
@@ -282,6 +282,7 @@ void CCCBot::readStdInMessages( )
         pthread_mutex_unlock( &stdInMutex);
      }
 }
+#endif
 
 //
 // CCBot
@@ -324,6 +325,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 
 		string ClanTag = CFG->GetString( Prefix + "clantag", "" );
 		string HostbotName = CFG->GetString( Prefix + "hostbotname", "" );
+		bool AntiSpam = CFG->GetInt( Prefix + "antispam", 1 ) == 0 ? false : true;
 		bool GreetUsers = CFG->GetInt( Prefix + "greetusers", 0 ) == 0 ? false : true;
 		bool SwearingKick = CFG->GetInt( Prefix + "swearingkick", 0 ) == 0 ? false : true;
 		bool AnnounceGames = CFG->GetInt( Prefix + "announcegames", 0 ) == 0 ? false : true;
@@ -344,15 +346,17 @@ CCCBot :: CCCBot( CConfig *CFG )
 			break;
 
 		CONSOLE_Print( "[CCBOT] found battle.net connection #" + UTIL_ToString( i ) + " for server [" + Server + "]" );
-		m_BNETs.push_back( new CBNET( this, Server, CDKeyROC, CDKeyTFT, CountryAbbrev, Country, UserName, UserPassword, FirstChannel, RootAdmin, BNETCommandTrigger[0], War3Version, EXEVersion, EXEVersionHash, PasswordHashType, MaxMessageLength, ClanTag, GreetUsers, SwearingKick, AnnounceGames, SelfJoin, BanChat, ClanDefaultAccess, HostbotName ) );
+		m_BNETs.push_back( new CBNET( this, Server, CDKeyROC, CDKeyTFT, CountryAbbrev, Country, UserName, UserPassword, FirstChannel, RootAdmin, BNETCommandTrigger[0], War3Version, EXEVersion, EXEVersionHash, PasswordHashType, MaxMessageLength, ClanTag, GreetUsers, SwearingKick, AnnounceGames, SelfJoin, BanChat, ClanDefaultAccess, HostbotName, AntiSpam ) );
 
 	}
 
 	if( m_BNETs.empty( ) )
 		CONSOLE_Print( "[CCBOT] warning - no battle.net connections found in config file" );
 
+#ifndef WIN32
 	pthread_mutex_init(&stdInMutex, NULL);
 	pthread_create( &stdInThread, NULL, readStdIn,(void *) this);
+#endif
 
 	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + " - by h4x0rz88" );
 
@@ -373,8 +377,10 @@ CCCBot :: ~CCCBot( )
 	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
                 delete *i;
 
+#ifndef WIN32
 	pthread_cancel( stdInThread );
 	pthread_mutex_destroy( &stdInMutex );
+#endif
 	
 }
 
@@ -431,7 +437,9 @@ bool CCCBot :: Update( long usecBlock )
 			BNETExit = true;
 	}
 
-	readStdInMessages();
+#ifndef WIN32
+	readStdInMessages( );
+#endif
 
 	return m_Exiting || BNETExit;
 }
@@ -591,7 +599,6 @@ string CCCBot :: GetServerFromNamePartial( string name )
 		return DirectMatch;
 	else if ( PartialMatches == 1 )
 		return PartialMatch;
-
 	return "";
 }
 

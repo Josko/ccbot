@@ -49,9 +49,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	uint32_t Ping = chatEvent->GetPing( );
 	uint32_t UserFlags = chatEvent->GetUserFlags( );
 	uint32_t Access = m_CCBot->m_DB->AccessCheck( m_Server, User );
+
 	if( Access == 11 )
 		Access = 0;
-	m_ClanCommandsEnabled = IsClanMember( m_UserName );
+
+	m_ClanCommandsEnabled = IsClanMember( m_UserName );	
 
 	if( Event == CBNETProtocol :: EID_WHISPER )
 			CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] [" + User + "] " + Message );
@@ -62,6 +64,28 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 	if( Event == CBNETProtocol :: EID_WHISPER || Event == CBNETProtocol :: EID_TALK || Event == CBNETProtocol :: EID_EMOTE )
 	{	
+		// Anti-Spam
+
+		if( m_AntiSpam && !Message.empty( ) && Message[0] != m_CommandTrigger && Access < 9  )
+		{			
+	
+			string message = Message + ";" + User;
+
+			if( m_SpamCache.size( ) == 5 )
+				m_SpamCache.erase( m_SpamCache.begin( ) );
+
+			transform( message.begin( ), message.end( ), message.begin( ), (int(*)(int))tolower );
+			m_SpamCache.push_back( message );
+
+			int matches = 0;
+
+			for( vector<string> :: iterator i = m_SpamCache.begin( ); i != m_SpamCache.end( ); i++ )
+				if( (*i) == message )
+					matches++;
+
+			if( matches > 3 || ( message.length( ) > 3 && matches > 2 ) )
+				SendChatCommand( "/kick " + User + " Anti-Spam" );
+		}
 		
 		if( !Message.empty( ) && Message[0] == m_CommandTrigger && Event != CBNETProtocol :: EID_EMOTE)
 		{
@@ -87,17 +111,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				/**********************
 				******* COMMANDS ******
 				**********************/
-	
 				
 				//
 				// !ACCEPT
 				//
 
-				if( Command == "accept" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "accept" ) && !IsClanMember( m_UserName ) )
+				if( Command == "accept" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "accept" ) && m_ActiveInvitation == true )
 				{
 					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_InvitationClanTag, m_InvitationInviter, true ) );
-					QueueChatCommand( "Invitation has been accepted if it's still active.", User, Whisper );
-					m_DeclineInvitation = false;
+					QueueChatCommand( "Invitation has been accepted.", User, Whisper );
+					m_ActiveInvitation = false;
 				}
 
 				//
@@ -142,8 +165,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 								QueueChatCommand( Payload + " added to the safelist.", User, Whisper );
 							else
 								QueueChatCommand( "Error adding " + Payload + " to the safelist.", User, Whisper );
-						}
-										
+						}					
 				}
 				
 				//
@@ -179,7 +201,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						m_Announce = false;
 						QueueChatCommand( "Announcing has been disabled.", User, Whisper );
 					}
-
 				}
 
 				//
@@ -276,7 +297,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					bool CanSetAccess = true;
 
 					// extract the username and the access which we are setting
-					// ie. !setaccess Panda 8 -> username "Panda" , access "8" 
+					// ie. !setaccess 8 Panda -> username "Panda" , access "8" 
 
 					uint32_t NewAccess;
 					string UserName;
@@ -285,11 +306,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					SS >> NewAccess;
 
 					if( SS.fail( ) || SS.eof( ) )
-					{
-						string Response = "Bad input - use form  setaccess <access 0-10> <name>";
-						Response[21] = m_CommandTrigger;
+					{	
+						string Response = "Bad input - use form !setaccess <access 0-10> <name>";
 						QueueChatCommand( Response, User, Whisper );
-
 					}
 					else
 					{
@@ -441,11 +460,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					SS >> NewAccess;
 
 					if( SS.fail( ) || SS.eof( ) )
-					{
-						string Response = "Bad input - use form  setcommand <access 0-10> <command>";
-						Response[21] = m_CommandTrigger;
+					{				
+						string Response = "Bad input - use form !setcommand <access 0-10> <command>";
 						QueueChatCommand( Response, User, Whisper );
-
 					}
 					else
 					{
@@ -533,20 +550,18 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				//
 				// !CHANLIST
 				//
-				
-				
-				if( Command == "chanlist" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "chanlist" ) && m_ClanCommandsEnabled )
+								
+				if( Command == "chanlist" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "chanlist" ) )
 				{
 					string tempText;
 					
 					for( map<string, CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); i++ )					
-						tempText = tempText + (*i).second->GetUser( ) + ", ";			
-					
+						tempText = tempText + (*i).second->GetUser( ) + ", ";					
 
 					if( tempText.length( ) >= 2 )
 						tempText = tempText.substr( 0, tempText.length( ) - 2 );
 
-					QueueChatCommand( "Users in channel:  " + tempText + ".", User, Whisper );					
+					QueueChatCommand( "Users in channel: " + tempText + ".", User, Whisper );					
 
 				}
 
@@ -757,7 +772,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 					if ( GetUserFromNamePartial( Victim ).size( ) >= 1 )
 							Victim = GetUserFromNamePartial( Victim );
-					if( !IsClanShaman( Victim ) && !IsClanChieftain( Victim ) && !m_CCBot->m_DB->SafelistCheck( m_Server, Payload ) && GetUserFromNamePartial( Victim ).size( ) >= 1  )
+
+					if( !IsClanShaman( Victim ) && !IsClanChieftain( Victim ) && !m_CCBot->m_DB->SafelistCheck( m_Server, Victim ) && GetUserFromNamePartial( Victim ).size( ) >= 1  )
 					{	
 						if( !SS.eof( ) )
 						{
@@ -783,21 +799,24 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				
 				if( Command == "lockdown" && !Match( "off", Payload) && Access >= m_CCBot->m_DB->CommandAccess( "lockdown" ) )
 				{
-					m_AccessRequired = UTIL_ToInt32( Payload );
+					if( Payload.empty( ) )
+						m_AccessRequired = Access;
+					else					
+						m_AccessRequired = UTIL_ToInt32( Payload );
+
 					m_Lockdown = true;
-					QueueChatCommand( "Lockdown mode engaged! Users with access lower then [" + Payload + "] will be tempBanned", User, Whisper );
-	
+					QueueChatCommand( "Lockdown mode engaged! Users with access lower then [" + UTIL_ToString( m_AccessRequired ) + "] cannot join.", User, Whisper );	
 				}
 				
 				//
 				// !LOCKDOWN OFF
 				//
 				
-				if( Command == "lockdown" && Match( "off", Payload) && m_Lockdown && Access >= m_CCBot->m_DB->CommandAccess( "lockdown" ) )
+				if( Command == "lockdown" && Match( "off", Payload ) && m_Lockdown && Access >= m_CCBot->m_DB->CommandAccess( "lockdown" ) )
 				{
 					m_Lockdown = false;
 					QueueChatCommand( "Lockdown mode is deactivated! Anyone can join the channel now.", User, Whisper );
-					// unban everyone before deleting the users stored
+
 					for( vector<string> :: iterator i = LockdownNames.begin( ); i != LockdownNames.end( ); i++ )
 						ImmediateChatCommand( "/unban " + *i );
 					LockdownNames.clear( );
@@ -808,12 +827,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				//
 
 				if( Command == "motd" && Access >= m_CCBot->m_DB->CommandAccess( "motd" ) && m_ClanCommandsEnabled )
-				{
-					
+				{					
 					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANSETMOTD( Payload ) );
 					QueueChatCommand( "Clan MOTD set to: \"" + Payload + "\".", User, Whisper );
-					CONSOLE_Print("[CLAN: " + m_ServerAlias + "] clan MOTD changed by [" + User + "] to [" + Payload + "].");
-
 				}
 				
 				//
@@ -836,13 +852,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( Command == "remove"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "remove" ) && m_ClanCommandsEnabled )
 				{
-					if( IsClanChieftain( Payload ) || IsClanShaman( Payload ) )
+					if( !IsClanChieftain( Payload ) && !IsClanShaman( Payload ) )
 					{
 						m_Socket->PutBytes( m_Protocol->SEND_SID_CLANREMOVEMEMBER( Payload ) );
 						m_Removed = Payload;
 						m_UsedRemove = User;
-						CONSOLE_Print( "[CCBOT] attempting to kick " + Payload + " from " + m_ClanTag + " by " + User + "." );
 					}
+					else
 						QueueChatCommand( "Removing Chieftains and shamans is prohibited.", User, Whisper );
 				}
 
@@ -878,24 +894,32 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( Command == "saybnet" && !Payload.empty( ) && Access >= m_CCBot->m_DB-> CommandAccess( "say" ) )
 				{
-					vector<string> Tokens = UTIL_Tokenize( Payload, ' ' );
-					Payload = Payload.substr( Tokens[0].size( ) + 1 );				
-
-					for( vector<CBNET *> :: iterator i = m_CCBot->m_BNETs.begin( ); i != m_CCBot->m_BNETs.end( ); i++ )
+					if( Payload.find( " " ) != string :: npos )
 					{
-						if( Access > 8 && Match( (*i)->GetServer( ), Tokens[0] ) )
+						vector<string> Tokens = UTIL_Tokenize( Payload, ' ' );
+						Payload = Payload.substr( Tokens[0].size( ) + 1 );
+	
+						if( m_CCBot->GetServerFromNamePartial( Tokens[0] ).size( ) > 1 )
+							Tokens[0] = m_CCBot->GetServerFromNamePartial( Tokens[0] );		
+	
+						for( vector<CBNET *> :: iterator i = m_CCBot->m_BNETs.begin( ); i != m_CCBot->m_BNETs.end( ); i++ )
 						{
-							(*i)->QueueChatCommand( Payload );
-						}
-						else if( Payload[0] != '/' && Match( (*i)->GetServer( ), Tokens[0] ) )
-						{
-							(*i)->QueueChatCommand( Payload );
-						}
-						else if( (*i)->GetServer( ) == m_Server && Payload[0] == '/' )
-						{
-							QueueChatCommand( "Using B.NET commands is not allowed via say command.", User, Whisper );
+							if( Access > 8 && Match( (*i)->GetServer( ), Tokens[0] ) )
+							{
+								(*i)->QueueChatCommand( Payload );
+							}
+							else if( Payload[0] != '/' && Match( (*i)->GetServer( ), Tokens[0] ) )
+							{
+								(*i)->QueueChatCommand( Payload );
+							}
+							else if( (*i)->GetServer( ) == m_Server && Payload[0] == '/' )
+							{
+								QueueChatCommand( "Using B.NET commands is not allowed via say command.", User, Whisper );
+							}
 						}
 					}
+					else
+						QueueChatCommand( "Usage: ", User, Whisper );
 				}
 
 				//

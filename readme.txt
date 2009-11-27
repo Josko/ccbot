@@ -243,6 +243,13 @@ Version 0.28 ( 20.11.2009. )
 - Removed arguments when running ccbot since .cfg file placement is fixed
 - Print a few messages when creating a new ccbot.cfg so the user doesn't forget to edit it and restart the bot
 - Renamed ccbot Linux binary to ccbot++
+- Added input via stdin for Linux binaries
+- Fixed a bug where for !chanlist the bot needed to be in a clan
+- !saybnet now uses partial matching
+- Fixed a flaw in logic in !remove
+- !accept works only if there is an active invitation
+- Few fixed in !lockdown and !kick
+- Added Anti-spam
 
 Version 0.27 ( 13.11.2009. )
 

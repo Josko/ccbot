@@ -146,7 +146,7 @@ void CConfig :: CreateConfig( )
 
 			file << "# This file is used to configure CCBot options" << endl;
 			file << "" << endl;
-			file << "# Starting here are the global variables which are valid for every b" << endl;
+			file << "# Starting here are the global variables which are valid for every bnet" << endl;
 			file << "" << endl;
 			file << "bot_log = logs\\" << endl;
 			file << "bot_language = language.cfg" << endl;
@@ -155,7 +155,7 @@ void CConfig :: CreateConfig( )
 			file << "db_type = sqlite3" << endl;
 			file << "db_sqlite3_file = ccbot.dbs" << endl;
 			file << "" << endl;
-			file << "# Starting here are the per server variables" << endl;
+			file << "# Starting here are the per bnet variables" << endl;
 			file << "" << endl;
 			file << "bnet_server = server.eurobattle.net" << endl;
 			file << "bnet_cdkeyroc = FFFFFFFFFFFFFFFFFFFFFFFFFF" << endl;
@@ -164,7 +164,8 @@ void CConfig :: CreateConfig( )
 			file << "bnet_password = <bots bnet password>" << endl;
 			file << "bnet_firstchannel = <first channel the bot joins>" << endl;
 			file << "bnet_rootadmin = <your bnet name>" << endl;
-			file << "bnet_commandtrigger = !" << endl;		
+			file << "bnet_commandtrigger = !" << endl;
+			file << "bnet_antispam = 1" << endl;	
 			file << "bnet_greetusers = 0" << endl;
 			file << "bnet_swearingkick = 1" << endl;
 			file << "bnet_selfjoin = 0" << endl;
@@ -186,7 +187,7 @@ void CConfig :: CreateConfig( )
 			file << "bnet_custom_exeversionhash = " << endl;
 			file << "bnet_custom_passwordhashtype = pvpgn" << endl;
 			file << "" << endl;
-			file << "# You can add more servers (upto 9) - using \"bnet2_\" prefix instead of \"bnet_\" and so on" << endl;
+			file << "# You can add more servers (upto 9) by using \"bnet2_\" prefix instead of \"bnet_\" and so on" << endl;
 			file << "" << endl;
 
 			CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );

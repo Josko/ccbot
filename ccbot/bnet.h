@@ -53,7 +53,6 @@ private:
 	vector<string> LockdownNames;					// vector of tempbanned users whom will be unbanned later
 	vector<string> SquelchedUsers;					// vector of squelched users, lowercase names
 	map<string, CChannel *> m_Channel;				// map of users in channel
-	vector<string> m_Mail;						// vector of user mail
 	bool m_Exiting;							// set to true and this class will be deleted next update
 	string m_Server;						// battle.net server to connect to
 	string m_ServerAlias;						// alias to the connected battle.net
@@ -96,18 +95,20 @@ private:
 	bool m_Announce;						// bool variable if a announce message is active or not
 	string m_AnnounceMsg;						// text printed on X interval by the announce command
 	int m_AnnounceInterval;						// interval of two consecutive announce messages
-	bool m_DeclineInvitation;					// bool true if we got an SID_CLANINVITATION in the last 29 seconds
-	bool m_ClanCreation;						// bool true if we got an clan creation invitaiton in the last 29 seconds
+	bool m_ActiveInvitation;					// bool true if we got an SID_CLANINVITATION in the last 29 seconds
+	bool m_ActiveCreation;						// bool true if we got an clan creation invitaiton in the last 29 seconds
 	bool m_Rejoin;							// indicates that the bot is in the "wrong" channel
 	bool m_ClanCommandsEnabled;					// bool true if bot is in a clan and the users can use clan commands
 	bool m_GreetUsers;						// greet users on join
 	string m_ClanTag;						// clan tag
-	bool m_AnnounceGames;
-	bool m_BanChat;
-	bool m_SwearingKick;
-	bool m_SelfJoin;
-	uint32_t m_ClanDefaultAccess;
-	string m_HostbotName;
+	bool m_AnnounceGames;						// set to true and every game joined by users from channel will be announced in channel
+	bool m_BanChat;							// set to true and CHAT clients get kicked from channel
+	bool m_SwearingKick;						// set to true and every message containing swears (contained in swears.cfg) will get the user kicked
+	bool m_SelfJoin;						// set to true and !join command will be enabled
+	uint32_t m_ClanDefaultAccess;					// default access a clan members has
+	string m_HostbotName;						// hostbot's name if present
+	vector<string> m_SpamCache;
+	bool m_AntiSpam;
 
 	BYTEARRAY TempPacket;
 	BYTEARRAY m_InvitationClanTag;
@@ -116,9 +117,8 @@ private:
 	BYTEARRAY m_ClanTagCreation;
 	BYTEARRAY m_ClanCreator;
 
-
 public:
-	CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotname );
+	CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotname, bool nAntiSPam );
 	~CBNET( );
 
 	bool GetExiting( )				{ return m_Exiting; }
