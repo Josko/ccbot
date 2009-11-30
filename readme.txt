@@ -117,10 +117,7 @@ Commands
 
 In battle.net (via local chat or whisper at any time).
 
-Definitons: 
-<name> - needed input - command won't work if left out
-[name] - optional input
-
+Parameters in angled brackets <like this> are required and parameters in square brackets [like this] are optional.
 
 !addaccess <access <name>	sets the users access from 0-10
 !countaccess <access>		counts how many people have # access
@@ -250,6 +247,8 @@ Version 0.28 ( 20.11.2009. )
 - !accept works only if there is an active invitation
 - Few fixed in !lockdown and !kick
 - Added Anti-spam
+- Minor code changes, minor stuff, this and that
+
 
 Version 0.27 ( 13.11.2009. )
 
