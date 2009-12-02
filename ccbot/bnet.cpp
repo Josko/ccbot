@@ -197,7 +197,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 	
 		// send a null packet to detect disconnects
-		if( GetTime( ) >= m_LastNullTime + 40 )
+		if( GetTime( ) >= m_LastNullTime + 15 )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_NULL( ) );
 			m_LastNullTime = GetTime( );
@@ -218,7 +218,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 
 		// rejoining the channel when not in the set channel
-		if( GetTime( ) >= m_LastRejoinTime + 12 && m_LoggedIn && m_Rejoin )
+		if( GetTime( ) >= m_LastRejoinTime + 15 && m_LoggedIn && m_Rejoin )
 		{
 			QueueChatCommand( "/join " + m_CurrentChannel );
 			m_LastRejoinTime = GetTime( );

@@ -28,14 +28,18 @@
 #include "ccbotdbsqlite.h"
 #include "bnet.h"
 #include "bnetprotocol.h"
-#include <time.h>
 
+#include <time.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifndef WIN32
  #include <sys/time.h>
+#endif
+
+#ifdef WIN32
+ #include "pthread.h"
 #endif
 
 #ifdef __APPLE__
@@ -224,7 +228,6 @@ void DEBUG_Print( BYTEARRAY b )
 	cout << "}" << endl;
 }
 
-#ifndef WIN32
 void * readStdIn( void* in )
 {
     CCCBot* ccbot = ( CCCBot* ) in;
@@ -282,7 +285,6 @@ void CCCBot::readStdInMessages( )
         pthread_mutex_unlock( &stdInMutex);
      }
 }
-#endif
 
 //
 // CCBot
@@ -353,10 +355,8 @@ CCCBot :: CCCBot( CConfig *CFG )
 	if( m_BNETs.empty( ) )
 		CONSOLE_Print( "[CCBOT] warning - no battle.net connections found in config file" );
 
-#ifndef WIN32
 	pthread_mutex_init(&stdInMutex, NULL);
 	pthread_create( &stdInThread, NULL, readStdIn,(void *) this);
-#endif
 
 	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + " - by h4x0rz88" );
 
@@ -370,18 +370,15 @@ CCCBot :: CCCBot( CConfig *CFG )
 }
 
 CCCBot :: ~CCCBot( )
-{
+{
 	delete m_DB;
 	delete m_Language;
 
 	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
                 delete *i;
 
-#ifndef WIN32
 	pthread_cancel( stdInThread );
 	pthread_mutex_destroy( &stdInMutex );
-#endif
-	
 }
 
 bool CCCBot :: Update( long usecBlock )
@@ -437,9 +434,7 @@ bool CCCBot :: Update( long usecBlock )
 			BNETExit = true;
 	}
 
-#ifndef WIN32
 	readStdInMessages( );
-#endif
 
 	return m_Exiting || BNETExit;
 }

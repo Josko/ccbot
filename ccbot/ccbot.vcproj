@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="ccbot"
 	ProjectGUID="{B57A04BC-13D4-4CAD-B835-C046B9D66269}"
 	RootNamespace="ccbot"
@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\bncsutil\src"
+				AdditionalIncludeDirectories="..\bncsutil\src;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -62,8 +62,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib pthreadVCE2.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\pthread"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -97,6 +98,7 @@
 	<References>
 		<ProjectReference
 			ReferencedProjectIdentifier="{CFB9AEE6-C0BB-49B0-B0F5-F564975202B8}"
+			RelativePathToProject=".\bncsutil\vc8_build\BNCSutil.vcproj"
 		/>
 	</References>
 	<Files>
@@ -118,14 +120,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\commandpacket.h"
-				>
-			</File>
-			<File
-				RelativePath=".\config.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ccbot.h"
 				>
 			</File>
@@ -135,6 +129,14 @@
 			</File>
 			<File
 				RelativePath=".\ccbotdbsqlite.h"
+				>
+			</File>
+			<File
+				RelativePath=".\commandpacket.h"
+				>
+			</File>
+			<File
+				RelativePath=".\config.h"
 				>
 			</File>
 			<File
@@ -185,18 +187,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\chatevent.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\commandpacket.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\config.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\ccbot.cpp"
 					>
 				</File>
@@ -206,6 +196,18 @@
 				</File>
 				<File
 					RelativePath=".\ccbotdbsqlite.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\chatevent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\commandpacket.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\config.cpp"
 					>
 				</File>
 				<File
