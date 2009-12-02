@@ -21,6 +21,20 @@ The program itself runs in console mode and does not take any console input (it 
 
 There is also swears.cfg in the "cfg" folder in which you configure banned words and/or phrases.
 
+=============
+Console input
+=============
+
+As of version 0.28 it's possible to write commands directly on the console of the bot. You can send the command only on one server at a time. Format:
+
+<server's name, uses partial matching> <command, without the command trigger> [Payload, if any]
+
+So if you're connected to server.eurobattle.net and parti.com PvPGNs and you want to ban someone from the channel on parti.com server you would type in the console:
+
+pa ban Spammer Spamming the channel.
+
+-> In this case "pa" is enough to match parti.com, we type "ban" instead of "!ban" and the payload as usual.
+
 ==============
 Required Files
 ==============
@@ -240,7 +254,7 @@ Version 0.28 ( 20.11.2009. )
 - Removed arguments when running ccbot since .cfg file placement is fixed
 - Print a few messages when creating a new ccbot.cfg so the user doesn't forget to edit it and restart the bot
 - Renamed ccbot Linux binary to ccbot++
-- Added input via stdin for Linux binaries
+- Added input via stdin for Linux and Windows ( OS X untested )
 - Fixed a bug where for !chanlist the bot needed to be in a clan
 - !saybnet now uses partial matching
 - Fixed a flaw in logic in !remove
