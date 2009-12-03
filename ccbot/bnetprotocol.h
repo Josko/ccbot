@@ -107,6 +107,14 @@ public:
 		FLAG_NOUDP = 16,			// No UDP - 0x10
 	};
 
+	BYTEARRAY m_ClanTag;
+	BYTEARRAY m_ClanName;
+	BYTEARRAY m_Inviter;
+	BYTEARRAY m_InviterStr;
+	BYTEARRAY m_ClanCreationTag;
+	BYTEARRAY m_ClanCreator;
+	BYTEARRAY m_ClanCreationName;
+
 private:
 	BYTEARRAY m_ClientToken;			// set in constructor
 	BYTEARRAY m_LogonType;				// set in RECEIVE_SID_AUTH_INFO
@@ -137,9 +145,14 @@ public:
 	BYTEARRAY GetSalt( )				{ return m_Salt; }
 	BYTEARRAY GetServerPublicKey( )			{ return m_ServerPublicKey; }
 	BYTEARRAY GetUniqueName( )			{ return m_UniqueName; }
-	BYTEARRAY m_InvitationClanTag;
-	BYTEARRAY m_InvitationClanName;
-	BYTEARRAY m_InvitationInviter;
+	string GetInviterStr( )				{ return string( m_InviterStr.begin( ), m_InviterStr.end( ) ); }
+	BYTEARRAY GetClanTag( )				{ return m_ClanTag; }
+	BYTEARRAY GetInviter( )				{ return m_Inviter; }
+	string GetClanName( )				{ return string( m_ClanName.begin( ), m_ClanName.end( ) ); }
+	BYTEARRAY GetClanCreationTag( )			{ return m_ClanCreationTag; }
+	string GetClanCreationName( )			{ return string( m_ClanCreationName.begin( ), m_ClanCreationName.end( ) ); }
+	BYTEARRAY GetClanCreator( )			{ return m_ClanCreator; }
+	string GetClanCreatorStr( )			{ return string( m_ClanCreator.begin( ), m_ClanCreator.end( ) ); }
 
 	// receive functions
 
@@ -147,7 +160,6 @@ public:
 	bool RECEIVE_SID_ENTERCHAT( BYTEARRAY data );
 	CIncomingChatEvent *RECEIVE_SID_CHATEVENT( BYTEARRAY data );
 	bool RECEIVE_SID_CHECKAD( BYTEARRAY data );
-	bool RECEIVE_SID_STARTADVEX3( BYTEARRAY data );
 	BYTEARRAY RECEIVE_SID_PING( BYTEARRAY data );
 	bool RECEIVE_SID_LOGONRESPONSE( BYTEARRAY data );
 	bool RECEIVE_SID_AUTH_INFO( BYTEARRAY data );
@@ -166,17 +178,12 @@ public:
 
 	BYTEARRAY SEND_PROTOCOL_INITIALIZE_SELECTOR( );
 	BYTEARRAY SEND_SID_NULL( );
-	BYTEARRAY SEND_SID_STOPADV( );
-	BYTEARRAY SEND_SID_GETADVLISTEX( string gameName );
 	BYTEARRAY SEND_SID_ENTERCHAT( );
 	BYTEARRAY SEND_SID_JOINCHANNEL( string channel );
 	BYTEARRAY SEND_SID_CHATCOMMAND( string command );
 	BYTEARRAY SEND_SID_CHECKAD( );
-	BYTEARRAY SEND_SID_STARTADVEX3( unsigned char state, BYTEARRAY mapGameType, BYTEARRAY mapFlags, BYTEARRAY mapWidth, BYTEARRAY mapHeight, string gameName, string hostName, uint32_t upTime, string mapPath, BYTEARRAY mapCRC, uint32_t hostCounter );
-	BYTEARRAY SEND_SID_NOTIFYJOIN( string gameName );
 	BYTEARRAY SEND_SID_PING( BYTEARRAY pingValue );
 	BYTEARRAY SEND_SID_LOGONRESPONSE( BYTEARRAY clientToken, BYTEARRAY serverToken, BYTEARRAY passwordHash, string accountName );
-	BYTEARRAY SEND_SID_NETGAMEPORT( uint16_t serverPort );
 	BYTEARRAY SEND_SID_AUTH_INFO( unsigned char ver, string countryAbbrev, string country );
 	BYTEARRAY SEND_SID_AUTH_CHECK( BYTEARRAY clientToken, BYTEARRAY exeVersion, BYTEARRAY exeVersionHash, BYTEARRAY keyInfoROC, BYTEARRAY keyInfoTFT, string exeInfo, string keyOwnerName );
 	BYTEARRAY SEND_SID_AUTH_ACCOUNTLOGON( BYTEARRAY clientPublicKey, string accountName );

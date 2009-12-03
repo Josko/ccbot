@@ -110,13 +110,6 @@ private:
 	vector<string> m_SpamCache;
 	bool m_AntiSpam;
 
-	BYTEARRAY TempPacket;
-	BYTEARRAY m_InvitationClanTag;
-	BYTEARRAY m_InvitationClanName;
-	BYTEARRAY m_InvitationInviter;
-	BYTEARRAY m_ClanTagCreation;
-	BYTEARRAY m_ClanCreator;
-
 public:
 	CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotname, bool nAntiSPam );
 	~CBNET( );

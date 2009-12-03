@@ -260,9 +260,10 @@ void CCCBot::readStdInMessages( )
 			vector<string> Tokens = UTIL_Tokenize( *i, ' ' );
 			s = s.substr( Tokens[0].size( ) + 1 );
 
-			if( GetServerFromNamePartial( Tokens[0] ).size( ) > 1 )
-			Tokens[0] = GetServerFromNamePartial( Tokens[0] );
-		
+			if( GetServerFromNamePartial( Tokens[0] ).size( ) > 0 )
+				Tokens[0] = GetServerFromNamePartial( Tokens[0] );
+			else
+				DEBUG_Print( "Unable to partially match with a server." );		
            
 			for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
 			{
@@ -504,7 +505,7 @@ void CCCBot :: SetConfigs( CConfig *CFG )
 void CCCBot :: UpdateCommandAccess( )
 {
 	// load default access values and insert them into database if a access number hasn't already been set
-	// format: m_Commands["<command keyword>"] = <value> (must be higher or equal 0!!!)
+	// format: m_Commands["<command keyword>"] = <value> (must be higher or equal 0 and lower then 10)
 	
 	m_Commands[ "accept" ] = 9;
 	m_Commands[ "access" ] = 0;
@@ -590,10 +591,11 @@ string CCCBot :: GetServerFromNamePartial( string name )
 			}		
 	}
 
-	if ( DirectMatches == 1 )
+	if ( DirectMatches > 0 )
 		return DirectMatch;
 	else if ( PartialMatches == 1 )
-		return PartialMatch;
+		return PartialMatch;	
+
 	return "";
 }
 

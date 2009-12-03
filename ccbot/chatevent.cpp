@@ -129,10 +129,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !ACCEPT
 				//
 
-				if( Command == "accept" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "accept" ) && m_ActiveInvitation == true )
+				if( Command == "accept" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "accept" ) && m_ActiveInvitation )
 				{
-					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_InvitationClanTag, m_InvitationInviter, true ) );
+					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_Protocol->GetClanTag( ), m_Protocol->GetInviter( ), true ) );
 					QueueChatCommand( "Invitation has been accepted.", User, Whisper );
+					SendGetClanList( );
 					m_ActiveInvitation = false;
 				}
 
@@ -1113,11 +1114,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						if( IsClanShaman( m_UserName ) || IsClanChieftain( m_UserName ) )
 						{
-							m_LastKnown = Payload;
+							m_LastKnown = GetUserFromNamePartial( Payload );
 						
-							if( m_LoggedIn )
 							m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATION( Payload ) );							
-								QueueChatCommand( "Clan invitation was sent.", User, Whisper );
+							QueueChatCommand( "Clan invitation was sent.", User, Whisper );
 						}
 						else
 					   		QueueChatCommand( "Bot needs to have at least a shaman rank to invite.", User, Whisper );

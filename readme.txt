@@ -19,17 +19,17 @@ The program itself runs in console mode and does not take any console input (it 
 ***You need to edit ccbot.cfg before running CC Bot***
 ***You need to edit ccbot.cfg before running CC Bot***
 
-There is also swears.cfg in the "cfg" folder in which you configure banned words and/or phrases.
+There is also a swears.cfg file in the "cfg" folder in which you configure banned words and/or phrases.
 
 =============
 Console input
 =============
 
-As of version 0.28 it's possible to write commands directly on the console of the bot. You can send the command only on one server at a time. Format:
+As of version 0.28 it's possible to write commands directly on the console of the bot. You can send the command only to one server at a time. Format:
 
 <server's name, uses partial matching> <command, without the command trigger> [Payload, if any]
 
-So if you're connected to server.eurobattle.net and parti.com PvPGNs and you want to ban someone from the channel on parti.com server you would type in the console:
+So if you're connected to server.eurobattle.net and parti.com PvPGNs and you want to ban someone named Spammer from the channel, for spamming the channel on parti.com, you would type in the console:
 
 pa ban Spammer Spamming the channel.
 
@@ -248,6 +248,11 @@ Then when in the CCBot binary directory just type in terminal "./ccbot++" withou
 CHANGELOG
 =========
 
+Version 0.29 ( 3.12.2009. )
+
+- Minor tweaks to clan invitation responses and clan creation responses
+- Fixed a bug with stdin
+
 Version 0.28 ( 20.11.2009. )
 
 - Refined some parts of the code
@@ -262,7 +267,6 @@ Version 0.28 ( 20.11.2009. )
 - Few fixed in !lockdown and !kick
 - Added Anti-spam
 - Minor code changes, minor stuff, this and that
-
 
 Version 0.27 ( 13.11.2009. )
 

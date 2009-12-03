@@ -353,8 +353,8 @@ vector<CIncomingClanList *> CBNETProtocol :: RECEIVE_SID_CLANMEMBERLIST( BYTEARR
 
 CIncomingClanList *CBNETProtocol :: RECEIVE_SID_CLANMEMBERSTATUSCHANGE( BYTEARRAY data )
 {
-	// DEBUG_Print( "RECEIVED SID_CLANMEMBERSTATUSCHANGE" );
-	// DEBUG_Print( data );
+	DEBUG_Print( "RECEIVED SID_CLANMEMBERSTATUSCHANGE" );
+	DEBUG_Print( data );
 
 	// 2 bytes					-> Header
 	// 2 bytes					-> Length
@@ -397,7 +397,14 @@ bool CBNETProtocol :: RECEIVE_SID_CLANINVITATIONRESPONSE( BYTEARRAY data )
 	// x bytes (null terminated string)		-> Inviter Name
 
 	if( ValidateLength( data ) && data.size( ) >= 14  )
-		return true;		
+	{
+		m_ClanTag = BYTEARRAY( data.begin( ) + 8, data.begin( ) + 12 ); 
+		m_ClanName = UTIL_ExtractCString( data, 12 );
+		m_Inviter = BYTEARRAY( data.begin( ) + 12 + m_ClanName.size( ), data.end( ) - 1 );
+		m_InviterStr = UTIL_ExtractCString( data, m_ClanName.size( ) + 13 );
+
+		return true;
+	}	
 
 	return false;
 }
@@ -417,7 +424,13 @@ bool CBNETProtocol :: RECEIVE_SID_CLANCREATIONINVITATION( BYTEARRAY data )
 	// x bytes (list of strings)			-> List of users invited
 
 	if( ValidateLength( data ) && data.size( ) >= 16  )
+	{
+		m_ClanCreationTag = BYTEARRAY( data.begin( ) + 8, data.begin( ) + 12 );
+		m_ClanCreationName = UTIL_ExtractCString( data, 13 );
+		m_ClanCreator = UTIL_ExtractCString( data, m_ClanCreationName.size( ) + 14  );
+
 		return true;
+	}
 	
 	return false;
 }
@@ -767,8 +780,8 @@ BYTEARRAY CBNETProtocol :: SEND_SID_CLANSETMOTD( string message )
 BYTEARRAY CBNETProtocol :: SEND_SID_CLANINVITATIONRESPONSE( BYTEARRAY clantag, BYTEARRAY inviter, bool response )
 {
 	unsigned char Cookie[] = { 0, 11, 0 };
-	unsigned char accept[] = { 0, 6 };
-	unsigned char decline[] = { 0, 4 };
+	unsigned char Accept[] = { 0, 6 };
+	unsigned char Decline[] = { 0, 4 };
 
 	BYTEARRAY packet;
 	packet.push_back( BNET_HEADER_CONSTANT );	// BNET header constant
@@ -779,9 +792,9 @@ BYTEARRAY CBNETProtocol :: SEND_SID_CLANINVITATIONRESPONSE( BYTEARRAY clantag, B
 	UTIL_AppendByteArrayFast( packet, clantag );	// clan tag
 	UTIL_AppendByteArrayFast( packet, inviter );	// inviter
 	if( response )
-		UTIL_AppendByteArray( packet, accept, 2 );	// response - 0x06: Accept
+		UTIL_AppendByteArray( packet, Accept, 2 );	// response - 0x06: Accept
 	else
-		UTIL_AppendByteArray( packet, decline, 2 );	// response - 0x04: Decline
+		UTIL_AppendByteArray( packet, Decline, 2 );	// response - 0x04: Decline
 	AssignLength( packet );				// assign length
 
 	// DEBUG_Print( "SEND SID_CLANINVITATIONRESPONSE" );
@@ -792,7 +805,7 @@ BYTEARRAY CBNETProtocol :: SEND_SID_CLANINVITATIONRESPONSE( BYTEARRAY clantag, B
 BYTEARRAY CBNETProtocol :: SEND_SID_CLANCREATIONINVITATION( BYTEARRAY clantag, BYTEARRAY inviter )
 {
 	unsigned char Cookie[] = { 2, 0, 0, 0 };
-	unsigned char accept[] = { 0, 6 };
+	unsigned char Accept[] = { 0, 6 };
 
 	BYTEARRAY packet;
 	packet.push_back( BNET_HEADER_CONSTANT );	// BNET header constant
@@ -802,7 +815,7 @@ BYTEARRAY CBNETProtocol :: SEND_SID_CLANCREATIONINVITATION( BYTEARRAY clantag, B
 	UTIL_AppendByteArray( packet, Cookie, 4 );	// cookie
 	UTIL_AppendByteArrayFast( packet, clantag );	// clan tag
 	UTIL_AppendByteArrayFast( packet, inviter );	// inviter	
-	UTIL_AppendByteArray( packet, accept, 2 );	// response - 0x06: Accept
+	UTIL_AppendByteArray( packet, Accept, 2 );	// response - 0x06: Accept
 	AssignLength( packet );				// assign length
 
 	// DEBUG_Print( "SEND SID_CLANCREATIONINVITATION" );

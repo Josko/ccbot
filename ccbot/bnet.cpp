@@ -211,7 +211,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 
 		// part of !Announce
-		if( ( GetTime( ) >= m_LastAnnounceTime + m_AnnounceInterval ) && m_Announce == true  )
+		if( ( GetTime( ) >= m_LastAnnounceTime + m_AnnounceInterval ) && m_Announce  )
 		{
 			QueueChatCommand( m_AnnounceMsg );
 			m_LastAnnounceTime = GetTime( );
@@ -227,14 +227,14 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		// if we didn't accept a clan invitation send a decline after 29 seconds (to be on the safe side it doesn't cross over 30 seconds )
 		if( GetTime( ) >= ( m_LastInvitationTime + 29 ) && m_ActiveInvitation && m_LoggedIn )
 		{
-			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_InvitationClanTag, m_InvitationInviter, false ) );
+			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_Protocol->GetClanTag( ), m_Protocol->GetInviter( ), false ) );
 			m_ActiveInvitation = false;
 		}
 
-		// wait 5 seconds before accepting the invitation otherwise the clan can get created but you would need to wait 30 seconds and get an error
-		if( GetTime( ) >= ( m_LastInvitationTime + 5 ) && m_ActiveCreation && m_LoggedIn )
+		// wait 8 seconds before accepting the invitation otherwise the clan can get created but you would need to wait 30 seconds and get an error
+		if( GetTime( ) >= ( m_LastInvitationTime + 8 ) && m_ActiveCreation && m_LoggedIn )
 		{
-			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANCREATIONINVITATION( m_ClanTagCreation, m_ClanCreator )  );
+			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANCREATIONINVITATION( m_Protocol->GetClanCreationTag( ), m_Protocol->GetClanCreator( ) ) );
 			m_ActiveCreation = false;
 		}
 
@@ -530,30 +530,20 @@ void CBNET :: ProcessPackets( )
 
 			case CBNETProtocol :: SID_CLANINVITATIONRESPONSE:
 				if( m_Protocol->RECEIVE_SID_CLANINVITATIONRESPONSE( Packet->GetData( ) ) )
-				{					
-					TempPacket = Packet->GetData( );
-
-					m_InvitationClanTag = BYTEARRAY( TempPacket.begin( ) + 8, TempPacket.begin( ) + 12 );
-					m_InvitationClanName = UTIL_ExtractCString( TempPacket, 12 );
-					m_InvitationInviter = BYTEARRAY( TempPacket.begin( ) + 12 + m_InvitationClanName.size( ), TempPacket.end( ) - 1);
-					m_ActiveInvitation = true;
+				{
 					m_LastInvitationTime = GetTime( );
+					m_ActiveInvitation = true;
 
-					string Response = "Clan invitation received: type !accept to accept the invitation";
-					QueueChatCommand( Response );
+					QueueChatCommand( "Clan invitation received for [" + m_Protocol->GetClanName( ) + "] from [" + m_Protocol->GetInviterStr( ) + "]." );
+					QueueChatCommand( "Type !accept to accept the clan invitation." );
 				}
 				break;
 
 			case CBNETProtocol :: SID_CLANCREATIONINVITATION:
 				if( m_Protocol->RECEIVE_SID_CLANCREATIONINVITATION( Packet->GetData( ) ) )
 				{					
-					TempPacket = Packet->GetData( );
 
-					m_ClanTagCreation = BYTEARRAY( TempPacket.begin( ) + 8, TempPacket.begin( ) + 12 );
-					BYTEARRAY m_ClanTagCreation = UTIL_ExtractCString( TempPacket, 13 );
-					m_ClanCreator = UTIL_ExtractCString( TempPacket, m_ClanTagCreation.size( ) + 14  );
-
-					QueueChatCommand( "Clan creation received - accepting..." );
+					QueueChatCommand( "Clan creation of [" + m_Protocol->GetClanCreationName( ) + "] by [" + m_Protocol->GetClanCreatorStr( ) + "] received - accepting..." );
 
 					m_ActiveCreation = true;
 					m_LastInvitationTime = GetTime( );
@@ -576,6 +566,7 @@ void CBNET :: ProcessPackets( )
 					case 0:
 						QueueChatCommand( m_Removed + " has been kicked from " + m_ClanTag + " by " + m_UsedRemove + "." );
 						m_Removed = "Unknown User";
+						SendGetClanList( );
 					break;
 
 					case 7:
