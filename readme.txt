@@ -252,6 +252,7 @@ Version 0.29 ( 3.12.2009. )
 
 - Minor tweaks to clan invitation responses and clan creation responses
 - Fixed a bug with stdin
+- Added RoC support (just leave the TFT key line empty in ccbot.cfg)
 
 Version 0.28 ( 20.11.2009. )
 
@@ -351,19 +352,3 @@ Version 0.24 ( 8.11.2009. )
 - Bot tested on FAWKZBNET - added alias
 - Made country abbreviation and name RU and Russia respectively - just for gags
 - Rank check on !join and !invite - bot MUST be a shaman or chieftain
-
-Version 0.23 ( 7.11.2009. )
-
-- Added !motd and bnetprotocol for changing clan motds
-- Fixed some minor bugs and typos, added a bit of comments to the source code
-- Modified !tbrgames now to announce all games any user joins after leaving the channel - command is now !games <on|off>
-- Renamed many variables to match the naming scheme used in the whole project
-- Edited parts of the code in many files
-- Greatly optimised swear kicking (faster, better, with a check if the user getting kicked is in channel)
-- Swear words are now read from swear.txt which should be in your ghostpath\cfg
-- Added new config value bot_cfgpath
-- Checking if the user is in channel for some events/commands (like when writing !join)
-- Added !reload which loads the clan list and text CFG files
-- Rewrote the "Compiling GHost++ on Linux" and fixed a bunch of grammar/vocabulary issues
-- Added !uptime to show the uptime
-

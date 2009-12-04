@@ -295,7 +295,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 {
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Exiting = false;
-	m_Version = "0.28";
+	m_Version = "0.29";
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
 	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;	
@@ -359,7 +359,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 	pthread_mutex_init(&stdInMutex, NULL);
 	pthread_create( &stdInThread, NULL, readStdIn,(void *) this);
 
-	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + " - by h4x0rz88" );
+	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++ - by h4x0rz88" );
 
 	// Update the swears.cfg file
 	UpdateSwearList( );	
@@ -376,7 +376,7 @@ CCCBot :: ~CCCBot( )
 	delete m_Language;
 
 	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
-                delete *i;
+        	delete *i;
 
 	pthread_cancel( stdInThread );
 	pthread_mutex_destroy( &stdInMutex );
