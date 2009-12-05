@@ -512,6 +512,7 @@ void CCCBot :: UpdateCommandAccess( )
 	m_Commands[ "checkaccess" ] = 5;
 	m_Commands[ "checkban" ] = 3;
 	m_Commands[ "checksafelist" ] = 5;
+	m_Commands[ "chieftain" ] = 9;
 	m_Commands[ "clanlist" ] = 1;
 	m_Commands[ "clearqueue" ] = 3;
 	m_Commands[ "command" ] = 7;

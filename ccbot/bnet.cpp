@@ -397,6 +397,13 @@ void CBNET :: ProcessPackets( )
 				ChatEvent = NULL;
 				break;
 
+			case CBNETProtocol :: SID_FLOODDETECTED:
+				if( m_Protocol->RECEIVE_SID_FLOODDETECTED( Packet->GetData( ) ) )
+				{
+					// we're disced for flooding, exit so we don't prolong the temp IP ban
+					m_Exiting = true;
+				}
+				break;
 			
 			case CBNETProtocol :: SID_PING:
 				m_Socket->PutBytes( m_Protocol->SEND_SID_PING( m_Protocol->RECEIVE_SID_PING( Packet->GetData( ) ) ) );
@@ -554,6 +561,20 @@ void CBNET :: ProcessPackets( )
 
 					m_ActiveCreation = true;
 					m_LastInvitationTime = GetTime( );
+				}
+				break;
+
+			case CBNETProtocol :: SID_CLANMAKECHIEFTAIN:
+				switch( m_Protocol->RECEIVE_SID_CLANMAKECHIEFTAIN( Packet->GetData( ) ) )
+				{
+					case 0:
+						QueueChatCommand( "User successfuly promoted to chieftain." );
+						SendGetClanList( );
+						break;
+
+					default:
+						QueueChatCommand( "Error setting promoting user to Chieftain." );
+					
 				}
 				break;
 

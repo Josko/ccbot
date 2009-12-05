@@ -67,7 +67,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 		// Anti-Spam
 
-		if( m_AntiSpam && !Message.empty( ) && Message[0] != m_CommandTrigger && Access < 3  )
+		if( m_AntiSpam && !Message.empty( ) && Message[0] != m_CommandTrigger && Access < 3 && IsInChannel( User ) && User != m_UserName )
 		{			
 			string message = Message;
 			transform( message.begin( ), message.end( ), message.begin( ), (int(*)(int))tolower );		
@@ -128,7 +128,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				/**********************
 				******* COMMANDS ******
-				**********************/
+				**********************/						
 				
 				//
 				// !ACCEPT
@@ -734,6 +734,15 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					SendGetClanList( );
 					QueueChatCommand( "Updating bot's internal clan list from Battle.Net...", User, Whisper );
 					QueueWhisperCommand( "Received [" + UTIL_ToString( m_Clans.size( ) ) + "] clan members.", User );
+				}
+
+				//
+				// !CHIEFTAIN
+				//
+
+				else if( Command == "chieftain" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "chieftain" ) && IsClanChieftain( m_UserName ) )
+				{
+					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANMAKECHIEFTAIN( Payload ) );
 				}	
 
 				//

@@ -255,6 +255,7 @@ Version 0.29 ( 3.12.2009. )
 - Added RoC support (just leave the TFT key line empty in ccbot.cfg)
 - Minor tweaks to Anti-Spam
 - Improved CHAT client recognition
+- Added !Chieftain command
 
 Version 0.28 ( 20.11.2009. )
 
