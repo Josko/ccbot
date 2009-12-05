@@ -54,16 +54,18 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
  	transform( m_ServerAlias.begin( ), m_ServerAlias.end( ), m_ServerAlias.begin( ), (int(*)(int))tolower );
 	if( m_ServerAlias == "server.eurobattle.net" )
 		m_ServerAlias = "eurobattle.net";
-	if( m_ServerAlias == "fawkz.com" )
-		m_ServerAlias = "fawkzbnet";
+	if( m_ServerAlias == "playdota.eu" )
+		m_ServerAlias = "playdota";
 	m_CDKeyROC = nCDKeyROC;
 	m_CDKeyTFT = nCDKeyTFT;
 
-	if( m_CDKeyROC.size( ) != 26 )
-		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] warning - your ROC CD key is not 26 characters long and is probably invalid" );
+	// needed only on BNET
 
-	if( !m_CDKeyTFT.empty( ) && m_CDKeyTFT.size( ) != 26 )
-		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] warning - your TFT CD key is not 26 characters long and is probably invalid" );
+	// if( m_CDKeyROC.size( ) != 26 )
+	//	CONSOLE_Print( "[BNET: " + m_ServerAlias + "] warning - your ROC CD key is not 26 characters long and is probably invalid" );
+
+	// if( !m_CDKeyTFT.empty( ) && m_CDKeyTFT.size( ) != 26 )
+	//	CONSOLE_Print( "[BNET: " + m_ServerAlias + "] warning - your TFT CD key is not 26 characters long and is probably invalid" );
 
 	transform( m_CDKeyROC.begin( ), m_CDKeyROC.end( ), m_CDKeyROC.begin( ), (int(*)(int))toupper );
 	transform( m_CDKeyTFT.begin( ), m_CDKeyTFT.end( ), m_CDKeyTFT.begin( ), (int(*)(int))toupper );
@@ -77,6 +79,7 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	transform( m_RootAdmin.begin( ), m_RootAdmin.end( ), m_RootAdmin.begin( ), (int(*)(int))tolower );
 	m_CCBot->m_DB->AccessSet( m_Server, m_RootAdmin, 10 );
 	m_CommandTrigger = nCommandTrigger;
+	m_CommandTriggerStr = nCommandTrigger;
 	m_War3Version = nWar3Version;
 	m_EXEVersion = nEXEVersion;
 	m_EXEVersionHash = nEXEVersionHash;
@@ -90,14 +93,14 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_LastGetClanTime = 0;
 	m_LastAnnounceTime = 0;
 	m_LastInvitationTime = 0;
+	m_Delay = 5001;
 	m_WaitingToConnect = true;
 	m_ActiveInvitation = false;
 	m_ActiveCreation = false;
 	m_LoggedIn = false;
 	m_InChat = false;
 	m_Lockdown = false;
-	m_Delay = 5001;
-	m_Announce = false;
+	m_Announce = false;	
 	m_ClanTag = "Clan " + nClanTag;
 	m_GreetUsers = nGreetUsers;
 	m_HostbotName = nHostbotName;
@@ -106,7 +109,7 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_SwearingKick = nSwearingKick;
 	m_SelfJoin = nSelfJoin;
 	m_ClanDefaultAccess = nClanDefaultAccess;
-	m_AntiSpam = nAntiSpam;
+	m_AntiSpam = nAntiSpam;	
 }
 
 CBNET :: ~CBNET( )
@@ -189,15 +192,10 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		
 		
 		if( !m_ChatCommands.empty( ) && GetTicks( ) >= m_LastChatCommandTicks + m_Delay )
-		{
-			
+		{			
 			string ChatCommand = m_ChatCommands.front( );
 			m_ChatCommands.pop( );
-			m_Delay = 1431;
-
-			if ( ChatCommand.length( ) >= 5 )
-				 m_Delay += ChatCommand.length( )*20.2;
-
+			m_Delay = 1100 + ChatCommand.length( )*40.1;
 			SendChatCommand( ChatCommand );
 			m_LastChatCommandTicks = GetTicks( );
 			m_LastOutPacketTicks = GetTicks( );
@@ -497,8 +495,6 @@ void CBNET :: ProcessPackets( )
 				{
 					CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon failed - invalid password, disconnecting" );
 
-					// try to figure out if the user might be using the wrong logon type since too many people are confused by this
-
 					string Server = m_Server;
 					transform( Server.begin( ), Server.end( ), Server.begin( ), (int(*)(int))tolower );
 
@@ -515,46 +511,44 @@ void CBNET :: ProcessPackets( )
 
 					case 9:
 						QueueChatCommand( m_ClanTag + " is currently full, please contact a shaman/chieftain." );
-					break;
+						break;
 								
 					case 5:
 						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan." );
-					break;
+						break;
 
 					case 0:					
 						QueueChatCommand( m_LastKnown + " has successfully joined " + m_ClanTag + "." );
 						SendGetClanList( );					
-					break;
+						break;
 
 					case 4:
 						QueueChatCommand( m_LastKnown + " has rejected a clan invitation for " + m_ClanTag + "." );
-					break;
+						break;
 
 					case 8:
 						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan." );
-					break;
+						break;
 
 					default:
 						CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANINVITATION value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANINVITATION( Packet->GetData( ) ) ) + "]" );
-					break;
-
-				}
-				
+						break;
+				}				
 
 			case CBNETProtocol :: SID_CLANINVITATIONRESPONSE:
 				if( m_Protocol->RECEIVE_SID_CLANINVITATIONRESPONSE( Packet->GetData( ) ) )
 				{
-					m_LastInvitationTime = GetTime( );
-					m_ActiveInvitation = true;
-
 					QueueChatCommand( "Clan invitation received for [" + m_Protocol->GetClanName( ) + "] from [" + m_Protocol->GetInviterStr( ) + "]." );
-					QueueChatCommand( "Type !accept to accept the clan invitation." );
+					QueueChatCommand( "Type " + m_CommandTriggerStr + "accept to accept the clan invitation." );
+
+					m_ActiveInvitation = true;
+					m_LastInvitationTime = GetTime( );										
 				}
 				break;
 
 			case CBNETProtocol :: SID_CLANCREATIONINVITATION:
 				if( m_Protocol->RECEIVE_SID_CLANCREATIONINVITATION( Packet->GetData( ) ) )
-				{					
+				{		
 
 					QueueChatCommand( "Clan creation of [" + m_Protocol->GetClanCreationName( ) + "] by [" + m_Protocol->GetClanCreatorStr( ) + "] received - accepting..." );
 
@@ -569,32 +563,32 @@ void CBNET :: ProcessPackets( )
 					case 1:
 						QueueChatCommand( "Error: " + m_Removed + " - removal failed by " + m_UsedRemove + "." );
 						m_Removed = "Unknown User";
-					break;
+						break;
 			
 					case 2:
 						QueueChatCommand( "Error: " + m_Removed + " - can't be removed yet from " + m_ClanTag + "." );
 						m_Removed = "Unknown User";
-					break;
+						break;
 
 					case 0:
 						QueueChatCommand( m_Removed + " has been kicked from " + m_ClanTag + " by " + m_UsedRemove + "." );
 						m_Removed = "Unknown User";
 						SendGetClanList( );
-					break;
+						break;
 
 					case 7:
 						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, bot not authorised to remove." );
 						m_Removed = "Unknown User";
-					break;
+						break;
 
 					case 8:
 						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, not allowed." );
 						m_Removed = "Unknown User";
-                                	break;
+                                		break;
 
 					default:
-					CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANREMOVEMEMBER value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( Packet->GetData( ) ) ) + "]" );
-					break;
+						CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANREMOVEMEMBER value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( Packet->GetData( ) ) ) + "]" );
+						break;
 				}
 
 			case CBNETProtocol :: SID_CLANMEMBERLIST:

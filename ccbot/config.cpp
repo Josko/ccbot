@@ -165,11 +165,11 @@ void CConfig :: CreateConfig( )
 			file << "bnet_firstchannel = <first channel the bot joins>" << endl;
 			file << "bnet_rootadmin = <your bnet name>" << endl;
 			file << "bnet_commandtrigger = !" << endl;
-			file << "bnet_antispam = 1" << endl;	
+			file << "bnet_antispam = 0" << endl;	
 			file << "bnet_greetusers = 0" << endl;
-			file << "bnet_swearingkick = 1" << endl;
+			file << "bnet_swearingkick = 0" << endl;
 			file << "bnet_selfjoin = 0" << endl;
-			file << "bnet_announcegames = 1" << endl;
+			file << "bnet_announcegames = 0" << endl;
 			file << "bnet_banchat = 0" << endl;
 			file << "" << endl;
 			file << "# These variables are blank if not used" << endl;

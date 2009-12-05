@@ -69,6 +69,7 @@ private:
 	string m_CurrentChannel;					// the current chat channel
 	string m_RootAdmin;						// the root admin
 	char m_CommandTrigger;						// the character prefix to identify commands
+	string m_CommandTriggerStr;					// the character prefix to identify commands
 	unsigned char m_War3Version;					// custom warcraft 3 version for PvPGN users
 	BYTEARRAY m_EXEVersion;						// custom exe version for PvPGN users
 	BYTEARRAY m_EXEVersionHash;					// custom exe version hash for PvPGN users
@@ -88,27 +89,28 @@ private:
 	string m_LastKnown;						// who used the -join command last, gets deleted (set to "unknown user") after we get the packet
 	string m_Removed;						// who gets removed from clan, gets deleted (set to "unknown user") after we get the packet
 	string m_UsedRemove;						// who used the -remove command last, gets deleted (set to "unknown user") after we get the packet
-	string GameName;						// GameName extracted	
-	bool m_Lockdown;						// hold True of False, depending on !LockDown
-	uint32_t m_AccessRequired;					// access required to join the channel when lockdown is on
-	uint32_t m_Delay;						// delay of the next QueueChatCommand based on the length of the past one
+	bool m_AntiSpam;						// set to true and will kick spammers
 	bool m_Announce;						// bool variable if a announce message is active or not
-	string m_AnnounceMsg;						// text printed on X interval by the announce command
-	int m_AnnounceInterval;						// interval of two consecutive announce messages
+	bool m_Lockdown;						// hold True of False, depending on !LockDown
 	bool m_ActiveInvitation;					// bool true if we got an SID_CLANINVITATION in the last 29 seconds
 	bool m_ActiveCreation;						// bool true if we got an clan creation invitaiton in the last 29 seconds
 	bool m_Rejoin;							// indicates that the bot is in the "wrong" channel
 	bool m_ClanCommandsEnabled;					// bool true if bot is in a clan and the users can use clan commands
-	bool m_GreetUsers;						// greet users on join
-	string m_ClanTag;						// clan tag
 	bool m_AnnounceGames;						// set to true and every game joined by users from channel will be announced in channel
 	bool m_BanChat;							// set to true and CHAT clients get kicked from channel
 	bool m_SwearingKick;						// set to true and every message containing swears (contained in swears.cfg) will get the user kicked
 	bool m_SelfJoin;						// set to true and !join command will be enabled
+	bool m_GreetUsers;						// greet users on join
+	string m_ClanTag;						// clan tag
+	uint32_t m_AccessRequired;					// access required to join the channel when lockdown is on
+	uint32_t m_Delay;						// delay of the next QueueChatCommand based on the length of the past one	
+	string m_AnnounceMsg;						// text printed on X interval by the announce command
+	int m_AnnounceInterval;						// interval of two consecutive announce messages	
+	
 	uint32_t m_ClanDefaultAccess;					// default access a clan members has
 	string m_HostbotName;						// hostbot's name if present
-	vector<string> m_SpamCache;
-	bool m_AntiSpam;
+	multimap<string, string> m_SpamCache;				// cache used to store ( loweruser, lowermessage ) for detecting spam
+	
 
 public:
 	CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotname, bool nAntiSPam );
@@ -188,10 +190,10 @@ public:
 	CChannel( string user );
 	~CChannel( );
 
-	string GetUser( )			{ return m_User; }
-	uint32_t GetPing( )			{ return m_Ping; }
-	uint32_t GetUserFlags( )		{ return m_UserFlags; }
-	string GetClan( )			{ return m_Clan; }
+	string GetUser( )				{ return m_User; }
+	uint32_t GetPing( )				{ return m_Ping; }
+	uint32_t GetUserFlags( )			{ return m_UserFlags; }
+	string GetClan( )				{ return m_Clan; }
 	
 	void SetPing( uint32_t nPing )			{ m_Ping = nPing; }
 	void SetUserFlags( uint32_t nUserFlags )	{ m_UserFlags = nUserFlags; }

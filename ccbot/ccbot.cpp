@@ -46,13 +46,13 @@
  #include <mach/mach_time.h>
 #endif
 
-time_t gStartTime;
 string gLogFile;
 CCCBot *gCCBot = NULL;
 
 uint32_t GetTime( )
 {
-	return (uint32_t)( (GetTicks( ) / 1000) - gStartTime );
+	// return (uint32_t)( (GetTicks( ) / 1000) - gStartTime );
+	return GetTicks( ) / 1000;
 }
 
 uint32_t GetTicks( )
@@ -125,8 +125,8 @@ int main( )
 #endif
 
 	// initialize the start time
-	gStartTime = 0;
-	gStartTime = GetTime( );
+	// gStartTime = 0;
+	// gStartTime = GetTime( );
 
 #ifdef WIN32
 
@@ -323,12 +323,9 @@ CCCBot :: CCCBot( CConfig *CFG )
 		string RootAdmin = CFG->GetString( Prefix + "rootadmin", string( ) );
 		string BNETCommandTrigger = CFG->GetString( Prefix + "commandtrigger", "!" );
 
-		if( BNETCommandTrigger.empty( ) )
-			BNETCommandTrigger = "!";
-
 		string ClanTag = CFG->GetString( Prefix + "clantag", "" );
 		string HostbotName = CFG->GetString( Prefix + "hostbotname", "" );
-		bool AntiSpam = CFG->GetInt( Prefix + "antispam", 1 ) == 0 ? false : true;
+		bool AntiSpam = CFG->GetInt( Prefix + "antispam", 0 ) == 0 ? false : true;
 		bool GreetUsers = CFG->GetInt( Prefix + "greetusers", 0 ) == 0 ? false : true;
 		bool SwearingKick = CFG->GetInt( Prefix + "swearingkick", 0 ) == 0 ? false : true;
 		bool AnnounceGames = CFG->GetInt( Prefix + "announcegames", 0 ) == 0 ? false : true;
@@ -494,10 +491,8 @@ void CCCBot :: ReloadConfigs( )
 void CCCBot :: SetConfigs( CConfig *CFG )
 {
 	// this doesn't set EVERY config value since that would potentially require reconfiguring the battle.net connections
-	// it just set the easily reloadable values
 
 	m_Language = new CLanguage( LanguageFile );
-
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
 	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;	
 }

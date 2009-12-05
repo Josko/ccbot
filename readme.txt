@@ -1,5 +1,5 @@
 =================================
-Clan & Channel Bot - Version 0.28
+Clan & Channel Bot - Version 0.29
 =================================
 
 CCBot is a heavily modified GHost++ project made by Varlock. Author of the modified version is h4x0rz88 from Eurobattle.net. The original GHost++ project can be found here: http://forum.codelain.com/
@@ -253,6 +253,8 @@ Version 0.29 ( 3.12.2009. )
 - Minor tweaks to clan invitation responses and clan creation responses
 - Fixed a bug with stdin
 - Added RoC support (just leave the TFT key line empty in ccbot.cfg)
+- Minor tweaks to Anti-Spam
+- Improved CHAT client recognition
 
 Version 0.28 ( 20.11.2009. )
 
@@ -265,9 +267,9 @@ Version 0.28 ( 20.11.2009. )
 - !saybnet now uses partial matching
 - Fixed a flaw in logic in !remove
 - !accept works only if there is an active invitation
-- Few fixed in !lockdown and !kick
+- Few bugs fixed in !lockdown and !kick
 - Added Anti-spam
-- Minor code changes, minor stuff, this and that
+- Minor code changes and tweaks
 
 Version 0.27 ( 13.11.2009. )
 
