@@ -120,8 +120,8 @@ CIncomingChatEvent *CBNETProtocol :: RECEIVE_SID_CHATEVENT( BYTEARRAY data )
 
 bool CBNETProtocol :: RECEIVE_SID_FLOODDETECTED( BYTEARRAY data )
 {
-	DEBUG_Print( "RECEIVED SID_FLOODDETECTED" );
-	DEBUG_Print( data );
+	// DEBUG_Print( "RECEIVED SID_FLOODDETECTED" );
+	// DEBUG_Print( data );
 
 	// 2 bytes					-> Header
 	// 2 bytes					-> Length
@@ -866,8 +866,8 @@ BYTEARRAY CBNETProtocol :: SEND_SID_CLANMAKECHIEFTAIN( string username )
 	UTIL_AppendByteArrayFast( packet, username );		// clan tag
 	AssignLength( packet );					// assign length
 
-	DEBUG_Print( "SEND SID_CLANMAKECHIEFTAIN" );
-	DEBUG_Print( packet );
+	// DEBUG_Print( "SEND SID_CLANMAKECHIEFTAIN" );
+	// DEBUG_Print( packet );
 	return packet;
 }
 

@@ -198,6 +198,7 @@ Parameters in angled brackets <like this> are required and parameters in square 
 !lockdown off			deactivates lockdown mode and everyone banned during lockdown gets unbanned
 !saybnets <text>		sends the chat command to every BNET we're connected to
 !saybnet <bnet>	<text>		sends the chat command just to the specified BNET we're connected to
+!chieftain <name>		transfers the chieftain position to the specified user
 
 ============================
 Compiling CCBot on Windows

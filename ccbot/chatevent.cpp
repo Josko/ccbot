@@ -389,8 +389,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				else if( Command == "countaccess" && Access >= m_CCBot->m_DB->CommandAccess( "countaccess" ) )
 				{
-				
-
 					if( Payload.size( ) == 0 )
 						Payload = "0";
 					else if( UTIL_ToInt32( Payload ) > 10 )
@@ -410,16 +408,15 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				//
 				// !DELACCESS
 				//
-				// TO DO: !DELUSER from database
 				
 				else if( Command == "delaccess" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "delaccess" ) )
 				{
 					if( !m_CCBot->m_DB->AccessCheck( m_Server, Payload ) )
-						QueueChatCommand( "User has no set access - the default 0 access remains.", User, Whisper );
+						QueueChatCommand( "User has no set access.", User, Whisper );
 					else
 					{
 						if( m_CCBot->m_DB->AccessRemove( Payload ) )
-							QueueChatCommand( "Deleted user [" + Payload + "]'s set access and returning it to default 0." , User, Whisper );
+							QueueChatCommand( "Deleted user [" + Payload + "]'s set access." , User, Whisper );
 						else
 							QueueChatCommand( "Error deleting user [" + Payload + "]'s access.", User, Whisper );
 					}					
@@ -740,9 +737,15 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !CHIEFTAIN
 				//
 
-				else if( Command == "chieftain" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "chieftain" ) && IsClanChieftain( m_UserName ) )
+				else if( Command == "chieftain" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "chieftain" ) && IsClanChieftain( m_UserName ) && m_ClanCommandsEnabled )
 				{
-					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANMAKECHIEFTAIN( Payload ) );
+					if( IsClanMember( Payload ) )
+					{
+						m_Socket->PutBytes( m_Protocol->SEND_SID_CLANMAKECHIEFTAIN( Payload ) );
+						m_LastKnown = Payload;
+					}
+					else
+						QueueChatCommand( "User must be in the clan.", User, Whisper );
 				}	
 
 				//
@@ -773,7 +776,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						SendClanChangeRank( Payload, CBNETProtocol :: CLAN_MEMBER );
 						SendGetClanList( );
-						CONSOLE_Print( "[CLAN: " +  m_ServerAlias + "] changing " + Payload + " to status grunt done by " + User );
 						QueueChatCommand( "You have successfully changed rank of " + Payload + " to Grunt.", User, Whisper );
 					}
 					else
@@ -861,7 +863,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( IsClanShaman( m_UserName ) || IsClanChieftain( m_UserName ) )
 					{
 						SendClanChangeRank( Payload, CBNETProtocol :: CLAN_PARTIAL_MEMBER );
-						CONSOLE_Print( "[CLAN: " +  m_ServerAlias + "] changing " + Payload + " to status peon done by " + User );
 						QueueChatCommand( "You have successfully changed rank of " + Payload + " to Peon.", User, Whisper );
 					}
 					else
@@ -974,7 +975,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( IsClanChieftain( m_UserName ) )
 					{
 						SendClanChangeRank( Payload, CBNETProtocol :: CLAN_OFFICER );
-						CONSOLE_Print( "[CLAN: " +  m_ServerAlias + "] changing " + Payload + " to status shaman done by " + User );
 						QueueChatCommand( "You have successfully changed rank of " + Payload + " to Shaman.", User, Whisper );
 					}
 					else
@@ -1081,8 +1081,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					date += UTIL_ToString( time ) + "s";
 
 					QueueChatCommand( m_UserName + " has a uptime of : " + date, User, Whisper );
-				}		
-
+				}
 					
 				//
 				// !CHECKBAN
@@ -1363,8 +1362,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			}			
 		}
 		else
-			CONSOLE_Print( "[INFO: " + m_ServerAlias + "] " + Message );	
-					
+			CONSOLE_Print( "[INFO: " + m_ServerAlias + "] " + Message );						
 	}
 
 	else if( Event == CBNETProtocol :: EID_JOIN )
@@ -1486,8 +1484,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		if( Message.size( ) >= 14 )
 		{
 			reverse( Message.begin( ), Message.end( ) ); 
-			user->SetClan( Message.substr( 0, Message.find_first_of(" ") ) );
-			
+			user->SetClan( Message.substr( 0, Message.find_first_of(" ") ) );			
 		}
 		m_Channel[lowerUser] = user;
 	}

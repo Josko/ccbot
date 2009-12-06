@@ -568,13 +568,12 @@ void CBNET :: ProcessPackets( )
 				switch( m_Protocol->RECEIVE_SID_CLANMAKECHIEFTAIN( Packet->GetData( ) ) )
 				{
 					case 0:
-						QueueChatCommand( "User successfuly promoted to chieftain." );
+						QueueChatCommand( m_LastKnown + " successfuly promoted to chieftain." );
 						SendGetClanList( );
 						break;
 
 					default:
-						QueueChatCommand( "Error setting promoting user to Chieftain." );
-					
+						QueueChatCommand( "Error setting user to Chieftain." );					
 				}
 				break;
 

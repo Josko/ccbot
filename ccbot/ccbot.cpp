@@ -552,7 +552,7 @@ void CCCBot :: UpdateCommandAccess( )
 #endif
 
 
-	for( map<string, uint32_t> :: iterator i = m_Commands.begin( ); i != m_Commands.end( ); i++ )
+	for( map<string, uint32_t> :: iterator i = m_Commands.begin( ); i != m_Commands.end( ); ++i )
 		if( m_DB->CommandAccess( (*i).first ) == 11 )
 		{
 			m_DB->CommandSetAccess( (*i).first, (*i).second );
