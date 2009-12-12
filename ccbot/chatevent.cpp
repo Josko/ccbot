@@ -1331,30 +1331,20 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					else
 						QueueChatCommand( "Can only access pings from users in channel.", User, Whisper );
 				}
+				
+				//
+				// !RESTART
+				//
 
+				else if( Command == "restart" && Access >= m_CCBot->m_DB->CommandAccess( "restart" ) )
+				{
 				
 #ifdef WIN32
-				//
-				// !RESTART /just for Windows
-				//		
-				else if( Command == "restart" && Access >= m_CCBot->m_DB->CommandAccess( "restart" ) )
-				{
-					QueueChatCommand( "Restarting...", User, Whisper );
 					_spawnl(_P_OVERLAY,"ccbot.exe","ccbot.exe",NULL);
-				}
-#else
-				//
-				// !RESTART /just for Linux
-				//		
-				else if( Command == "restart" && Access >= m_CCBot->m_DB->CommandAccess( "restart" ) )
-				{
-					QueueChatCommand( "Restarting...", User, Whisper );
-					// execl("ccbot++",NULL);
-					execl("ccbot++","ccbot++",NULL);
-				}
+#else		
+					execl("ccbot++","ccbot++",NULL);				
 #endif		
-		}
-		
+				}		
 	}
 
 	else if( Event == CBNETProtocol :: EID_INFO )

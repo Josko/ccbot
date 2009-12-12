@@ -196,7 +196,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		{			
 			string ChatCommand = m_ChatCommands.front( );
 			m_ChatCommands.pop( );
-			m_Delay = 1100 + ChatCommand.length( )*40.1;
+			m_Delay = 1100 + ChatCommand.length( )*41;
 			SendChatCommand( ChatCommand );
 			m_LastChatCommandTicks = GetTicks( );
 			m_LastOutPacketTicks = GetTicks( );
