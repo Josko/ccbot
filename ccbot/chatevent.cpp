@@ -470,7 +470,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					bool Exists = false;
 
 					uint32_t NewAccess;
-					string Command;
+					string command;
 					stringstream SS;
 					SS << Payload;
 					SS >> NewAccess;
@@ -481,28 +481,28 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					}
 					else
 					{
-						getline( SS, Command );
-						string :: size_type Start = Command.find_first_not_of( " " );
+						getline( SS, command );
+						string :: size_type Start = command.find_first_not_of( " " );
 
 						if( Start != string :: npos )
-							Command = Command.substr( Start );
+							command = command.substr( Start );
 
 						if( NewAccess > 10 )
 							NewAccess = 10;
 					
 						for( map<string, uint32_t> :: iterator i = m_CCBot->m_Commands.begin( ); i != m_CCBot->m_Commands.end( ); ++i )
-							if( (*i).first == Command )
+							if( (*i).first == command )
 								Exists = true;
 										
 						if( Exists )
 						{
-							if( m_CCBot->m_DB->CommandSetAccess( Command, NewAccess ) )
-								QueueChatCommand( "Updated [" + Command + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper );
+							if( m_CCBot->m_DB->CommandSetAccess( command, NewAccess ) )
+								QueueChatCommand( "Updated [" + command + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper );
 							else
-								QueueChatCommand( "Error updating access for [" + Command + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper );
+								QueueChatCommand( "Error updating access for [" + command + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper );
 						}
 						else
-							QueueChatCommand( "Unable to set access for [" + Command + "] because it doesn't exist.", User, Whisper );
+							QueueChatCommand( "Unable to set access for [" + command + "] because it doesn't exist.", User, Whisper );
 					}
 				}
 

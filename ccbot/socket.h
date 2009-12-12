@@ -1,6 +1,6 @@
 /*
 
-   Copyright [2009] [JoÅ¡ko NikoliÄ‡]
+   Copyright [2009] [Joško Nikolić]
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@
  #define ESTALE WSAESTALE
  #define ETOOMANYREFS WSAETOOMANYREFS
  #define EUSERS WSAEUSERS
- #define EHOSTDOWN WSAEHOS
+ #define EDQUOT WSAEDQUOT
+ #define EHOSTDOWN WSAEHOSTDOWN
 #else
  #include <arpa/inet.h>
  #include <errno.h>

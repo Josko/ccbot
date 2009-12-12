@@ -29,7 +29,6 @@
 //
 
 class CTCPClient;
-class CUDPClient;
 class CCommandPacket;
 class CBNCSUtilInterface;
 class CBNETProtocol;

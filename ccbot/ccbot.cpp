@@ -255,7 +255,7 @@ void CCCBot::readStdInMessages( )
         {
 		string s = *i;
 
-		if( s.find( " " ) != string::npos )
+		if( s.find( " " ) != string::npos && s != " " && !s.empty( ) )
 		{
 			vector<string> Tokens = UTIL_Tokenize( *i, ' ' );
 			s = s.substr( Tokens[0].size( ) + 1 );

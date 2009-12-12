@@ -257,6 +257,8 @@ Version 0.29 ( 3.12.2009. )
 - Minor tweaks to Anti-Spam
 - Improved CHAT client recognition
 - Added !Chieftain command
+- Fixed a fatal error caused when you just inputed a space into stdin
+- Overall minor fixes, optimisations etc.
 
 Version 0.28 ( 20.11.2009. )
 
