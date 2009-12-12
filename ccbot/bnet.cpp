@@ -501,17 +501,13 @@ void CBNET :: ProcessPackets( )
 					m_Socket->PutBytes( m_Protocol->SEND_SID_ENTERCHAT( ) );
 					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANMEMBERLIST( ) );
 
-					/* for( vector<CIncomingChannelEvent *> :: iterator i = m_Event.begin( ); i != m_Event.end( ); i++ )
+					/* for( vector<CIncomingChannelEvent *> :: iterator i = m_Event.begin( ); i != m_Event.end( ); ++i )
 					delete *i; */
 					
        				}
 				else
 				{
 					CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon failed - invalid password, disconnecting" );
-
-					string Server = m_Server;
-					transform( Server.begin( ), Server.end( ), Server.begin( ), (int(*)(int))tolower );
-
 					m_Socket->Disconnect( );
 					delete Packet;
 					return;
@@ -622,7 +618,7 @@ void CBNET :: ProcessPackets( )
 			{
 				vector<CIncomingClanList *> Clans = m_Protocol->RECEIVE_SID_CLANMEMBERLIST( Packet->GetData( ) );
 
-				for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); i++ )
+				for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
 					delete *i;
 
 				m_Clans = Clans;
@@ -770,7 +766,7 @@ bool CBNET :: IsRootAdmin( string name )
 
 bool CBNET :: IsClanPeon( string name )
 {
-	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); i++ )
+	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
 		if( Match( (*i)->GetName( ), name ) && (*i)->GetRank( ) == "Peon" || (*i)->GetRank( ) == "Recruit" )
 			return true;
 
@@ -779,7 +775,7 @@ bool CBNET :: IsClanPeon( string name )
 
 bool CBNET :: IsClanGrunt( string name )
 {
-	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); i++ )
+	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
 		if( Match( (*i)->GetName( ), name ) && (*i)->GetRank( ) == "Grunt" )
 			return true;
 
@@ -788,7 +784,7 @@ bool CBNET :: IsClanGrunt( string name )
 
 bool CBNET :: IsClanShaman( string name )
 {
-	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); i++ )
+	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
 		if( Match( (*i)->GetName( ), name ) && (*i)->GetRank( ) == "Shaman" )
 			return true;
 
@@ -798,7 +794,7 @@ bool CBNET :: IsClanShaman( string name )
 bool CBNET :: IsClanChieftain( string name )
 {
 
-	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); i++ )
+	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
 		if( Match( (*i)->GetName( ), name ) && (*i)->GetRank( ) == "Chieftain" )
 			return true;
 
@@ -807,7 +803,7 @@ bool CBNET :: IsClanChieftain( string name )
 
 bool CBNET :: IsClanMember( string name )
 {
-	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); i++ )
+	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
 		if( Match( (*i)->GetName( ), name ) )
 			return true;
 		
@@ -817,7 +813,7 @@ bool CBNET :: IsClanMember( string name )
 bool CBNET :: IsAlreadySquelched( string name )
 {
 
-	for( vector<string> :: iterator i = SquelchedUsers.begin( ); i != SquelchedUsers.end( ); i++ )	
+	for( vector<string> :: iterator i = SquelchedUsers.begin( ); i != SquelchedUsers.end( ); ++i )	
 		if( Match( name, *i ) )
 			return true;	
 
@@ -828,7 +824,7 @@ bool CBNET :: IsInChannel( string name )
 {
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 
-	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); i++ )
+	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 		if( (*i).first == name )
 			return true;
 
@@ -837,7 +833,7 @@ bool CBNET :: IsInChannel( string name )
 
 bool CBNET :: IsInLockdownNames( string name )
 {
-	for( vector<string> :: iterator i = LockdownNames.begin( ); i != LockdownNames.end( ); i++ )
+	for( vector<string> :: iterator i = LockdownNames.begin( ); i != LockdownNames.end( ); ++i )
 		if( Match( name, (*i) ) )	
 			return true;
 
@@ -868,7 +864,7 @@ string CBNET :: GetUserFromNamePartial( string name )
 
 	// try to match each username with the passed string (e.g. "Varlock" would be matched with "lock")
 
-	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); i++ )
+	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 	{
 
 			if( (*i).first == name )
@@ -924,7 +920,7 @@ CChannel *CBNET :: GetUserByName( string name )
 {
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 
-	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); i++ )
+	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 		if( name == (*i).first )
 			return i->second;
 

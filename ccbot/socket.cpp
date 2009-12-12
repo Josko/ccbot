@@ -77,42 +77,42 @@ string CSocket :: GetErrorString( )
 
 	switch( m_Error )
 	{
-	case EWOULDBLOCK: return "EWOULDBLOCK";
-	case EINPROGRESS: return "EINPROGRESS";
-	case EALREADY: return "EALREADY";
-	case ENOTSOCK: return "ENOTSOCK";
-	case EDESTADDRREQ: return "EDESTADDRREQ";
-	case EMSGSIZE: return "EMSGSIZE";
-	case EPROTOTYPE: return "EPROTOTYPE";
-	case ENOPROTOOPT: return "ENOPROTOOPT";
-	case EPROTONOSUPPORT: return "EPROTONOSUPPORT";
-	case ESOCKTNOSUPPORT: return "ESOCKTNOSUPPORT";
-	case EOPNOTSUPP: return "EOPNOTSUPP";
-	case EPFNOSUPPORT: return "EPFNOSUPPORT";
-	case EAFNOSUPPORT: return "EAFNOSUPPORT";
-	case EADDRINUSE: return "EADDRINUSE";
-	case EADDRNOTAVAIL: return "EADDRNOTAVAIL";
-	case ENETDOWN: return "ENETDOWN";
-	case ENETUNREACH: return "ENETUNREACH";
-	case ENETRESET: return "ENETRESET";
-	case ECONNABORTED: return "ECONNABORTED";
-	case ECONNRESET: return "ECONNRESET";
-	case ENOBUFS: return "ENOBUFS";
-	case EISCONN: return "EISCONN";
-	case ENOTCONN: return "ENOTCONN";
-	case ESHUTDOWN: return "ESHUTDOWN";
-	case ETOOMANYREFS: return "ETOOMANYREFS";
-	case ETIMEDOUT: return "ETIMEDOUT";
-	case ECONNREFUSED: return "ECONNREFUSED";
-	case ELOOP: return "ELOOP";
-	case ENAMETOOLONG: return "ENAMETOOLONG";
-	case EHOSTDOWN: return "EHOSTDOWN";
-	case EHOSTUNREACH: return "EHOSTUNREACH";
-	case ENOTEMPTY: return "ENOTEMPTY";
-	case EUSERS: return "EUSERS";
-	case EDQUOT: return "EDQUOT";
-	case ESTALE: return "ESTALE";
-	case EREMOTE: return "EREMOTE";
+		case EWOULDBLOCK: 	return "EWOULDBLOCK";
+		case EINPROGRESS:	return "EINPROGRESS";
+		case EALREADY: 		return "EALREADY";
+		case ENOTSOCK: 		return "ENOTSOCK";
+		case EDESTADDRREQ: 	return "EDESTADDRREQ";
+		case EMSGSIZE: 		return "EMSGSIZE";
+		case EPROTOTYPE: 	return "EPROTOTYPE";
+		case ENOPROTOOPT: 	return "ENOPROTOOPT";
+		case EPROTONOSUPPORT: 	return "EPROTONOSUPPORT";
+		case ESOCKTNOSUPPORT:	return "ESOCKTNOSUPPORT";
+		case EOPNOTSUPP: 	return "EOPNOTSUPP";
+		case EPFNOSUPPORT: 	return "EPFNOSUPPORT";
+		case EAFNOSUPPORT:	return "EAFNOSUPPORT";
+		case EADDRINUSE: 	return "EADDRINUSE";
+		case EADDRNOTAVAIL: 	return "EADDRNOTAVAIL";
+		case ENETDOWN: 		return "ENETDOWN";
+		case ENETUNREACH: 	return "ENETUNREACH";
+		case ENETRESET: 	return "ENETRESET";
+		case ECONNABORTED: 	return "ECONNABORTED";
+		case ECONNRESET: 	return "ECONNRESET";
+		case ENOBUFS: 		return "ENOBUFS";
+		case EISCONN: 		return "EISCONN";
+		case ENOTCONN: 		return "ENOTCONN";
+		case ESHUTDOWN: 	return "ESHUTDOWN";
+		case ETOOMANYREFS: 	return "ETOOMANYREFS";
+		case ETIMEDOUT: 	return "ETIMEDOUT";
+		case ECONNREFUSED: 	return "ECONNREFUSED";
+		case ELOOP: 		return "ELOOP";
+		case ENAMETOOLONG: 	return "ENAMETOOLONG";
+		case EHOSTDOWN: 	return "EHOSTDOWN";
+		case EHOSTUNREACH: 	return "EHOSTUNREACH";
+		case ENOTEMPTY: 	return "ENOTEMPTY";
+		case EUSERS: 		return "EUSERS";
+		case EDQUOT: 		return "EDQUOT";
+		case ESTALE: 		return "ESTALE";
+		case EREMOTE: 		return "EREMOTE";
 	}
 
 	return "UNKNOWN ERROR";
@@ -376,14 +376,6 @@ void CTCPClient :: Connect( string localaddress, string address, uint16_t port )
                         LocalSIN.sin_addr.s_addr = INADDR_ANY;
 
                 LocalSIN.sin_port = htons( 0 );
-
-                if( bind( m_Socket, (struct sockaddr *)&LocalSIN, sizeof( LocalSIN ) ) == SOCKET_ERROR )
-                {
-                        m_HasError = true;
-                        m_Error = GetLastError( );
-                        CONSOLE_Print( "[TCPCLIENT] error (bind) - " + GetErrorString( ) );
-                        return;
-                }
         }
 
         // get IP address
@@ -500,14 +492,6 @@ bool CTCPServer :: Listen( string address, uint16_t port )
 
 	m_SIN.sin_port = htons( port );
 
-	if( bind( m_Socket, (struct sockaddr *)&m_SIN, sizeof( m_SIN ) ) == SOCKET_ERROR )
-	{
-		m_HasError = true;
-		m_Error = GetLastError( );
-		CONSOLE_Print( "[TCPSERVER] error (bind) - " + GetErrorString( ) );
-		return false;
-	}
-
 	// listen, queue length 8
 
 	if( listen( m_Socket, 8 ) == SOCKET_ERROR )
@@ -553,190 +537,3 @@ CTCPSocket *CTCPServer :: Accept( fd_set *fd )
 	return NULL;
 }
 
-//
-// CUDPSocket
-//
-
-CUDPSocket :: CUDPSocket( ) : CSocket( )
-{
-	Allocate( SOCK_DGRAM );
-
-	// enable broadcast support
-
-	int OptVal = 1;
-	setsockopt( m_Socket, SOL_SOCKET, SO_BROADCAST, (const char *)&OptVal, sizeof( int ) );
-}
-
-CUDPSocket :: ~CUDPSocket( )
-{
-
-}
-
-bool CUDPSocket :: SendTo( struct sockaddr_in sin, BYTEARRAY message )
-{
-	if( m_Socket == INVALID_SOCKET || m_HasError )
-		return false;
-
-	string MessageString = string( message.begin( ), message.end( ) );
-
-	if( sendto( m_Socket, MessageString.c_str( ), MessageString.size( ), 0, (struct sockaddr *)&sin, sizeof( sin ) ) == -1 )
-		return false;
-
-	return true;
-}
-
-bool CUDPSocket :: SendTo( string address, uint16_t port, BYTEARRAY message )
-{
-	if( m_Socket == INVALID_SOCKET || m_HasError )
-		return false;
-
-	// get IP address
-
-	struct hostent *HostInfo;
-	uint32_t HostAddress;
-	HostInfo = gethostbyname( address.c_str( ) );
-
-	if( !HostInfo )
-	{
-		m_HasError = true;
-		// m_Error = h_error;
-		CONSOLE_Print( "[UDPSOCKET] error (gethostbyname)" );
-		return false;
-	}
-
-	memcpy( &HostAddress, HostInfo->h_addr, HostInfo->h_length );
-	struct sockaddr_in sin;
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = HostAddress;
-	sin.sin_port = htons( port );
-
-	return SendTo( sin, message );
-}
-
-bool CUDPSocket :: Broadcast( uint16_t port, BYTEARRAY message )
-{
-	if( m_Socket == INVALID_SOCKET || m_HasError )
-		return false;
-
-	struct sockaddr_in sin;
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = INADDR_BROADCAST;
-	sin.sin_port = htons( port );
-
-	string MessageString = string( message.begin( ), message.end( ) );
-
-	if( sendto( m_Socket, MessageString.c_str( ), MessageString.size( ), 0, (struct sockaddr *)&sin, sizeof( sin ) ) == -1 )
-	{
-		CONSOLE_Print( "[UDPSOCKET] failed to broadcast packet (port " + UTIL_ToString( port ) + ", size " + UTIL_ToString( MessageString.size( ) ) + " bytes)" );
-		return false;
-	}
-
-	return true;
-}
-
-//
-// CUDPServer
-//
-
-CUDPServer :: CUDPServer( ) : CUDPSocket( )
-{
-	// make socket non blocking
-
-#ifdef WIN32
-	int iMode = 1;
-	ioctlsocket( m_Socket, FIONBIO, (u_long FAR *)&iMode );
-#else
-	fcntl( m_Socket, F_SETFL, fcntl( m_Socket, F_GETFL ) | O_NONBLOCK );
-#endif
-
-	// set the socket to reuse the address
-	// with UDP sockets this allows more than one program to listen on the same port
-
-	int optval = 1;
-
-#ifdef WIN32
-	setsockopt( m_Socket, SOL_SOCKET, SO_REUSEADDR, (const char *)&optval, sizeof( int ) );
-#else
-	setsockopt( m_Socket, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval, sizeof( int ) );
-#endif
-}
-
-CUDPServer :: ~CUDPServer( )
-{
-
-}
-
-bool CUDPServer :: Bind( struct sockaddr_in sin )
-{
-	if( m_Socket == INVALID_SOCKET || m_HasError )
-		return false;
-
-	m_SIN = sin;
-
-	if( bind( m_Socket, (struct sockaddr *)&m_SIN, sizeof( m_SIN ) ) == SOCKET_ERROR )
-	{
-		m_HasError = true;
-		m_Error = GetLastError( );
-		CONSOLE_Print( "[UDPSERVER] error (bind) - " + GetErrorString( ) );
-		return false;
-	}
-
-	return true;
-}
-
-bool CUDPServer :: Bind( string address, uint16_t port )
-{
-	if( m_Socket == INVALID_SOCKET || m_HasError )
-		return false;
-
-	struct sockaddr_in sin;
-	sin.sin_family = AF_INET;
-
-	if( !address.empty( ) )
-	{
-		if( ( sin.sin_addr.s_addr = inet_addr( address.c_str( ) ) ) == INADDR_NONE )
-			sin.sin_addr.s_addr = INADDR_ANY;
-	}
-	else
-		sin.sin_addr.s_addr = INADDR_ANY;
-
-	sin.sin_port = htons( port );
-
-	return Bind( sin );
-}
-
-void CUDPServer :: RecvFrom( fd_set *fd, struct sockaddr_in *sin, string *message )
-{
-	if( m_Socket == INVALID_SOCKET || m_HasError || !sin || !message )
-		return;
-
-	int AddrLen = sizeof( *sin );
-
-	if( FD_ISSET( m_Socket, fd ) )
-	{
-		// data is waiting, receive it
-
-		char buffer[1024];
-
-#ifdef WIN32
-		int c = recvfrom( m_Socket, buffer, 1024, 0, (struct sockaddr *)sin, &AddrLen );
-#else
-		int c = recvfrom( m_Socket, buffer, 1024, 0, (struct sockaddr *)sin, (socklen_t *)&AddrLen );
-#endif
-
-		if( c == SOCKET_ERROR && GetLastError( ) != EWOULDBLOCK )
-		{
-			// receive error
-
-			m_HasError = true;
-			m_Error = GetLastError( );
-			CONSOLE_Print( "[UDPSERVER] error (recvfrom) - " + GetErrorString( ) );
-		}
-		else if( c > 0 )
-		{
-			// success!
-
-			*message = string( buffer, c );
-		}
-	}
-}

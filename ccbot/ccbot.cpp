@@ -222,7 +222,7 @@ void DEBUG_Print( BYTEARRAY b )
 {
 	cout << "{ ";
 
-	for( unsigned int i = 0; i < b.size( ); i++ )
+	for( unsigned int i = 0; i < b.size( ); ++i )
 		cout << hex << (int)b[i] << " ";
 
 	cout << "}" << endl;
@@ -251,7 +251,7 @@ void CCCBot::readStdInMessages( )
     if( pthread_mutex_trylock( &stdInMutex ) == 0 )
     {
 
-        for( vector<string> :: iterator i = stdInputMessages.begin( ); i !=stdInputMessages.end( ); i++ )
+        for( vector<string> :: iterator i = stdInputMessages.begin( ); i !=stdInputMessages.end( ); ++i )
         {
 		string s = *i;
 
@@ -265,7 +265,7 @@ void CCCBot::readStdInMessages( )
 			else
 				DEBUG_Print( "Unable to partially match with a server." );		
            
-			for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
+			for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
 			{
                 		if( !(*i)->GetExiting( ) && Tokens[0] == (*i)->GetServer( ) )
                 		{
@@ -303,7 +303,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 	// load the battle.net connections
 	// we're just loading the config data and creating the CBNET classes here, the connections are established later (in the Update function)
 
-	for( uint32_t i = 1; i < 10; i++ )
+	for( uint32_t i = 1; i < 10; ++i )
 	{
 		string Prefix;
 
@@ -372,7 +372,7 @@ CCCBot :: ~CCCBot( )
 	delete m_DB;
 	delete m_Language;
 
-	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
+	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
         	delete *i;
 
 	pthread_cancel( stdInThread );
@@ -401,7 +401,7 @@ bool CCCBot :: Update( long usecBlock )
 
 	// all battle.net sockets
 
-	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
+	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
 		NumFDs += (*i)->SetFD( &fd, &send_fd, &nfds );
 
 	struct timeval tv;
@@ -426,7 +426,7 @@ bool CCCBot :: Update( long usecBlock )
 
 	// update battle.net connections
 
-	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
+	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
 	{
 		if( (*i)->Update( &fd, &send_fd ) )
 			BNETExit = true;
@@ -565,20 +565,20 @@ string CCCBot :: GetServerFromNamePartial( string name )
 	string DirectMatch;
 	string PartialMatch;
 
-	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); i++ )
+	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
 	{
 		string servername = (*i)->GetServer( );
 		transform( servername.begin( ), servername.end( ), servername.begin( ), (int(*)(int))tolower );
 
 			if( servername == name )
 			{
-				DirectMatches++;
+				++DirectMatches;
 				DirectMatch = (*i)->GetServer( );
 			}
 
 			if( servername.find( name ) != string :: npos )
 			{
-				PartialMatches++;
+				++PartialMatches;
 				PartialMatch = (*i)->GetServer( );
 			}		
 	}

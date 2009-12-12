@@ -1,6 +1,6 @@
 /*
 
-   Copyright [2009] [Joško Nikolić]
+   Copyright [2009] [JoÅ¡ko NikoliÄ‡]
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,42 +26,14 @@
  #include <winsock2.h>
  #include <errno.h>
 
- #define EADDRINUSE WSAEADDRINUSE
- #define EADDRNOTAVAIL WSAEADDRNOTAVAIL
- #define EAFNOSUPPORT WSAEAFNOSUPPORT
- #define EALREADY WSAEALREADY
- #define ECONNABORTED WSAECONNABORTED
- #define ECONNREFUSED WSAECONNREFUSED
- #define ECONNRESET WSAECONNRESET
- #define EDESTADDRREQ WSAEDESTADDRREQ
- #define EDQUOT WSAEDQUOT
- #define EHOSTDOWN WSAEHOSTDOWN
- #define EHOSTUNREACH WSAEHOSTUNREACH
- #define EINPROGRESS WSAEINPROGRESS
- #define EISCONN WSAEISCONN
- #define ELOOP WSAELOOP
- #define EMSGSIZE WSAEMSGSIZE
- // #define ENAMETOOLONG WSAENAMETOOLONG
- #define ENETDOWN WSAENETDOWN
- #define ENETRESET WSAENETRESET
- #define ENETUNREACH WSAENETUNREACH
- #define ENOBUFS WSAENOBUFS
- #define ENOPROTOOPT WSAENOPROTOOPT
- #define ENOTCONN WSAENOTCONN
- // #define ENOTEMPTY WSAENOTEMPTY
- #define ENOTSOCK WSAENOTSOCK
- #define EOPNOTSUPP WSAEOPNOTSUPP
  #define EPFNOSUPPORT WSAEPFNOSUPPORT
- #define EPROTONOSUPPORT WSAEPROTONOSUPPORT
- #define EPROTOTYPE WSAEPROTOTYPE
  #define EREMOTE WSAEREMOTE
  #define ESHUTDOWN WSAESHUTDOWN
  #define ESOCKTNOSUPPORT WSAESOCKTNOSUPPORT
  #define ESTALE WSAESTALE
- #define ETIMEDOUT WSAETIMEDOUT
  #define ETOOMANYREFS WSAETOOMANYREFS
  #define EUSERS WSAEUSERS
- #define EWOULDBLOCK WSAEWOULDBLOCK
+ #define EHOSTDOWN WSAEHOS
 #else
  #include <arpa/inet.h>
  #include <errno.h>
@@ -191,34 +163,5 @@ public:
 	virtual CTCPSocket *Accept( fd_set *fd );
 };
 
-//
-// CUDPSocket
-//
-
-class CUDPSocket : public CSocket
-{
-public:
-	CUDPSocket( );
-	virtual ~CUDPSocket( );
-
-	virtual bool SendTo( struct sockaddr_in sin, BYTEARRAY message );
-	virtual bool SendTo( string address, uint16_t port, BYTEARRAY message );
-	virtual bool Broadcast( uint16_t port, BYTEARRAY message );
-};
-
-//
-// CUDPServer
-//
-
-class CUDPServer : public CUDPSocket
-{
-public:
-	CUDPServer( );
-	virtual ~CUDPServer( );
-
-	virtual bool Bind( struct sockaddr_in sin );
-	virtual bool Bind( string address, uint16_t port );
-	virtual void RecvFrom( fd_set *fd, struct sockaddr_in *sin, string *message );
-};
-
 #endif
+

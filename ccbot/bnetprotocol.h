@@ -35,13 +35,13 @@ class CBNETProtocol
 {
 public:
 	enum Protocol {
-		SID_NULL				= 0,	// 0x0
-		SID_STOPADV				= 2,	// 0x2
-		SID_GETADVLISTEX			= 9,	// 0x9
-		SID_ENTERCHAT				= 10,	// 0xA
-		SID_JOINCHANNEL				= 12,	// 0xC
-		SID_CHATCOMMAND				= 14,	// 0xE
-		SID_CHATEVENT				= 15,	// 0xF
+		SID_NULL				= 0,	// 0x00
+		SID_STOPADV				= 2,	// 0x02
+		SID_GETADVLISTEX			= 9,	// 0x09
+		SID_ENTERCHAT				= 10,	// 0x0A
+		SID_JOINCHANNEL				= 12,	// 0x0C
+		SID_CHATCOMMAND				= 14,	// 0x0E
+		SID_CHATEVENT				= 15,	// 0x0F
 		SID_FLOODDETECTED			= 19,	// 0x13
 		SID_CHECKAD				= 21,	// 0x15
 		SID_STARTADVEX3				= 28,	// 0x1C

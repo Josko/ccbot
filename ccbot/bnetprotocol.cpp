@@ -291,7 +291,6 @@ int CBNETProtocol :: RECEIVE_SID_CLANINVITATION( BYTEARRAY data )
 	}
 
 	return -1;
-
 }
 
 int CBNETProtocol :: RECEIVE_SID_CLANREMOVEMEMBER( BYTEARRAY data )

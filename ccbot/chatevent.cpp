@@ -158,7 +158,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						vector<string> m_CommandList = m_CCBot->m_DB->CommandList( i );
 
-						for( vector<string> :: iterator it = m_CommandList.begin( ); it != m_CommandList.end( ); it++ )
+						for( vector<string> :: iterator it = m_CommandList.begin( ); it != m_CommandList.end( ); ++it )
 							Commands = Commands + m_CommandTrigger + (*it) + ", ";
 
 						Commands = Commands.substr( 0, Commands.size( ) -2 );
