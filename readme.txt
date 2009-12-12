@@ -193,7 +193,7 @@ Parameters in angled brackets <like this> are required and parameters in square 
 !setcommand <access> <name> 	sets the access for the set command (use full names for commands - !clearqueue instead of !cq)
 !accept				accepts a active clan invitation
 !ping [name]			shows users ping (to server)
-!restart			closes and starts the bot again - ONLY FOR WINDOWS - DO NOT RENAME ghost.exe TO ANYTHING ELSE or it won't work
+!restart			closes and starts the bot again - if you rename the binary this command won't work ( ccbot.exe filename for Windows, ccbot++ for Linux )
 !lockdown <access>		activates lockdown mode - everyone with a lower access cannot enter
 !lockdown off			deactivates lockdown mode and everyone banned during lockdown gets unbanned
 !saybnets <text>		sends the chat command to every BNET we're connected to

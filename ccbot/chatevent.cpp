@@ -1344,7 +1344,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 #else		
 					execl("ccbot++","ccbot++",NULL);				
 #endif		
-				}		
+				}
+		}		
 	}
 
 	else if( Event == CBNETProtocol :: EID_INFO )
