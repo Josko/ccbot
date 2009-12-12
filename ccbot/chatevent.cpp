@@ -72,8 +72,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			string message = Message;
 			transform( message.begin( ), message.end( ), message.begin( ), (int(*)(int))tolower );		
 
-			if( m_SpamCache.size( ) == 6 )
+			if( m_SpamCache.size( ) == 7 )
 				m_SpamCache.erase( m_SpamCache.begin( ) );
+
+			m_LastChatEvent = GetTime( );
+			ChatEvent = true;
 
 			m_SpamCache.insert( pair<string, string>( lowerUser, message ) );
 
@@ -100,7 +103,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			string message = Message;
 			transform( message.begin( ), message.end( ), message.begin( ), (int(*)(int))tolower );
 
-			for( int i = 0; i < m_CCBot->m_SwearList.size( ); ++i)
+			for( uint32_t i = 0; i < m_CCBot->m_SwearList.size( ); ++i)
 				if( message.find( m_CCBot->m_SwearList[i] ) != string :: npos )
 					QueueChatCommand( m_CCBot->m_Language->SwearKick( User, m_CCBot->m_SwearList[i] ) );
 		}
@@ -151,7 +154,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					SendChatCommand( "/w " + User +" With an access of [" + UTIL_ToString( Access ) + "] you have the following commands:" );
 					string Commands;
 
-					for( int i = 0; i <= Access; ++i)
+					for( uint32_t i = 0; i <= Access; ++i)
 					{
 						vector<string> m_CommandList = m_CCBot->m_DB->CommandList( i );
 
@@ -1329,16 +1332,27 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						QueueChatCommand( "Can only access pings from users in channel.", User, Whisper );
 				}
 
+				
 #ifdef WIN32
 				//
 				// !RESTART /just for Windows
 				//		
 				else if( Command == "restart" && Access >= m_CCBot->m_DB->CommandAccess( "restart" ) )
 				{
+					QueueChatCommand( "Restarting...", User, Whisper );
 					_spawnl(_P_OVERLAY,"ccbot.exe","ccbot.exe",NULL);
 				}
-#endif	
-			
+#else
+				//
+				// !RESTART /just for Linux
+				//		
+				else if( Command == "restart" && Access >= m_CCBot->m_DB->CommandAccess( "restart" ) )
+				{
+					QueueChatCommand( "Restarting...", User, Whisper );
+					// execl("ccbot++",NULL);
+					execl("ccbot++","ccbot++",NULL);
+				}
+#endif		
 		}
 		
 	}

@@ -367,8 +367,8 @@ vector<CIncomingClanList *> CBNETProtocol :: RECEIVE_SID_CLANMEMBERLIST( BYTEARR
 
 CIncomingClanList *CBNETProtocol :: RECEIVE_SID_CLANMEMBERSTATUSCHANGE( BYTEARRAY data )
 {
-	DEBUG_Print( "RECEIVED SID_CLANMEMBERSTATUSCHANGE" );
-	DEBUG_Print( data );
+	// DEBUG_Print( "RECEIVED SID_CLANMEMBERSTATUSCHANGE" );
+	// DEBUG_Print( data );
 
 	// 2 bytes					-> Header
 	// 2 bytes					-> Length
@@ -458,7 +458,7 @@ bool CBNETProtocol :: RECEIVE_SID_CLANCREATIONINVITATION( BYTEARRAY data )
 	if( ValidateLength( data ) && data.size( ) >= 16  )
 	{
 		m_ClanCreationTag = BYTEARRAY( data.begin( ) + 8, data.begin( ) + 12 );
-		m_ClanCreationName = UTIL_ExtractCString( data, 13 );
+		m_ClanCreationName = UTIL_ExtractCString( data, 12 );
 		m_ClanCreator = UTIL_ExtractCString( data, m_ClanCreationName.size( ) + 14  );
 
 		return true;

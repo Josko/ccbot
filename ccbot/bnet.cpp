@@ -93,6 +93,7 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_LastGetClanTime = 0;
 	m_LastAnnounceTime = 0;
 	m_LastInvitationTime = 0;
+	m_LastChatEvent = 0;
 	m_Delay = 5001;
 	m_WaitingToConnect = true;
 	m_ActiveInvitation = false;
@@ -208,6 +209,12 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			m_LastNullTime = GetTime( );
 		}
 		
+		if( GetTime( ) >= m_LastChatEvent + 5 && m_AntiSpam && ChatEvent )
+		{
+			m_SpamCache.erase( m_SpamCache.end( ) );
+			ChatEvent = false;
+		}
+
 		// refresh the clan vector so it gets updated every 35 seconds
 		if( GetTime( ) >= m_LastGetClanTime + 60 && m_LoggedIn )
 		{
