@@ -258,6 +258,10 @@ Version 0.29 ( 3.12.2009. )
 - Improved CHAT client recognition
 - Added !Chieftain command
 - Fixed a fatal error caused when you just inputed a space into stdin
+- Added timestamps to console output
+- Updated SQLite from 3.6.16 to 3.6.21
+- Minor changes to the Makefile
+- Updated ms_stdint.h
 - Overall minor fixes, optimisations etc.
 
 Version 0.28 ( 20.11.2009. )

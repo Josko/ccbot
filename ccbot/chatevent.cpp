@@ -176,7 +176,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				//
 				
 
-				else if( Command == "addsafelist" || Command == "adds" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "addsafelist" ) )
+				else if( ( Command == "addsafelist" || Command == "adds" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "addsafelist" ) )
 				{					
 					if( m_CCBot->m_DB->SafelistCheck( m_Server, Payload ) )
 						QueueChatCommand( "User is already safelisted.", User, Whisper );
@@ -195,8 +195,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				else if( Command == "announce" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "announce" ) )
 				{					
-					string Interval;
-					string AnnounceMessage;
+					string Interval, AnnounceMessage;
 					stringstream SS;
 					SS << Payload;
 					SS >> Interval;
@@ -232,8 +231,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				else if( ( Command == "ban" || Command == "addban" )&& !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "ban" ) )
 				{
 					
-					string Victim;
-					string Reason;
+					string Victim, Reason;
 					stringstream SS;
 					SS << Payload;
 					SS >> Victim;
@@ -282,22 +280,24 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 					if( IsClanMember( Payload ) )
 					{
-						if( IsClanPeon( Payload ) )							
+						if( IsClanPeon( Payload ) )
+						{							
 							if( Ban )							
 								QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( Access ) + "] access and banned from channel.", User, Whisper );		
 							else
 								QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( Access ) + "] access.", User, Whisper );
-
-						if( IsClanGrunt( Payload ) )
+						}
+						else if( IsClanGrunt( Payload ) )
+						{
 							if( Ban )
 								QueueChatCommand( Payload + " is in clan, rank Grunt, with [" + UTIL_ToString( Access ) + "] access and is banned from channel.", User, Whisper );		
 							else
 								QueueChatCommand( Payload + " is in clan, rank Grunt with [" + UTIL_ToString( Access ) + "] access.", User, Whisper );					
-
-						if( IsClanShaman( Payload ) )
+						}
+						else if( IsClanShaman( Payload ) )
 								QueueChatCommand( Payload + " is in clan, rank Shaman, with [" + UTIL_ToString( Access ) + "] access.", User, Whisper );
 
-						if( IsClanChieftain( Payload ) )
+						else if( IsClanChieftain( Payload ) )
 							QueueChatCommand( Payload + " is in clan, rank Chieftain, with [" + UTIL_ToString( Access ) + "] access.", User, Whisper );
 					}
 					else
@@ -430,13 +430,12 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !CHECKS
 				//
 
-				if( Command == "checksafelist" || Command == "checks" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "checksafelist" ) )
+				if( ( Command == "checksafelist" || Command == "checks" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "checksafelist" ) )
 				{
-					
-						if( m_CCBot->m_DB->SafelistCheck( m_Server, Payload ) )
-							QueueChatCommand( "User [" + Payload + "] is safelisted.", User, Whisper );
-						else
-							QueueChatCommand( "User [" + Payload + "] is not safelisted.", User, Whisper );
+					if( m_CCBot->m_DB->SafelistCheck( m_Server, Payload ) )
+						QueueChatCommand( "User [" + Payload + "] is safelisted.", User, Whisper );
+					else
+						QueueChatCommand( "User [" + Payload + "] is not safelisted.", User, Whisper );
 				}
 				
 				//
@@ -511,7 +510,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !CQ
 				//
 
-				else if( ( Command == "clearqueue" ) || ( Command == "cq" ) && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "clearqueue" ) )
+				else if( ( Command == "clearqueue" ||  Command == "cq" ) && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "clearqueue" ) )
 				{
 					while( !m_ChatCommands.empty( ) )
 						m_ChatCommands.pop( );
@@ -540,7 +539,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !COUNTS
 				//
 
-				else if( ( Command == "countsafelist" ) || ( Command == "counts" ) && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "countsafelist" ) )
+				else if( ( Command == "countsafelist" || Command == "counts" ) && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "countsafelist" ) )
 				{
 					uint32_t Count = m_CCBot->m_DB->SafelistCount( m_Server );
 
@@ -682,7 +681,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !DELS
 				//				
 
-				else if( Command == "delsafelist" || Command == "dels" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "delsafelist" ) )
+				else if( ( Command == "delsafelist" || Command == "dels" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "delsafelist" ) )
 				{
 					
 					
@@ -702,7 +701,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !QUIT
 				//
 
-				else if( Command == "exit" || Command == "quit" && Access >= m_CCBot->m_DB->CommandAccess( "exit" ) )
+				else if( ( Command == "exit" || Command == "quit" ) && Access >= m_CCBot->m_DB->CommandAccess( "exit" ) )
 				{
 					m_Exiting = true;
 				}
@@ -989,7 +988,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !IGNORE
 				//
 
-				else if( Command == "squelch" || Command == "ignore" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "squelch" ) )
+				else if( ( Command == "squelch" || Command == "ignore" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "squelch" ) )
 				{
 					if( !IsAlreadySquelched( Payload ) )
 					{
@@ -1007,7 +1006,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !SL
 				//
 
-				else if( Command == "squelchlist" || Command == "sl" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "squelch" ) )
+				else if( ( Command == "squelchlist" || Command == "sl" ) && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "squelch" ) )
 				{					
 					string tempText;
 
@@ -1036,7 +1035,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !UNIGNORE
 				//
 
-				else if( Command == "unsquelch" || Command == "unignore" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "squelch" ) )
+				else if( ( Command == "unsquelch" || Command == "unignore" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "squelch" ) )
 				{
 					if( IsAlreadySquelched( Payload ) )
 					{
@@ -1168,17 +1167,19 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !O
 				//
 				
-				else if( Command == "online" || Command == "o" && Access >= m_CCBot->m_DB->CommandAccess( "online" ) && m_ClanCommandsEnabled )
+				else if( ( Command == "online" || Command == "o" ) && Access >= m_CCBot->m_DB->CommandAccess( "online" ) && m_ClanCommandsEnabled )
 				{
 					string Online;
 					uint32_t OnlineNumber = 0;
 
 					for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
+					{
 						if( (*i)->GetStatus( ) == "Online" && !Match( (*i)->GetName( ), m_UserName ) )
 						{
 							Online = Online + (*i)->GetName( ) + ", ";
 							++OnlineNumber;
 						}
+					}
 
 					if( OnlineNumber == 0 )
 						SendChatCommand( "/w " + User + " " + "There are no " + m_ClanTag + " members online." );

@@ -178,19 +178,20 @@ int main( )
 
 void CONSOLE_Print( string message )
 {
-        cout << message << endl;
-
         // logging
+
+	time_t Now;
+        time( &Now );
+        char datestr[100];
+        strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
+        char str[80];
+	char timestr[100];
+        strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
 
         if( !gLogFile.empty( ) )
         {
                 ofstream Log;
-                time_t Now;
-                time( &Now );
-                char datestr[100];
-                strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
-                char str[80];
-#ifdef WIN32
+                #ifdef WIN32
                 strcpy(str, "logs\\");
 #else
                 strcpy(str, "logs/");
@@ -211,6 +212,8 @@ void CONSOLE_Print( string message )
                         Log.close( );
                 }
         }
+
+	cout << "[" << timestr << "] " << message << endl;
 }
 
 void DEBUG_Print( string message )
@@ -369,6 +372,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 
 CCCBot :: ~CCCBot( )
 {
+	m_DB = NULL;
 	delete m_DB;
 	delete m_Language;
 
@@ -376,7 +380,7 @@ CCCBot :: ~CCCBot( )
         	delete *i;
 
 	pthread_cancel( stdInThread );
-	pthread_mutex_destroy( &stdInMutex );
+	pthread_mutex_destroy( &stdInMutex );	
 }
 
 bool CCCBot :: Update( long usecBlock )
@@ -474,7 +478,6 @@ void CCCBot :: UpdateSwearList( )
 			file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! WRITE EVERYTHING HERE IN lowercase OR IT WONT WORK! ####" << endl;
 			file << "#############################################################################################################" << endl;
 			file << "# setting the # character on the first position will comment out your line" << endl;
-
 		}
 	}
 	file.close( );

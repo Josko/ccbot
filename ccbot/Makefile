@@ -5,13 +5,11 @@ CC = gcc
 DFLAGS =
 OFLAGS = -O3
 LFLAGS = -L. -L../bncsutil/src/bncsutil/ -lbncsutil -lpthread -ldl -lrt -lnsl
-CFLAGS =
+CFLAGS += -Wall
 
 ifeq ($(SYSTEM),Darwin)
 DFLAGS += -D__APPLE__
 OFLAGS += -flat_namespace
-else
-LFLAGS += -lrt
 endif
 
 ifeq ($(SYSTEM),FreeBSD)
@@ -20,7 +18,7 @@ endif
 
 ifeq ($(SYSTEM),SunOS)
 DFLAGS += -D__SOLARIS__
-LFLAGS += -lresolv -lsocket -lnsl
+LFLAGS += -lresolv -lsocket
 endif
 
 CFLAGS += $(OFLAGS) $(DFLAGS) -I. -I../bncsutil/src/

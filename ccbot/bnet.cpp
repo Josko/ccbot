@@ -767,7 +767,7 @@ bool CBNET :: IsRootAdmin( string name )
 bool CBNET :: IsClanPeon( string name )
 {
 	for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
-		if( Match( (*i)->GetName( ), name ) && (*i)->GetRank( ) == "Peon" || (*i)->GetRank( ) == "Recruit" )
+		if( Match( (*i)->GetName( ), name ) && ( (*i)->GetRank( ) == "Peon" || (*i)->GetRank( ) == "Recruit" ) )
 			return true;
 
 	return false;
