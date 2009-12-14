@@ -25,15 +25,18 @@ There is also a swears.cfg file in the "cfg" folder in which you configure banne
 Console input
 =============
 
-As of version 0.28 it's possible to write commands directly on the console of the bot. You can send the command only to one server at a time. Format:
+It's possible to input commands directly to the console. If you're using only one BNET then you just type the command (without the command trigger) directly as:
 
-<server's name, uses partial matching> <command, without the command trigger> [Payload, if any]
+<command> [payload]
+example: slap Radiant
 
-So if you're connected to server.eurobattle.net and parti.com PvPGNs and you want to ban someone named Spammer from the channel, for spamming the channel on parti.com, you would type in the console:
+If you're running on multiple (different) BNETs you need to type the server's name. Example running server.eurobattle.net and playdota.eu and you want to slap Radiant on eurobattle.net:
 
-pa ban Spammer Spamming the channel.
+<server, uses partial matching> <command> [payload]
+example: euro slap Radiant
 
--> In this case "pa" is enough to match parti.com, we type "ban" instead of "!ban" and the payload as usual.
+Note: Parameters in angled brackets <like this> are required and parameters in square brackets [like this] are optional.
+Note: If you use two or more identical servers (like two bots on eurobattle.net) you must always type the full name as the server name and the command will be sent to BOTH servers.
 
 ==============
 Required Files

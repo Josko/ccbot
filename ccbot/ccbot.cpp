@@ -213,7 +213,7 @@ void CONSOLE_Print( string message )
                 }
         }
 
-	cout << "[" << timestr << "] " << message << endl;
+	cout << "[" << timestr << "]" << message << endl;
 }
 
 void DEBUG_Print( string message )
@@ -237,16 +237,16 @@ void * readStdIn( void* in )
 
     while( true )
     {
-        string s;
+        string input;
 
-        getline( cin, s );
+        getline( cin, input );
 
 	if( !cin.good( ) )
 		cin.clear( );
 
         if( pthread_mutex_lock( &( ccbot->stdInMutex ) ) == 0 )
         {
-            ccbot->stdInputMessages.push_back( s );
+            ccbot->stdInputMessages.push_back( input );
             pthread_mutex_unlock( &( ccbot->stdInMutex ) );
         }
     }
@@ -259,32 +259,39 @@ void CCCBot::readStdInMessages( )
 
         for( vector<string> :: iterator i = stdInputMessages.begin( ); i !=stdInputMessages.end( ); ++i )
         {
-		string s = *i;
+		string input = *i;
 
-		if( s.find( " " ) != string::npos && s != " " && !s.empty( ) )
+		if( m_BNETs.size( ) == 1 )
 		{
-			vector<string> Tokens = UTIL_Tokenize( *i, ' ' );
-			s = s.substr( Tokens[0].size( ) + 1 );
+			for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
+			{         		
+                		CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, (*i)->GetRootAdmin( ), (*i)->GetCommandTrigger( ) + input );
+				(*i)->ProcessChatEvent( &event );     
+			}
+		}
+		else if( input.find( " " ) != string::npos && m_BNETs.size( ) > 1  )
+		{
+			string :: size_type CommandStart = input.find( " " );
+			string server = input.substr( 0, CommandStart );
+			string command = input.substr( CommandStart + 1 );
 
-			if( GetServerFromNamePartial( Tokens[0] ).size( ) > 0 )
-				Tokens[0] = GetServerFromNamePartial( Tokens[0] );
+			if( GetServerFromNamePartial( server ).size( ) > 0 )
+				server = GetServerFromNamePartial( server );
 			else
-				DEBUG_Print( "Unable to partially match with a server." );		
+				DEBUG_Print( "Unable to partially match with a server." );
            
 			for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
 			{
-                		if( !(*i)->GetExiting( ) && Tokens[0] == (*i)->GetServer( ) )
+                		if( !(*i)->GetExiting( ) && server == (*i)->GetServer( ) )
                 		{
-                		    CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, (*i)->GetRootAdmin( ), (*i)->GetCommandTrigger( ) + s );
-	
-                		    (*i)->ProcessChatEvent( &event );
-                		}            
+                		    CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, (*i)->GetRootAdmin( ), (*i)->GetCommandTrigger( ) + command );
+           		  	  (*i)->ProcessChatEvent( &event );
+               			}            
 			}
 		}
 		else
 		{
 			DEBUG_Print( "Usage: <server, partial matching> <command, without command trigger>" );
-			DEBUG_Print( "Example: eur ban h4x0rz88" );
 		}		
         }
 
