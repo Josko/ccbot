@@ -239,7 +239,10 @@ void * readStdIn( void* in )
     {
         string s;
 
-        getline( std::cin, s );
+        getline( cin, s );
+
+	if( !cin.good( ) )
+		cin.clear( );
 
         if( pthread_mutex_lock( &( ccbot->stdInMutex ) ) == 0 )
         {

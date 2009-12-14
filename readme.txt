@@ -90,12 +90,12 @@ lang_0020 = /w $USER$ Welcome to the $CHANNEL$ channel! Enjoy your stay.
 lang_0021 = Come again for more DotA games.
 
 If you want to disable any of the lines without recompiling (sending 1 instead of 2 lines) of
-greet just shorten the line to only 1 character. Example for sending 1 line greet:
+greet just shorten the line to only 1 or 0 characters. Example for sending 1 line greet:
 
 lang_0020 = /w $USER$ Welcome to the $CHANNEL$ channel! Enjoy your stay.
-lang_0021 = 2
+lang_0021 = 
 
-Because lang_0021 message length is lower then 2 (this value is coded in bnet.cpp)  - it won't be printed and sent to the server.
+Because lang_0021 message length is lower then 1 - it won't be printed and sent to the server.
 
 ================================
 Using CC Bot on Multiple Realms
@@ -262,6 +262,7 @@ Version 0.29 ( 3.12.2009. )
 - Updated SQLite from 3.6.16 to 3.6.21
 - Minor changes to the Makefile
 - Updated ms_stdint.h
+- Fixed an issue with CTRL + D (eof) in stdin input
 - Overall minor fixes, optimisations etc.
 
 Version 0.28 ( 20.11.2009. )
