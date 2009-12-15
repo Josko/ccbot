@@ -203,16 +203,15 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 	
 		// send a null packet to detect disconnects
-		if( GetTime( ) >= m_LastNullTime + 15 )
+		if( GetTime( ) >= m_LastNullTime + 60 )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_NULL( ) );
 			m_LastNullTime = GetTime( );
 		}
 		
-		if( GetTime( ) >= m_LastChatEvent + 5 && m_AntiSpam && ChatEvent )
+		if( GetTime( ) >= m_LastChatEvent + 4 && m_AntiSpam )
 		{
-			m_SpamCache.erase( m_SpamCache.end( ) );
-			ChatEvent = false;
+			m_SpamCache.clear( );
 		}
 
 		// refresh the clan vector so it gets updated every 35 seconds
@@ -252,7 +251,6 @@ bool CBNET :: Update( void *fd, void *send_fd )
 
 		m_Socket->DoSend( (fd_set*)send_fd );
 		return m_Exiting;
-
 	}
 
 	if( m_Socket->GetConnecting( ) )

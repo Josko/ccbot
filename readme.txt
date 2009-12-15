@@ -1,5 +1,5 @@
 =================================
-Clan & Channel Bot - Version 0.29
+Clan & Channel Bot - Version 0.30
 =================================
 
 CCBot is a heavily modified GHost++ project made by Varlock. Author of the modified version is h4x0rz88 from Eurobattle.net. The original GHost++ project can be found here: http://forum.codelain.com/
@@ -202,6 +202,7 @@ Parameters in angled brackets <like this> are required and parameters in square 
 !saybnets <text>		sends the chat command to every BNET we're connected to
 !saybnet <bnet>	<text>		sends the chat command just to the specified BNET we're connected to
 !chieftain <name>		transfers the chieftain position to the specified user
+!rejoin				bot rejoins the current channel
 
 ============================
 Compiling CCBot on Windows
@@ -251,6 +252,15 @@ Then when in the CCBot binary directory just type in terminal "./ccbot++" withou
 =========
 CHANGELOG
 =========
+
+Version 0.30 ( 14.12.2009. )
+
+- Changed Anti-Spam to be stricter depending on number of people in the channel
+- Added !rejoin command
+- Fixed a few responses
+- Fixed !saybnets
+- Ban Chat will kick the chat users already in channel when connecting
+- Fixed a bug in !setaccess when setting higher access to a user with 0 access
 
 Version 0.29 ( 3.12.2009. )
 

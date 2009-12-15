@@ -34,12 +34,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef WIN32
- #include <sys/time.h>
-#endif
-
 #ifdef WIN32
  #include "pthread.h"
+#else
+ #include <sys/time.h>
 #endif
 
 #ifdef __APPLE__
@@ -203,11 +201,6 @@ void CONSOLE_Print( string message )
 
                 if( !Log.fail( ) )
                 {
-                        char timestr[100];
-                        strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
-
-                        // erase the newline
-
                         Log << "[" << timestr << "] " << message << endl;
                         Log.close( );
                 }
@@ -218,12 +211,21 @@ void CONSOLE_Print( string message )
 
 void DEBUG_Print( string message )
 {
-	cout << message << endl;
+	time_t Now;
+        time( &Now );
+	char timestr[100];
+        strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
+
+	cout << "[" << timestr << "] " << message << endl;
 }
 
 void DEBUG_Print( BYTEARRAY b )
 {
-	cout << "{ ";
+	time_t Now;
+        time( &Now );
+	char timestr[100];
+        strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
+	cout << "[" << timestr << "] " << "{ ";
 
 	for( unsigned int i = 0; i < b.size( ); ++i )
 		cout << hex << (int)b[i] << " ";
@@ -237,12 +239,11 @@ void * readStdIn( void* in )
 
     while( true )
     {
-        string input;
+	string input;
+	getline( cin, input );	
 
-        getline( cin, input );
-
-	if( !cin.good( ) )
-		cin.clear( );
+	// print current input
+	CONSOLE_Print( "[CONSOLE]: " + input );
 
         if( pthread_mutex_lock( &( ccbot->stdInMutex ) ) == 0 )
         {
@@ -263,11 +264,9 @@ void CCCBot::readStdInMessages( )
 
 		if( m_BNETs.size( ) == 1 )
 		{
-			for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
-			{         		
-                		CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, (*i)->GetRootAdmin( ), (*i)->GetCommandTrigger( ) + input );
-				(*i)->ProcessChatEvent( &event );     
-			}
+			CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, m_BNETs[0]->GetRootAdmin( ), m_BNETs[0]->GetCommandTrigger( ) + input );
+			m_BNETs[0]->ProcessChatEvent( &event );     
+			
 		}
 		else if( input.find( " " ) != string::npos && m_BNETs.size( ) > 1  )
 		{
@@ -284,15 +283,11 @@ void CCCBot::readStdInMessages( )
 			{
                 		if( !(*i)->GetExiting( ) && server == (*i)->GetServer( ) )
                 		{
-                		    CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, (*i)->GetRootAdmin( ), (*i)->GetCommandTrigger( ) + command );
-           		  	  (*i)->ProcessChatEvent( &event );
+                			CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, (*i)->GetRootAdmin( ), (*i)->GetCommandTrigger( ) + command );
+           		  		(*i)->ProcessChatEvent( &event );
                			}            
 			}
-		}
-		else
-		{
-			DEBUG_Print( "Usage: <server, partial matching> <command, without command trigger>" );
-		}		
+		}				
         }
 
         stdInputMessages.clear( );
@@ -308,7 +303,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 {
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Exiting = false;
-	m_Version = "0.29";
+	m_Version = "0.30";
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
 	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;	
