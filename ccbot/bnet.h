@@ -83,7 +83,7 @@ private:
 	uint32_t m_LastInvitationTime;					// GetTime when the last SID_CLANINVITATION was recevied
 	uint32_t m_LastChatCommandTicks;				// GetTicks when the last chat command was sent for the m_ChatCommands queue
 	uint32_t m_LastOutPacketTicks;					// GetTicks when the last Packet was sent
-	uint32_t m_LastChatEvent;					// GetTicks when the last chatEvent occured
+	uint32_t m_LastSpamCacheCleaning;				// GetTicks when the last m_SpamCache was last cleared
 	bool m_WaitingToConnect;					// if we're waiting to reconnect to battle.net after being disconnected
 	bool m_LoggedIn;						// if we've logged into battle.net or not
 	bool m_InChat;							// if we've entered chat or not (but we're not necessarily in a chat channel yet)
@@ -107,7 +107,6 @@ private:
 	uint32_t m_Delay;						// delay of the next QueueChatCommand based on the length of the past one	
 	string m_AnnounceMsg;						// text printed on X interval by the announce command
 	int m_AnnounceInterval;						// interval of two consecutive announce messages
-	bool ChatEvent;	
 	
 	uint32_t m_ClanDefaultAccess;					// default access a clan members has
 	string m_HostbotName;						// hostbot's name if present

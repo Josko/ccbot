@@ -458,7 +458,7 @@ bool CBNETProtocol :: RECEIVE_SID_CLANCREATIONINVITATION( BYTEARRAY data )
 	{
 		m_ClanCreationTag = BYTEARRAY( data.begin( ) + 8, data.begin( ) + 12 );
 		m_ClanCreationName = UTIL_ExtractCString( data, 12 );
-		m_ClanCreator = UTIL_ExtractCString( data, m_ClanCreationName.size( ) + 14  );
+		m_ClanCreator = UTIL_ExtractCString( data, m_ClanCreationName.size( ) + 13  );
 
 		return true;
 	}

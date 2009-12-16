@@ -93,7 +93,7 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_LastGetClanTime = 0;
 	m_LastAnnounceTime = 0;
 	m_LastInvitationTime = 0;
-	m_LastChatEvent = 0;
+	m_LastSpamCacheCleaning = 0;
 	m_Delay = 5001;
 	m_WaitingToConnect = true;
 	m_ActiveInvitation = false;
@@ -209,9 +209,10 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			m_LastNullTime = GetTime( );
 		}
 		
-		if( GetTime( ) >= m_LastChatEvent + 4 && m_AntiSpam )
+		if( GetTime( ) >= m_LastSpamCacheCleaning + 5 && m_AntiSpam )
 		{
 			m_SpamCache.clear( );
+			m_LastSpamCacheCleaning = GetTime( );
 		}
 
 		// refresh the clan vector so it gets updated every 35 seconds
@@ -243,7 +244,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 
 		// wait 8 seconds before accepting the invitation otherwise the clan can get created but you would need to wait 30 seconds and get an error
-		if( GetTime( ) >= ( m_LastInvitationTime + 8 ) && m_ActiveCreation && m_LoggedIn )
+		if( GetTime( ) >= ( m_LastInvitationTime + 5 ) && m_ActiveCreation && m_LoggedIn )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANCREATIONINVITATION( m_Protocol->GetClanCreationTag( ), m_Protocol->GetClanCreator( ) ) );
 			m_ActiveCreation = false;
@@ -556,8 +557,7 @@ void CBNET :: ProcessPackets( )
 
 			case CBNETProtocol :: SID_CLANCREATIONINVITATION:
 				if( m_Protocol->RECEIVE_SID_CLANCREATIONINVITATION( Packet->GetData( ) ) )
-				{		
-
+				{
 					QueueChatCommand( "Clan creation of [" + m_Protocol->GetClanCreationName( ) + "] by [" + m_Protocol->GetClanCreatorStr( ) + "] received - accepting..." );
 
 					m_ActiveCreation = true;

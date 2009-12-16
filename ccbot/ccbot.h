@@ -124,7 +124,8 @@ public:
 	void EventBNETLoggedIn( CBNET *bnet );
 	void EventBNETConnectTimedOut( CBNET *bnet );
 
-	// other functions	
+	// other functions
+	void Restart( );
 	void SetConfigs( CConfig *CFG );
 	void ReloadConfigs( );
 	void UpdateSwearList( );

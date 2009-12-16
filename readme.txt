@@ -261,6 +261,10 @@ Version 0.30 ( 14.12.2009. )
 - Fixed !saybnets
 - Ban Chat will kick the chat users already in channel when connecting
 - Fixed a bug in !setaccess when setting higher access to a user with 0 access
+- Fixed a bug in clan creation
+- Fixed a bug in !restart where zombie connections would be left
+- Edited !topic so you can make a blank topic
+- !saybnet now uses partial matching
 
 Version 0.29 ( 3.12.2009. )
 

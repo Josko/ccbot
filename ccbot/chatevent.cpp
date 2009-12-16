@@ -71,10 +71,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		{			
 			string message = Message;
 			transform( message.begin( ), message.end( ), message.begin( ), (int(*)(int))tolower );
-
-			m_LastChatEvent = GetTime( );
-			ChatEvent = true;
-
 			uint32_t SpamCacheSize = m_Channel.size( ) * 3;
 
 			if( m_SpamCache.size( ) > SpamCacheSize )
@@ -857,7 +853,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				else if( Command == "motd" && Access >= m_CCBot->m_DB->CommandAccess( "motd" ) && m_ClanCommandsEnabled )
 				{					
 					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANSETMOTD( Payload ) );
-					QueueChatCommand( "Clan MOTD set to: \"" + Payload + "\".", User, Whisper );
+					QueueChatCommand( "Clan MOTD set to: [" + Payload + "].", User, Whisper );
 				}
 				
 				//
@@ -925,17 +921,22 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						string :: size_type CommandStart = Payload.find( " " );
 						string server = Payload.substr( 0, CommandStart );
-						string command = Payload.substr( CommandStart + 1 );		
+						string command = Payload.substr( CommandStart + 1 );
+
+						if( m_CCBot->GetServerFromNamePartial( server ).size( ) > 0 )
+							server = m_CCBot->GetServerFromNamePartial( server );
+						else
+							QueueChatCommand( "Unable to partially match with a server." );
 	
 						for( vector<CBNET *> :: iterator i = m_CCBot->m_BNETs.begin( ); i != m_CCBot->m_BNETs.end( ); ++i )
 						{
 							if( Access > 8 && Match( (*i)->GetServer( ), server ) )
 							{
-								(*i)->QueueChatCommand( Payload );
+								(*i)->QueueChatCommand( command );
 							}
-							else if( Payload[0] != '/' && Match( (*i)->GetServer( ), server ) )
+							else if( command[0] != '/' && Match( (*i)->GetServer( ), server ) )
 							{
-								(*i)->QueueChatCommand( Payload );
+								(*i)->QueueChatCommand( command );
 							}
 							else if( (*i)->GetServer( ) == m_Server && Payload[0] == '/' )
 							{
@@ -1022,7 +1023,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// !TOPIC
 				//
 
-				else if( Command == "topic" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "topic" ) )
+				else if( Command == "topic" && Access >= m_CCBot->m_DB->CommandAccess( "topic" ) )
 				{					
 					QueueChatCommand( "/topic " + m_CurrentChannel + " \"" + Payload + "\"" );
 					QueueChatCommand( "Channel topic set to [" + Payload + "].", User, Whisper );
@@ -1337,12 +1338,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				else if( Command == "restart" && ( Access >= m_CCBot->m_DB->CommandAccess( "restart" ) || IsRootAdmin( User ) ) )
 				{
-				
-#ifdef WIN32
-					_spawnl( _P_OVERLAY, "ccbot.exe", "ccbot.exe", NULL );
-#else		
-					execl( "ccbot++", "ccbot++", NULL );				
-#endif		
+					m_CCBot->Restart( );	
 				}
 		}		
 	}

@@ -542,6 +542,7 @@ void CCCBot :: UpdateCommandAccess( )
 	m_Commands[ "online" ] = 1;
 	m_Commands[ "peon" ] = 7;
 	m_Commands[ "ping" ] = 0;
+	m_Commands[ "rejoin" ] = 4;
 	m_Commands[ "reload" ] = 4;
 	m_Commands[ "remove" ] = 9;
 	m_Commands[ "say" ] = 6;
@@ -624,3 +625,24 @@ void CCCBot :: EventBNETConnectTimedOut( CBNET *bnet )
 
 }
 
+void CCCBot :: Restart ( )
+{
+
+	// shutdown ghost
+
+	CONSOLE_Print( "[CCBOT] restarting" );
+	delete gCCBot;
+	gCCBot = NULL;
+
+#ifdef WIN32
+	// shutdown winsock
+
+	CONSOLE_Print( "[CCBOT] shutting down winsock" );
+	WSACleanup( );
+
+	_spawnl( _P_OVERLAY, "ccbot.exe", "ccbot.exe", NULL );
+#else		
+	execl( "ccbot++", "ccbot++", NULL );				
+#endif	
+
+}

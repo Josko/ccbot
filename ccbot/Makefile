@@ -4,7 +4,7 @@ C++ = g++
 CC = gcc
 DFLAGS =
 OFLAGS = -O3
-LFLAGS = -L. -L../bncsutil/src/bncsutil/ -lbncsutil -lpthread -ldl -lrt -lnsl -lncurses
+LFLAGS = -L. -L../bncsutil/src/bncsutil/ -lbncsutil -lpthread -ldl -lrt -lnsl
 CFLAGS += -Wall
 
 ifeq ($(SYSTEM),Darwin)
