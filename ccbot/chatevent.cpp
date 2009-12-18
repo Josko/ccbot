@@ -154,7 +154,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					SendChatCommand( "/w " + User +" With an access of [" + UTIL_ToString( Access ) + "] you have the following commands:" );
 					string Commands;
 
-					for( uint32_t i = 0; i <= Access; ++i)
+					for( uint32_t i = 0; i <= Access; ++i )
 					{
 						vector<string> m_CommandList = m_CCBot->m_DB->CommandList( i );
 
@@ -167,7 +167,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 							SendChatCommand( "/w " + User + " [" + UTIL_ToString( i ) + "]: " + Commands );
 
 						Commands.erase( );
-					}			
+					}
 				}
 
 				//
@@ -586,7 +586,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( tempText.length( ) >= 2 )
 						tempText = tempText.substr( 0, tempText.length( ) - 2 );
 
-					QueueChatCommand( "Users in channel [" + UTIL_ToString( m_Channel.size( ) ) + "]: " + tempText + ".", User, Whisper );
+					QueueChatCommand( "Users in channel [" + UTIL_ToString( m_Channel.size( ) ) + "]: " + tempText + ".", User, Whisper );			
 				}
 
 				//
@@ -1010,9 +1010,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					string tempText;
 
 					for( vector<string> :: iterator i = SquelchedUsers.begin( ); i != SquelchedUsers.end( ); ++i )
+					{
 						if( (*i).size( ) > 0 )
 							tempText = tempText + (*i) + ", ";					
-				
+					}
+
 					if ( tempText.size( ) == 0 || SquelchedUsers.size( ) == 0 )
 						QueueChatCommand( "There are no squelched users." , User, Whisper );
 					else if( tempText.size( ) >= 2 )
@@ -1144,7 +1146,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				
 				else if( ( Command == "joinclan" || Command == "join" ) && Payload.empty( ) && !IsClanMember( User ) && IsInChannel( User ) && Access >= 0  && m_ClanCommandsEnabled )
 				{
-
 					if( m_SelfJoin )
 					{
 						if( IsClanShaman( m_UserName ) || IsClanChieftain( m_UserName ) )
@@ -1173,7 +1174,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 					for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
 					{
-						if( (*i)->GetStatus( ) == "Online" && !Match( (*i)->GetName( ), m_UserName ) )
+						if( (*i)->GetStatus( ) == "Online" && !Match( (*i)->GetName( ), m_UserName ) && !Match( (*i)->GetName( ), m_HostbotName ) )
 						{
 							Online = Online + (*i)->GetName( ) + ", ";
 							++OnlineNumber;
@@ -1304,13 +1305,32 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					}
 					else
 						  QueueChatCommand( User + " serves " + Victim + " a " + Object + "." );				 
+				}
+
+				//
+				// !STATUS
+				//
+
+				else if ( Command == "status" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "status" ) )
+				{
+					string message = "Status: ";
+
+			       		for( vector<CBNET *> :: iterator i = m_CCBot->m_BNETs.begin( ); i != m_CCBot->m_BNETs.end( ); ++i )
+					{
+						if( (*i)->GetLoggedIn( ) == true )
+							message += (*i)->GetUserName( ) + " [Online], ";
+						else
+							message += (*i)->GetUserName( ) + " [Offline], ";
+					}
+
+					QueueChatCommand( message.substr( 0, message.size( ) - 2 ) + ".", User, Whisper );						 
 				}				
 
 				//
 				// !VERSION
 				//
 
-				else if( Command == "version" && Payload.empty( ) && Access >= 0 )					
+				else if( Command == "version" && Payload.empty( ) )					
 						QueueChatCommand( m_CCBot->m_Language->Version( m_CCBot->m_Version ), User, Whisper );
 
 				//
@@ -1321,7 +1341,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					if( Payload.empty( ) )
 						Payload = User;			
-					else if( GetUserFromNamePartial( Payload ).size( ) >= 2 )
+					else if( GetUserFromNamePartial( Payload ).size( ) >= 1 )
 						Payload = GetUserFromNamePartial( Payload );
 
 					CChannel *Result = GetUserByName( Payload );
@@ -1364,9 +1384,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 	else if( Event == CBNETProtocol :: EID_JOIN )
 	{
-		bool CanJoinChannel = false;	
-
-		CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + "] user [" + User + "] joined the channel." );
+		bool CanJoinChannel = false;		
 
 		// check if the user joined has been banned if yes ban him again and send him the reason the first time he tries to join
 		CDBBan *Ban = m_CCBot->m_DB->BanCheck( m_Server, User );
@@ -1435,14 +1453,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{					
 					m_CCBot->m_DB->AccessSet( m_Server, User, m_ClanDefaultAccess );
 					CONSOLE_Print( "[ACCESS: " + m_ServerAlias + "] Setting [" + User + "] access to clan default of " + UTIL_ToString( m_ClanDefaultAccess ) ); 
-				}													
+				}
+
+				CONSOLE_Print( "[CHANNEL : " + m_ServerAlias + " : " + m_CurrentChannel +"] user [" + User + "] joined the channel." );													
 			}			
 		}		
 	}
 
 	else if( Event == CBNETProtocol :: EID_LEAVE )
 	{
-		CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + "] user [" + User + "] left the channel." );
+		CONSOLE_Print( "[CHANNEL : " + m_ServerAlias + " : " + m_CurrentChannel +"] user [" + User + "] left the channel." );
 
 		if ( m_AnnounceGames && !Match( m_HostbotName, User ) )
 			SendChatCommandHidden( "/whereis " + User );

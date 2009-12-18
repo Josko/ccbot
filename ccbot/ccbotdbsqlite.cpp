@@ -190,19 +190,19 @@ CCCBotDBSQLite :: CCCBotDBSQLite( CConfig *CFG ) : CCCBotDB( CFG )
 			CONSOLE_Print( "[SQLITE3] couldn't find admins table, assuming database is empty" );
 			SchemaNumber = "4";
 
-			if( m_DB->Exec( "CREATE TABLE bans ( id INTEGER PRIMARY KEY, server TEXT NOT NULL, name TEXT NOT NULL, date TEXT NOT NULL, admin TEXT NOT NULL, reason TEXT )" ) != SQLITE_OK )
+			if( m_DB->Exec( "CREATE TABLE bans ( id INTEGER NOT NULL PRIMARY KEY, server TEXT NOT NULL, name TEXT NOT NULL, date TEXT NOT NULL, admin TEXT NOT NULL, reason TEXT )" ) != SQLITE_OK )
 				CONSOLE_Print( "[SQLITE3] error creating bans table - " + m_DB->GetError( ) );
 
-			if( m_DB->Exec( "CREATE TABLE safelist ( id INTEGER PRIMARY KEY, name TEXT NOT NULL, server TEXT NOT NULL DEFAULT \"\" )" ) != SQLITE_OK )
+			if( m_DB->Exec( "CREATE TABLE safelist ( id INTEGER NOT NULL PRIMARY KEY, name TEXT NOT NULL, server TEXT NOT NULL DEFAULT \"\" )" ) != SQLITE_OK )
 				CONSOLE_Print( "[SQLITE3] error creating safelist table - " + m_DB->GetError( ) );
 
 			if( m_DB->Exec( "CREATE TABLE config ( name TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL )" ) != SQLITE_OK )
 				CONSOLE_Print( "[SQLITE3] error creating config table - " + m_DB->GetError( ) );
 		
-			if( m_DB->Exec( "CREATE TABLE access ( id INTEGER PRIMARY KEY, server TEXT NOT NULL, name TEXT NOT NULL, access INTEGER )" ) != SQLITE_OK )
+			if( m_DB->Exec( "CREATE TABLE access ( id INTEGER NOT NULL PRIMARY KEY, server TEXT NOT NULL, name TEXT NOT NULL, access INTEGER )" ) != SQLITE_OK )
 				CONSOLE_Print( "[SQLITE3] error creating access table - " + m_DB->GetError( ) );
 
-			if( m_DB->Exec( "CREATE TABLE commands ( id INTEGER PRIMARY KEY, name TEXT NOT NULL, access INTEGER NOT NULL )" ) != SQLITE_OK )
+			if( m_DB->Exec( "CREATE TABLE commands ( id INTEGER NOT NULL PRIMARY KEY, name TEXT NOT NULL, access INTEGER NOT NULL )" ) != SQLITE_OK )
 				CONSOLE_Print( "[SQLITE3] error creating access table - " + m_DB->GetError( ) );
 
 			m_DB->Prepare( "INSERT INTO config VALUES ( \"schema_number\", ? )", (void **)&Statement );

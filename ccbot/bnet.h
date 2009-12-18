@@ -173,7 +173,6 @@ public:
 	bool Match( string string1, string string2 );
 
 	CChannel *GetUserByName( string name );
-
 };
 
 //

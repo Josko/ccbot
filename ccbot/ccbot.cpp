@@ -240,7 +240,10 @@ void * readStdIn( void* in )
     while( true )
     {
 	string input;
-	getline( cin, input );	
+	getline( cin, input );
+
+	if( !cin.good( ) )
+		cin.clear( );
 
 	// print current input
 	CONSOLE_Print( "[CONSOLE]: " + input );
@@ -543,19 +546,21 @@ void CCCBot :: UpdateCommandAccess( )
 	m_Commands[ "peon" ] = 7;
 	m_Commands[ "ping" ] = 0;
 	m_Commands[ "rejoin" ] = 4;
-	m_Commands[ "reload" ] = 4;
+	m_Commands[ "restart" ] = 9;
 	m_Commands[ "remove" ] = 9;
+	m_Commands[ "reload" ] = 4;
 	m_Commands[ "say" ] = 6;
 	m_Commands[ "setaccess" ] = 8;
 	m_Commands[ "setcommand" ] = 9;
 	m_Commands[ "shaman" ] = 9;
 	m_Commands[ "slap" ] = 0;
 	m_Commands[ "spit" ] = 0;
+	m_Commands[ "status" ] = 2;
 	m_Commands[ "squelch" ] = 5;
 	m_Commands[ "topic" ] = 5;
 	m_Commands[ "unban" ] = 7;
 	m_Commands[ "uptime" ] = 1;
-	m_Commands[ "restart" ] = 9;
+	
 
 	for( map<string, uint32_t> :: iterator i = m_Commands.begin( ); i != m_Commands.end( ); ++i )
 		if( m_DB->CommandAccess( (*i).first ) == 11 )
