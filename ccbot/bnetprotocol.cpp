@@ -213,7 +213,7 @@ bool CBNETProtocol :: RECEIVE_SID_AUTH_CHECK( BYTEARRAY data )
 	// 2 bytes					-> Header
 	// 2 bytes					-> Length
 	// 4 bytes					-> KeyState
-	// null terminated string		-> KeyStateDescription
+	// null terminated string			-> KeyStateDescription
 
 	if( ValidateLength( data ) && data.size( ) >= 9 )
 	{

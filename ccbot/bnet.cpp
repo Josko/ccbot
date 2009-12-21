@@ -90,6 +90,7 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_LastChatCommandTicks = 0;
 	m_LastOutPacketTicks = 0;
 	m_LastRejoinTime = 0;
+	m_RejoinInterval = 15;
 	m_LastGetClanTime = 0;
 	m_LastAnnounceTime = 0;
 	m_LastInvitationTime = 0;
@@ -203,7 +204,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 	
 		// send a null packet to detect disconnects
-		if( GetTime( ) >= m_LastNullTime + 60 )
+		if( GetTime( ) >= m_LastNullTime + 90 )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_NULL( ) );
 			m_LastNullTime = GetTime( );
@@ -216,7 +217,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 
 		// refresh the clan vector so it gets updated every 35 seconds
-		if( GetTime( ) >= m_LastGetClanTime + 60 && m_LoggedIn )
+		if( GetTime( ) >= m_LastGetClanTime + 75 && m_LoggedIn )
 		{
 			SendGetClanList( );
 			m_LastGetClanTime = GetTime( );
@@ -230,7 +231,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 
 		// rejoining the channel when not in the set channel
-		if( GetTime( ) >= m_LastRejoinTime + 15 && m_LoggedIn && m_Rejoin )
+		if( GetTime( ) >= m_LastRejoinTime + m_RejoinInterval && m_LoggedIn && m_Rejoin )
 		{
 			QueueChatCommand( "/join " + m_CurrentChannel );
 			m_LastRejoinTime = GetTime( );
@@ -465,6 +466,45 @@ void CBNET :: ProcessPackets( )
 				else
 				{	
 					// cd keys not accepted
+					switch( UTIL_ByteArrayToUInt32( m_Protocol->m_KeyState, false ) )
+					{
+						case 	CBNETProtocol :: KR_OLD_GAME_VERSION:
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Old game version - update your hases and/or ccbot.cfg" );
+							break;
+
+						case 	CBNETProtocol :: KR_INVALID_VERSION:
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid game version - update your hases and/or ccbot.cfg" );
+							break;
+
+						case 	CBNETProtocol :: KR_INVALID_ROC_KEY:
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid RoC key" );
+							break;
+
+						case 	CBNETProtocol :: KR_ROC_KEY_IN_USE:
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] RoC key is being used by someone else" );
+							break;
+							
+						case 	CBNETProtocol :: KR_ROC_KEY_BANNED:
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Banned RoC key" );
+							break;
+
+						case 	CBNETProtocol :: KR_WRONG_PRODUCT:
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Wrong product key" );
+							break;
+
+						case 	CBNETProtocol :: KR_INVALID_TFT_KEY:
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid TFT key" );
+							break;
+
+						case 	CBNETProtocol :: KR_TFT_KEY_BANNED:
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Banned TFT key" );
+							break;
+
+						case 	CBNETProtocol :: KR_TFT_KEY_IN_USE:
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] TFT key is being used by someone else" );
+							break;
+					}				
+
 					m_Socket->Disconnect( );
 					delete Packet;
 					return;

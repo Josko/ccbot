@@ -71,8 +71,13 @@ public:
 		KR_GOOD					= 0,
 		KR_OLD_GAME_VERSION			= 256,
 		KR_INVALID_VERSION			= 257,
+		KR_INVALID_ROC_KEY			= 512,
 		KR_ROC_KEY_IN_USE			= 513,
-		KR_TFT_KEY_IN_USE			= 529
+		KR_ROC_KEY_BANNED			= 514,
+		KR_WRONG_PRODUCT			= 515,
+		KR_INVALID_TFT_KEY			= 528,
+		KR_TFT_KEY_IN_USE			= 529,
+		KR_TFT_KEY_BANNED			= 530
 	};
 
 	enum IncomingChatEvent {
@@ -117,15 +122,16 @@ public:
 	BYTEARRAY m_ClanCreator;
 	BYTEARRAY m_ClanCreationName;
 
+	BYTEARRAY m_KeyState;				// set in RECEIVE_SID_AUTH_CHECK
+	BYTEARRAY m_KeyStateDescription;		// set in RECEIVE_SID_AUTH_CHECK
+
 private:
 	BYTEARRAY m_ClientToken;			// set in constructor
 	BYTEARRAY m_LogonType;				// set in RECEIVE_SID_AUTH_INFO
 	BYTEARRAY m_ServerToken;			// set in RECEIVE_SID_AUTH_INFO
 	BYTEARRAY m_MPQFileTime;			// set in RECEIVE_SID_AUTH_INFO
 	BYTEARRAY m_IX86VerFileName;			// set in RECEIVE_SID_AUTH_INFO
-	BYTEARRAY m_ValueStringFormula;			// set in RECEIVE_SID_AUTH_INFO
-	BYTEARRAY m_KeyState;				// set in RECEIVE_SID_AUTH_CHECK
-	BYTEARRAY m_KeyStateDescription;		// set in RECEIVE_SID_AUTH_CHECK
+	BYTEARRAY m_ValueStringFormula;			// set in RECEIVE_SID_AUTH_INFO	
 	BYTEARRAY m_Salt;				// set in RECEIVE_SID_AUTH_ACCOUNTLOGON
 	BYTEARRAY m_ServerPublicKey;			// set in RECEIVE_SID_AUTH_ACCOUNTLOGON
 	BYTEARRAY m_UniqueName;				// set in RECEIVE_SID_ENTERCHAT

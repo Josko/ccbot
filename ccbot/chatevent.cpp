@@ -46,8 +46,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	string lowerUser = User;
 	transform( lowerUser.begin( ), lowerUser.end( ), lowerUser.begin( ), (int(*)(int))tolower );
 	string Message = chatEvent->GetMessage( );
-	uint32_t Ping = chatEvent->GetPing( );
-	uint32_t UserFlags = chatEvent->GetUserFlags( );
 	uint32_t Access = m_CCBot->m_DB->AccessCheck( m_Server, User );
 
 	if( Access == 11 )
@@ -58,9 +56,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	if( Event == CBNETProtocol :: EID_WHISPER )
 			CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] [" + User + "] " + Message );
 	else if( Event == CBNETProtocol :: EID_TALK )
-			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] [" + User + "] " + Message );
+			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + ":" + m_CurrentChannel + "] [" + User + "] " + Message );
 	else if( Event == CBNETProtocol :: EID_EMOTE )
-			CONSOLE_Print( "[EMOTE: " + m_ServerAlias + "] [" + User + "] " + Message );
+			CONSOLE_Print( "[EMOTE: " + m_ServerAlias + ":" + m_CurrentChannel + "] [" + User + "] " + Message );
 
 	if( Event == CBNETProtocol :: EID_WHISPER || Event == CBNETProtocol :: EID_TALK || Event == CBNETProtocol :: EID_EMOTE )
 	{	
@@ -1434,8 +1432,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				CChannel *user = GetUserByName( User );
 				if( !user )
 					user = new CChannel( User );
-				user->SetPing( Ping );
-				user->SetUserFlags( UserFlags );
+				user->SetPing( chatEvent->GetPing( ) );
+				user->SetUserFlags( chatEvent->GetUserFlags( ) );
 
 				if( Message.size( ) >= 14 )
 				{
@@ -1455,14 +1453,14 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					CONSOLE_Print( "[ACCESS: " + m_ServerAlias + "] Setting [" + User + "] access to clan default of " + UTIL_ToString( m_ClanDefaultAccess ) ); 
 				}
 
-				CONSOLE_Print( "[CHANNEL : " + m_ServerAlias + " : " + m_CurrentChannel +"] user [" + User + "] joined the channel." );													
+				CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + ":" + m_CurrentChannel + "] user [" + User + "] joined the channel." );													
 			}			
 		}		
 	}
 
 	else if( Event == CBNETProtocol :: EID_LEAVE )
 	{
-		CONSOLE_Print( "[CHANNEL : " + m_ServerAlias + " : " + m_CurrentChannel +"] user [" + User + "] left the channel." );
+		CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + ":" + m_CurrentChannel + "] user [" + User + "] left the channel." );
 
 		if ( m_AnnounceGames && !Match( m_HostbotName, User ) )
 			SendChatCommandHidden( "/whereis " + User );
@@ -1474,7 +1472,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 	else if( Event == CBNETProtocol :: EID_ERROR )
 	{
-		CONSOLE_Print( "[ERROR: " + m_ServerAlias + "] " + Message );	
+		CONSOLE_Print( "[ERROR: " + m_ServerAlias + "] " + Message );
+		
+		if( Message == "You are banned from that channel." )
+			m_RejoinInterval = 300;
 	}
 
 	else if( Event == CBNETProtocol :: EID_CHANNEL )
@@ -1482,7 +1483,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		if( !Match( Message, m_CurrentChannel ) )
 			m_Rejoin = true;
 		else
+		{
 			m_Rejoin = false;
+			m_RejoinInterval = 15;
+		}
 
 		m_Channel.clear( );
 	}
@@ -1492,8 +1496,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		CChannel *user = GetUserByName( lowerUser );
 		if( !user )
 			user = new CChannel( User );
-		user->SetPing( Ping );
-		user->SetUserFlags( UserFlags );
+		user->SetPing( chatEvent->GetPing( ) );
+		user->SetUserFlags( chatEvent->GetUserFlags( ) );
 
 		if( Message.size( ) >= 14 )
 		{

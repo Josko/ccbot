@@ -79,7 +79,8 @@ private:
 	uint32_t m_LastNullTime;					// GetTime when the last null packet was sent for detecting disconnects
 	uint32_t m_LastGetClanTime;					// GetTime when the last SendGetClanList was send for updating the clan list
 	uint32_t m_LastAnnounceTime;					// GetTime when the last Announce message was sent
-	uint32_t m_LastRejoinTime;					// GetTime when the last /rejoin was attempted
+	uint32_t m_LastRejoinTime;					// GetTime when the last /join was attempted
+	uint32_t m_RejoinInterval;					// interval between two consecutive rejoins
 	uint32_t m_LastInvitationTime;					// GetTime when the last SID_CLANINVITATION was recevied
 	uint32_t m_LastChatCommandTicks;				// GetTicks when the last chat command was sent for the m_ChatCommands queue
 	uint32_t m_LastOutPacketTicks;					// GetTicks when the last Packet was sent
