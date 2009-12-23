@@ -106,6 +106,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			}
 		}
 		
+		// ?TRIGGER
+		
+		if( Message == "?trigger" && Event != CBNETProtocol :: EID_EMOTE)
+		{
+			QueueChatCommand( m_CCBot->m_Language->CommandTrigger( m_CommandTriggerStr ), User, Whisper );	
+		}
+		
 		if( !Message.empty( ) && Message[0] == m_CommandTrigger && Event != CBNETProtocol :: EID_EMOTE)
 		{
 			// extract the command trigger, the command, and the payload
@@ -138,7 +145,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( Command == "accept" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "accept" ) && m_ActiveInvitation )
 				{
 					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_Protocol->GetClanTag( ), m_Protocol->GetInviter( ), true ) );
-					QueueChatCommand( "Invitation has been accepted.", User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->InvitationAccepted( ), User, Whisper );
 					SendGetClanList( );
 					m_ActiveInvitation = false;
 				}
@@ -149,7 +156,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				else if( Command == "access" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "access" ) )
 				{
-					SendChatCommand( "/w " + User +" With an access of [" + UTIL_ToString( Access ) + "] you have the following commands:" );
+					SendChatCommand( "/w " + User + " " + m_CCBot->m_Language->HasFollowingAccess( UTIL_ToString( Access ) ) );
 					string Commands;
 
 					for( uint32_t i = 0; i <= Access; ++i )
@@ -177,13 +184,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				else if( ( Command == "addsafelist" || Command == "adds" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "addsafelist" ) )
 				{					
 					if( m_CCBot->m_DB->SafelistCheck( m_Server, Payload ) )
-						QueueChatCommand( "User is already safelisted.", User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->UserAlreadySafelisted( Payload ), User, Whisper );
 					else
 					{
 						if( m_CCBot->m_DB->SafelistAdd( m_Server, Payload ) )
-							QueueChatCommand( Payload + " added to the safelist.", User, Whisper );
+							QueueChatCommand( m_CCBot->m_Language->UserSafelisted( Payload ), User, Whisper );
 						else
-							QueueChatCommand( "Error adding " + Payload + " to the safelist.", User, Whisper );
+							QueueChatCommand( m_CCBot->m_Language->ErrorSafelisting( Payload ), User, Whisper );
 					}					
 				}
 				
@@ -207,17 +214,20 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 							AnnounceMessage = AnnounceMessage.substr( Start );
 					}
 
-					if( ( UTIL_ToInt16( Interval ) > 0 ) && ( AnnounceMessage.length() > 1 ) )
+					if( ( UTIL_ToInt32( Interval ) > 0 ) && ( AnnounceMessage.length( ) > 1 ) )
 					{
+						if( UTIL_ToInt32( Interval ) < 3 )
+							Interval = "4";
+
 						m_Announce = true;
 						m_AnnounceMsg = AnnounceMessage;	
 						m_AnnounceInterval = UTIL_ToInt32( Interval );
-						QueueChatCommand( "Announcing has been enabled every " + Interval + " seconds.", User, Whisper );				
+						QueueChatCommand( m_CCBot->m_Language->AnnounceEnabled( Interval ), User, Whisper );				
 					}
 					else if( Interval == "off" && m_Announce == true )
 					{
 						m_Announce = false;
-						QueueChatCommand( "Announcing has been disabled.", User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->AnnounceDisabled( ), User, Whisper );
 					}
 				}
 
@@ -251,16 +261,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	
 						if( Ban )
 						{
-							QueueChatCommand( "[" + Victim + "] was already banned from the channel by " + Ban->GetAdmin( ) + "." , User, Whisper );
+							QueueChatCommand( m_CCBot->m_Language->UserAlreadyBanned( Victim, Ban->GetAdmin( ) ), User, Whisper );
 							delete Ban;
 							Ban = NULL;
 						}
 						else
 						{
 							if( m_CCBot->m_DB->BanAdd( m_Server, Victim, User, Reason ) )
-								QueueChatCommand( "[" + Victim + "] successfully banned from the channel by " + User + ".", User, Whisper );
+								QueueChatCommand( m_CCBot->m_Language->SuccesfullyBanned( Victim, Ban->GetAdmin( ) ), User, Whisper );
 							else
-								QueueChatCommand( "Error banning [" + Victim + "] from the channel.", User, Whisper );
+								QueueChatCommand( m_CCBot->m_Language->ErrorBanningUser( Victim ), User, Whisper );
 						}
 					}
 				}
@@ -449,11 +459,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					bool Exists = false;
 
 					for( map<string, uint32_t> :: iterator i = m_CCBot->m_Commands.begin( ); i != m_CCBot->m_Commands.end( ); ++i )
+					{
 						if( (*i).first == Payload )
-						{
-							Exists = true;
-						}
-
+							Exists = true;						
+					}
 					if( Exists )
 						QueueChatCommand( "Access needed for the [" + Payload + "] command is [" + UTIL_ToString( m_CCBot->m_DB->CommandAccess( Payload ) ) + "]", User, Whisper );
 					else
@@ -515,7 +524,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					while( !m_ChatCommands.empty( ) )
 						m_ChatCommands.pop( );
 
-					QueueChatCommand( "Message queue cleared...", User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->MessageQueueCleared( ), User, Whisper );
 				}
 
 				//
@@ -709,12 +718,12 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					if( Payload == "on" )
 					{
-						QueueChatCommand( "Game announcer is ON.", User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->GameAnnouncerEnabled( ), User, Whisper );
 						m_AnnounceGames = true;
 					}
 					else if( Payload == "off" )
 					{
-						QueueChatCommand( "Game announcer is OFF.", User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->GameAnnouncerDisabled( ), User, Whisper );
 						m_AnnounceGames = false;
 					}
 				}				
@@ -726,8 +735,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				else if( Command == "getclan" && Access >= m_CCBot->m_DB->CommandAccess( "getclan" ) && m_ClanCommandsEnabled )
 				{
 					SendGetClanList( );
-					QueueChatCommand( "Updating bot's internal clan list from Battle.Net...", User, Whisper );
-					QueueWhisperCommand( "Received [" + UTIL_ToString( m_Clans.size( ) ) + "] clan members.", User );
+					QueueChatCommand( m_CCBot->m_Language->UpdatedClanList( ), User, Whisper );
+					QueueWhisperCommand( m_CCBot->m_Language->ReceivedClanMembers( UTIL_ToString( m_Clans.size( ) ) ), User );
 				}
 
 				//
@@ -742,7 +751,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						m_LastKnown = Payload;
 					}
 					else
-						QueueChatCommand( "User must be in the clan.", User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->MustBeAClanMember( Payload ), User, Whisper );
 				}	
 
 				//
@@ -754,12 +763,12 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					
 					if( Payload == "off" )
 					{
-						QueueChatCommand( "Greet users on join is disabled.", User, Whisper );
+						QueueChatCommand( "Greeting users on join is disabled.", User, Whisper );
 						m_GreetUsers = false;
 					}
 					else if( Payload == "on" )
 					{
-						QueueChatCommand( "Greet users on join is enabled.", User, Whisper );
+						QueueChatCommand( "Greeting users on join is enabled.", User, Whisper );
 						m_GreetUsers = true;
 					}
 				}	 				
@@ -1157,7 +1166,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						}
 					}
 					else
-						QueueChatCommand( "This feature has been disabled.", User, Whisper ); 	
+						QueueChatCommand( m_CCBot->m_Language->CommandDisabled( ), User, Whisper ); 	
 				}
 
 				//
@@ -1345,9 +1354,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					CChannel *Result = GetUserByName( Payload );
 
 					if( Result )
-						QueueChatCommand( Payload + " has a ping of " + UTIL_ToString( Result->GetPing( ) ) + "ms on " + m_ServerAlias + ".", User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->Ping( Payload, UTIL_ToString( Result->GetPing( ) ) , m_ServerAlias), User, Whisper );
 					else
-						QueueChatCommand( "Can only access pings from users in channel.", User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->CannotAccessPing( ), User, Whisper );
 				}
 				
 				//
@@ -1357,7 +1366,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				else if( Command == "restart" && ( Access >= m_CCBot->m_DB->CommandAccess( "restart" ) || IsRootAdmin( User ) ) )
 				{
 					m_CCBot->Restart( );	
-				}
+				}				
 		}		
 	}
 

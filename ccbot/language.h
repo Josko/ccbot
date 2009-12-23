@@ -36,13 +36,14 @@ public:
 
 	void Replace( string &Text, string Key, string Value );
 
+	string MessageQueueCleared(  );
 	string YouDontHaveAccessToThatCommand( );
-	string ErrorAddingUser( string user, string server );
-	string UnbannedUser( string victim );
-	string ErrorUnbanningUser( string victim );
-	string UserAlreadyBanned( string victim, string admin );
-	string SuccesfullyBanned( string victim, string admin );
-	string ErrorBanningUser( string victim );
+	string CommandTrigger( string trigger );
+	string Ping( string user, string ping, string server );
+	string CannotAccessPing(  );
+	string CommandDisabled(  );
+	string InvitationAccepted(  );
+	string HasFollowingAccess( string access );
 	string Version( string version );
 	string ConnectingToBNET( string server );
 	string ConnectedToBNET( string server );
@@ -53,11 +54,23 @@ public:
 	string WelcomeMessageLine2( string channel, string user );
 	string AnnounceGame( string user, string gamename );
 	string SwearKick( string user, string swear );
-	string InvitationHasBeenAccepted( );
-	string UserHasBeenAlreadySafelisted( string user );
-	string UserHasBeenAddedToSafelist( string user );	
-	string AnnounceEnabled( string user, string interval );
+	string UserAlreadySafelisted( string user );
+	string UserSafelisted( string user );
+	string ErrorSafelisting( string user );
+	string AnnounceEnabled( string interval );
 	string AnnounceDisabled( );
+	string UserAlreadyBanned( string victim, string admin );
+	string SuccesfullyBanned( string victim, string admin );
+	string ErrorBanningUser( string victim );
+	string UnbannedUser( string victim );
+	string ErrorUnbanningUser( string victim );
+	string GameAnnouncerEnabled(  );
+	string GameAnnouncerDisabled( );
+	string UpdatedClanList( );
+	string ReceivedClanMembers( string count );
+	string MustBeAClanMember( string user );
+	
+	string ErrorAddingUser( string user, string server );	
 	string UserHasAccess( string user, string access );
 	string ThereAreNoUsers( string access );
 	string ThereIsOneUser( string access );

@@ -204,7 +204,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 	
 		// send a null packet to detect disconnects
-		if( GetTime( ) >= m_LastNullTime + 90 )
+		if( GetTime( ) >= m_LastNullTime + 60 )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_NULL( ) );
 			m_LastNullTime = GetTime( );

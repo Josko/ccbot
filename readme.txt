@@ -204,6 +204,7 @@ Parameters in angled brackets <like this> are required and parameters in square 
 !chieftain <name>		transfers the chieftain position to the specified user
 !rejoin				bot rejoins the current channel
 !status				shows all servers the bot is connected to and if he's logged in or not
+?trigger			shows the command trigger currently used
 
 ============================
 Compiling CCBot on Windows
@@ -267,7 +268,10 @@ Version 0.30 ( 14.12.2009. )
 - Edited !topic so you can make a blank topic
 - !saybnet now uses partial matching
 - Added !status
-- Specify the channel on user join and leave
+- Specify the channel on user join, leave, emote and talk
+- Return BNET errors on connecting (such as CD key banned, etc.)
+- Minimum interval on !announce is 4 seconds
+- Added ?trigger
 
 Version 0.29 ( 3.12.2009. )
 
