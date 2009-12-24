@@ -272,6 +272,11 @@ Version 0.30 ( 14.12.2009. )
 - Return BNET errors on connecting (such as CD key banned, etc.)
 - Minimum interval on !announce is 4 seconds
 - Added ?trigger
+- Fixed a bug in !lockdown
+- More language.cfg support
+- Fixed a bug in !ban
+- Made ?trigger command case insensitive
+- Made arguments like "on" and "off" in commands such as !games, !greet, !lockdown case insensitive
 
 Version 0.29 ( 3.12.2009. )
 

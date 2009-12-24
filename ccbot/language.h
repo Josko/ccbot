@@ -69,6 +69,20 @@ public:
 	string UpdatedClanList( );
 	string ReceivedClanMembers( string count );
 	string MustBeAClanMember( string user );
+	string GreetingEnabled( );
+	string GreetingDisabled( );
+	string CFGReloaded( );
+	string NotAllowedUsingSay( );
+	string UnableToPartiallyMatchServer( );
+	string Uptime( string user, string time );
+	string GN8( string user );
+	string UserIsSafelisted( string user );
+	string UserNotSafelisted( string user );
+	string ChangedRank( string user, string rank );
+	string LockdownEnabled( string access );
+	string LockdownDisabled( );
+	string SetMOTD( string message );
+	string SetTopic( string message );
 	
 	string ErrorAddingUser( string user, string server );	
 	string UserHasAccess( string user, string access );
@@ -78,10 +92,8 @@ public:
 	string UserHasNoAccessSet( string user );
 	string DeletedUsersAccess( string access );
 	string ErrorDeletingAccess( string access );
-	string UserSafelisted( string number, string access );
-	string UserNotSafelisted( string number, string access );
-	string LockdownEnabled( string number, string access );
-	string LockdownDisabled( string number, string access );
+	
+	
 
 };
 

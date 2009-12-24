@@ -36,6 +36,7 @@
 
 #ifdef WIN32
  #include "pthread.h"
+ #include <process.h>
 #else
  #include <sys/time.h>
 #endif

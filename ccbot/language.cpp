@@ -93,6 +93,31 @@ string CLanguage :: MustBeAClanMember( string user )
 	return Out;
 }
 
+string CLanguage :: GreetingEnabled( )
+{
+	return m_CFG->GetString( "lang_0008", "lang_0008" );
+}
+
+string CLanguage :: GreetingDisabled( )
+{
+	return m_CFG->GetString( "lang_0009", "lang_0009" );
+}
+
+string CLanguage :: CFGReloaded( )
+{
+	return m_CFG->GetString( "lang_0010", "lang_0010" );
+}
+
+string CLanguage :: NotAllowedUsingSay( )
+{
+	return m_CFG->GetString( "lang_0011", "lang_0011" );
+}
+
+string CLanguage :: UnableToPartiallyMatchServer( )
+{
+	return m_CFG->GetString( "lang_0012", "lang_0012" );
+}
+
 string CLanguage :: Version( string version )
 {
 	string Out = m_CFG->GetString( "lang_0013", "lang_0013" );
@@ -258,5 +283,65 @@ string CLanguage :: ErrorBanningUser( string victim )
 {
 	string Out = m_CFG->GetString( "lang_0036", "lang_0036" );
 	Replace(Out, "$USER$", victim );
+	return Out;
+}
+
+string CLanguage :: Uptime( string user, string time )
+{
+	return m_CFG->GetString( "lang_0037", "lang_0037" );
+}
+
+string CLanguage :: GN8( string user )
+{
+	string Out = m_CFG->GetString( "lang_0038", "lang_0038" );
+	Replace(Out, "$USER$", user );
+	return Out;
+}
+
+string CLanguage :: UserIsSafelisted( string user )
+{
+	string Out = m_CFG->GetString( "lang_0039", "lang_0039" );
+	Replace(Out, "$USER$", user );
+	return Out;
+}
+
+string CLanguage :: UserNotSafelisted( string user )
+{
+	string Out = m_CFG->GetString( "lang_0040", "lang_0040" );
+	Replace(Out, "$USER$", user );
+	return Out;
+}
+
+string CLanguage :: ChangedRank( string user, string rank )
+{
+	string Out = m_CFG->GetString( "lang_0041", "lang_0041" );
+	Replace(Out, "$USER$", user );
+	Replace(Out, "$RANK$", rank );
+	return Out;
+}
+
+string CLanguage :: LockdownEnabled( string access )
+{
+	string Out = m_CFG->GetString( "lang_0042", "lang_0042" );
+	Replace(Out, "$ACCESS$", access );
+	return Out;
+}
+
+string CLanguage :: LockdownDisabled( )
+{
+	return m_CFG->GetString( "lang_0043", "lang_0043" );
+}
+
+string CLanguage :: SetMOTD( string message )
+{
+	string Out = m_CFG->GetString( "lang_0044", "lang_0044" );
+	Replace(Out, "$MOTD$", message );
+	return Out;
+}
+
+string CLanguage :: SetTopic( string message )
+{
+	string Out = m_CFG->GetString( "lang_0045", "lang_0045" );
+	Replace(Out, "$TOPIC$", message );
 	return Out;
 }
