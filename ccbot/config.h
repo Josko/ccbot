@@ -41,7 +41,6 @@ public:
 	void CreateConfig( );
 	int GetInt( string key, int x );
 	string GetString( string key, string x );
-	const char* GetCString( string key, char* x );	
 };
 
 #endif

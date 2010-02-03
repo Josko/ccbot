@@ -46,14 +46,6 @@ using namespace std;
 
 typedef vector<unsigned char> BYTEARRAY;
 
-struct irc_reply_data
-{
-	char* nick;
-	char* ident;
-	char* host;
-	char* target;
-};
-
 // time
 
 uint32_t GetTime( );		// seconds since January 1, 1970 usually

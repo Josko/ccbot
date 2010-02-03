@@ -1,5 +1,5 @@
 =================================
-Clan & Channel Bot - Version 0.30
+Clan & Channel Bot - Version 0.31
 =================================
 
 CCBot is a heavily modified GHost++ project made by Varlock. Author of the modified version is h4x0rz88 from Eurobattle.net. The original GHost++ project can be found here: http://forum.codelain.com/
@@ -54,7 +54,7 @@ Clan Moderation
 
 GHost Chat also had built in Clan support, for most functions he needs to be at least a Shaman in the clan - also making him a chieftain is _never_ a good idea.
 
-WARNING : All of the clan features could cause damage (by your account being banned, excesive traffic, etc.) if you use them while the bot is NOT a clan member. A measure
+WARNING : All of the clan features could cause damage (by your account being banned, excessive traffic, etc.) if you use them while the bot is NOT a clan member. A measure
 preventing this exists but there is always a risk.
 
 =======================
@@ -62,7 +62,7 @@ How Access System Works
 =======================
 
 User access levels range from 0 to 10. Root admin has automatically access of 10 and it's encouraged not to give anyone such a high level of access.
-You can change both user access level and commands needed access level to execute them.
+You can change both user access level and commands access level to execute them.
 
 Note: squelch keyword defines !squelch, !unsquelch and !squelchlist commands.
 
@@ -92,8 +92,8 @@ In lagnuage.cfg you have for 2 line greets:
 lang_0020 = /w $USER$ Welcome to the $CHANNEL$ channel! Enjoy your stay.
 lang_0021 = Come again for more DotA games.
 
-If you want to disable any of the lines without recompiling (sending 1 instead of 2 lines) of
-greet just shorten the line to only 1 or 0 characters. Example for sending 1 line greet:
+If you want to disable any of the lines without recompiling (sending 1 instead of 2 lines)
+just shorten the line to only 1 or 0 characters. Example for sending 1 line greet:
 
 lang_0020 = /w $USER$ Welcome to the $CHANNEL$ channel! Enjoy your stay.
 lang_0021 = 
@@ -101,14 +101,14 @@ lang_0021 =
 Because lang_0021 message length is lower then 1 - it won't be printed and sent to the server.
 
 ===============================
-Using CC Bot on Multiple Realms
+Using CCBot on Multiple Realms
 ===============================
 
-DOESN'T SUPPORT ORIGINAL B.NET! But it is possible to make it work on B.Net but that's something very complicated for most users.
+DOESN'T SUPPORT ORIGINAL B.NET! But it is possible to make it work on B.Net but that's something very complicated for most users. While the Warden is down - it's again viable for this bot to work on BNET as well.
 
 Here's how:
 
-1.) When CCBot starts up it reads up to 9 sets of battle.net connection information from ghost.cfg.
+1.) When CCBot starts up it reads up to 9 sets of battle.net connection information from ccbot.cfg.
 2.) A set of battle.net connection information contains the following keys:
  a.) *_server (required)
  b.) *_cdkeyroc
@@ -122,11 +122,19 @@ Here's how:
  j.) *_custom_exeversion
  k.) *_custom_exeversionhash
  l.) *_custom_passwordhashtype
+ m.) *_clantag
+ n.) *_greetusers
+ o.) *_swearingkick
+ p.) *_selfjoin
+ q.) *_announcegames
+ r.) *_banchat
+ s.) *_antispam
+ t.) *_clandefaultaccess
+ u.) *_hostbotname
 3.) CCBot will search for battle.net connection information by replacing the "*" in each key above with "bnet_" then "bnet2_" then "bnet3_" and so on until "bnet9_".
  a.) Note that CCBot doesn't search for "bnet1_" for backwards compatibility reasons.
-4.) If CC Bot doesn't find a *_server key it stops searching for any further battle.net connection information.
+4.) If CCBot doesn't find a *_server key it stops searching for any further battle.net connection information.
 5.) If any of the required keys are missing CCBot will skip that set of battle.net connection information and start searching for the next one.
-
 
 ========
 Commands
@@ -222,7 +230,7 @@ the ccbot project and replace the current binary if they do not experience any p
 
 
 =========================
-Compiling CC Bot on Linux
+Compiling CCBot on Linux
 =========================
 
 You will need a few libraries, all of which are installed, if you have apt, with following command:
@@ -244,7 +252,7 @@ Once it's built you can continue:
 The binary will be located in ~/ccbot/ccbot.
 
 ========================
-Running GHost++ on Linux
+Running CCBot on Linux
 ========================
 
 You will need to copy ~/ccbot/bncsutil/src/bncsutil/libbncutil.so to /usr/local/lib/ or otherwise set LD_LIBRARY_PATH so it can find the bncsutil library. (Install bncsutil)
@@ -254,6 +262,18 @@ Then when in the CCBot binary directory just type in terminal "./ccbot++" withou
 =========
 CHANGELOG
 =========
+
+Version 0.31 ( 03.02.2009. )
+
+- Removed libircclient from the project
+- Updated version to 0.31
+- Fixed a bug in !uptime caused by latest changes
+- Updated SQLite
+- Other minor changes
+- Some console output changes
+- Changed the process priority to High (from Above Normal)
+- Fixed an error in language.cfg
+- Updated the readme, fixed some typos
 
 Version 0.30 ( 14.12.2009. )
 
@@ -278,7 +298,7 @@ Version 0.30 ( 14.12.2009. )
 - Made ?trigger command case insensitive
 - Made arguments like "on" and "off" in commands such as !games, !greet, !lockdown case insensitive
 
-Version 0.29 ( 3.12.2009. )
+Version 0.29 ( 03.12.2009. )
 
 - Minor tweaks to clan invitation responses and clan creation responses
 - Fixed a bug with stdin
@@ -349,7 +369,7 @@ Version 0.26 ( 10.11.2009. )
 - Changed !lockdown - tempBans if the user joining has a lower access then set
 - Bot recognizes clan creation invites and automatically accepts them (this means you can make a clan with 1 War3 client nad 9 accounts on 1 bot)
 
-Version 0.25 ( 9.11.2009. )
+Version 0.25 ( 09.11.2009. )
 
 - Major changes to the channel users information saving, accessing, sorting and their related commands/procedures/functions
 - Added !ping
@@ -371,7 +391,7 @@ Version 0.25 ( 9.11.2009. )
 - If not logged in don't send refresh clanlist or rejoin if in "wrong" channel
 - Major optimisation to BYTEARRAY appending and creation
 
-Version 0.24 ( 8.11.2009. )
+Version 0.24 ( 08.11.2009. )
 
 - Major work on access system - old admin system completely removed and everything related
 - Access settings stored in database table "commands"

@@ -61,8 +61,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 	if( Event == CBNETProtocol :: EID_WHISPER || Event == CBNETProtocol :: EID_TALK || Event == CBNETProtocol :: EID_EMOTE )
 	{
-		/* if( Match( User, m_HostbotName ) && Event == CBNETProtocol :: EID_WHISPER )
-			conn->privmsg( "#Finnish-Alliance", Message.c_str( ) ); */
 
 		// Anti-Spam
 
