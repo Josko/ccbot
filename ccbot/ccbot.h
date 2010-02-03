@@ -30,7 +30,6 @@
  #include <stdint.h>
 #endif
 
-
 // STL
 
 #include <fstream>
@@ -46,6 +45,14 @@
 using namespace std;
 
 typedef vector<unsigned char> BYTEARRAY;
+
+struct irc_reply_data
+{
+	char* nick;
+	char* ident;
+	char* host;
+	char* target;
+};
 
 // time
 
@@ -103,7 +110,7 @@ public:
 	bool tcp_nodelay;					// config value: if set to 1 - improves performance, else saves bandwidth and traffic
 
 	vector<string> stdInputMessages;
-  	pthread_t stdInThread;
+  	pthread_t stdin_pthread;
 	pthread_mutex_t stdInMutex;
 
 	CCCBot( CConfig *CFG );
@@ -115,7 +122,6 @@ public:
 	void UpdateCommandAccess( );
 	void readStdInMessages( );
 
-
 	// events
 
 	void EventBNETConnecting( CBNET *bnet );
@@ -125,12 +131,12 @@ public:
 	void EventBNETConnectTimedOut( CBNET *bnet );
 
 	// other functions
+
 	void Restart( );
 	void SetConfigs( CConfig *CFG );
 	void ReloadConfigs( );
 	void UpdateSwearList( );
 	string GetServerFromNamePartial( string name );
-	
 };
 
 #endif

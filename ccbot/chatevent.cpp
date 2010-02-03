@@ -53,14 +53,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	m_ClanCommandsEnabled = IsClanMember( m_UserName );	
 
 	if( Event == CBNETProtocol :: EID_WHISPER )
-			CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] [" + User + "] " + Message );
+			CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "][" + User + "] " + Message );
 	else if( Event == CBNETProtocol :: EID_TALK )
-			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + ":" + m_CurrentChannel + "] [" + User + "] " + Message );
+			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + ":" + m_CurrentChannel + "][" + User + "] " + Message );
 	else if( Event == CBNETProtocol :: EID_EMOTE )
-			CONSOLE_Print( "[EMOTE: " + m_ServerAlias + ":" + m_CurrentChannel + "] [" + User + "] " + Message );
+			CONSOLE_Print( "[EMOTE: " + m_ServerAlias + ":" + m_CurrentChannel + "][" + User + "] " + Message );
 
 	if( Event == CBNETProtocol :: EID_WHISPER || Event == CBNETProtocol :: EID_TALK || Event == CBNETProtocol :: EID_EMOTE )
-	{	
+	{
+		/* if( Match( User, m_HostbotName ) && Event == CBNETProtocol :: EID_WHISPER )
+			conn->privmsg( "#Finnish-Alliance", Message.c_str( ) ); */
 
 		// Anti-Spam
 
@@ -773,7 +775,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}	 				
 
 				//
-				// !GRUNT				//
+				// !GRUNT
+				//
 
 				else if( Command == "grunt"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "grunt" ) && m_ClanCommandsEnabled )
 				{
@@ -866,7 +869,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 				
 				//
-				// !PEON				//
+				// !PEON
+				//
+
 				else if( Command == "peon"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "peon" ) && m_ClanCommandsEnabled )
 				{
 					if( IsClanShaman( m_UserName ) || IsClanChieftain( m_UserName ) )
@@ -979,7 +984,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 
 				//
-				// !SHAMAN				//
+				// !SHAMAN
+				//
+
 				else if( Command == "shaman"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "shaman" ) && m_ClanCommandsEnabled )
 				{
 					if( IsClanChieftain( m_UserName ) )
@@ -1308,7 +1315,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 					if ( GetUserFromNamePartial( Victim ).size( ) >= 1 )
 						Victim = GetUserFromNamePartial( Victim );
-					if ( Object == "shit" && !IsRootAdmin( User ) )
+
+					if ( Object == "shit" && !IsRootAdmin( User ) )
 					{
 						  QueueChatCommand( "/kick " + User + " Abusing the power of the Shit." );
 					}

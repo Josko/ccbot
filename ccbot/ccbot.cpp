@@ -131,8 +131,8 @@ int main( )
 
 	// increase process priority
 
-	CONSOLE_Print( "[CCBOT] setting process priority to \"above normal\"" );
-	SetPriorityClass( GetCurrentProcess( ), ABOVE_NORMAL_PRIORITY_CLASS );
+	CONSOLE_Print( "[CCBOT] setting process priority to \"high\"" );
+	SetPriorityClass( GetCurrentProcess( ), HIGH_PRIORITY_CLASS );
 
 	// initialize winsock
 
@@ -156,7 +156,7 @@ int main( )
 		// that said it's likely we'll loop more often than this due to there being data waiting on one of the sockets but there aren't any guarantees
 
 		if( gCCBot->Update( 10000 ) )
-		break;
+			break;
 	}
 
 	// shutdown ghost
@@ -190,7 +190,8 @@ void CONSOLE_Print( string message )
         if( !gLogFile.empty( ) )
         {
                 ofstream Log;
-                #ifdef WIN32
+                
+#ifdef WIN32
                 strcpy(str, "logs\\");
 #else
                 strcpy(str, "logs/");
@@ -234,7 +235,7 @@ void DEBUG_Print( BYTEARRAY b )
 	cout << "}" << endl;
 }
 
-void * readStdIn( void* in )
+void * stdin_thread( void* in )
 {
     CCCBot* ccbot = ( CCCBot* ) in;
 
@@ -255,9 +256,11 @@ void * readStdIn( void* in )
             pthread_mutex_unlock( &( ccbot->stdInMutex ) );
         }
     }
+
+	return in;
 }
 
-void CCCBot::readStdInMessages( )
+void CCCBot :: readStdInMessages( )
 {
     if( pthread_mutex_trylock( &stdInMutex ) == 0 )
     {
@@ -304,13 +307,14 @@ void CCCBot::readStdInMessages( )
 //
 
 CCCBot :: CCCBot( CConfig *CFG )
-{
+{
+
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Exiting = false;
-	m_Version = "0.30";
+	m_Version = "0.31";
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
-	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;	
+	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;
 
 	// load the battle.net connections
 	// we're just loading the config data and creating the CBNET classes here, the connections are established later (in the Update function)
@@ -365,10 +369,10 @@ CCCBot :: CCCBot( CConfig *CFG )
 	if( m_BNETs.empty( ) )
 		CONSOLE_Print( "[CCBOT] warning - no battle.net connections found in config file" );
 
-	pthread_mutex_init(&stdInMutex, NULL);
-	pthread_create( &stdInThread, NULL, readStdIn,(void *) this);
+	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++" );
 
-	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++ - by h4x0rz88" );
+	pthread_mutex_init(&stdInMutex, NULL);
+	pthread_create( &stdin_pthread, NULL, stdin_thread,(void *) this);
 
 	// Update the swears.cfg file
 	UpdateSwearList( );	
@@ -388,7 +392,7 @@ CCCBot :: ~CCCBot( )
 	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
         	delete *i;
 
-	pthread_cancel( stdInThread );
+	pthread_cancel( stdin_pthread );
 	pthread_mutex_destroy( &stdInMutex );	
 }
 
@@ -432,7 +436,7 @@ bool CCCBot :: Update( long usecBlock )
 		// we don't have any sockets (i.e. we aren't connected to battle.net maybe due to a lost connection and there aren't any games running)
 		// select will return immediately and we'll chew up the CPU if we let it loop so just sleep for 50ms to kill some time
 
-		MILLISLEEP( 70 );
+		MILLISLEEP( 100 );
 	}
 
 	bool BNETExit = false;
@@ -633,12 +637,11 @@ void CCCBot :: EventBNETConnectTimedOut( CBNET *bnet )
 
 void CCCBot :: Restart ( )
 {
-
 	// shutdown ghost
 
 	CONSOLE_Print( "[CCBOT] restarting" );
 	delete gCCBot;
-	gCCBot = NULL;
+	gCCBot = NULL;	
 
 #ifdef WIN32
 	// shutdown winsock

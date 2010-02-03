@@ -48,7 +48,6 @@ private:
 	queue<BYTEARRAY> m_OutPackets;					// queue of outgoing packets to be sent (to prevent getting kicked for flooding)
 	CBNCSUtilInterface *m_BNCSUtil;					// the interface to the bncsutil library (used for logging into battle.net)
 	queue<string> m_ChatCommands;					// queue of chat commands waiting to be sent (to prevent getting kicked for flooding)
-	vector<CIncomingClanList *> m_Clans;				// vector of clan members
 	vector<string> m_Admins;					// vector of cached admins
 	vector<string> LockdownNames;					// vector of tempbanned users whom will be unbanned later
 	vector<string> SquelchedUsers;					// vector of squelched users, lowercase names
@@ -64,7 +63,6 @@ private:
 	string m_UserName;						// battle.net username
 	string m_UserPassword;						// battle.net password
 	string m_FirstChannel;						// the first chat channel to join upon entering chat (note: we hijack this to store the last channel when entering a game)
-	string m_SecondClanTag;						// string holding clan tag in format "clan WXYZ"
 	string m_ClanRank;						// clan rank of bot's user
 	string m_CurrentChannel;					// the current chat channel
 	string m_RootAdmin;						// the root admin
@@ -118,6 +116,7 @@ public:
 	CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotname, bool nAntiSPam );
 	~CBNET( );
 
+	vector<CIncomingClanList *> m_Clans;		// vector of clan members
 	bool GetExiting( )				{ return m_Exiting; }
 	string GetServer( )				{ return m_Server; }
 	string GetCDKeyROC( )				{ return m_CDKeyROC; }
@@ -127,6 +126,8 @@ public:
 	string GetFirstChannel( )			{ return m_FirstChannel; }
 	string GetCurrentChannel( )			{ return m_CurrentChannel; }
 	string GetRootAdmin( )				{ return m_RootAdmin; }
+	string GetClanTag( )				{ return m_ClanTag; }
+	string GetHostBotName( )			{ return m_HostbotName; }
 	char GetCommandTrigger( )			{ return m_CommandTrigger; }
 	BYTEARRAY GetEXEVersion( )			{ return m_EXEVersion; }
 	BYTEARRAY GetEXEVersionHash( )			{ return m_EXEVersionHash; }

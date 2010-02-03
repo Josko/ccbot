@@ -288,7 +288,10 @@ string CLanguage :: ErrorBanningUser( string victim )
 
 string CLanguage :: Uptime( string user, string time )
 {
-	return m_CFG->GetString( "lang_0037", "lang_0037" );
+	string Out = m_CFG->GetString( "lang_0037", "lang_0037" );
+	Replace(Out, "$USER$", user );
+	Replace(Out, "$TIME$", time );
+	return Out;
 }
 
 string CLanguage :: GN8( string user )

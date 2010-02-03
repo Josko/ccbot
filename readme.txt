@@ -100,9 +100,9 @@ lang_0021 =
 
 Because lang_0021 message length is lower then 1 - it won't be printed and sent to the server.
 
-================================
+===============================
 Using CC Bot on Multiple Realms
-================================
+===============================
 
 DOESN'T SUPPORT ORIGINAL B.NET! But it is possible to make it work on B.Net but that's something very complicated for most users.
 
@@ -206,9 +206,9 @@ Parameters in angled brackets <like this> are required and parameters in square 
 !status				shows all servers the bot is connected to and if he's logged in or not
 ?trigger			shows the command trigger currently used
 
-============================
+==========================
 Compiling CCBot on Windows
-============================
+==========================
 
 1. Download Visual C++ 2008 Express Edition at http://www.microsoft.com/express/
 2. Open ghost.sln
@@ -221,9 +221,9 @@ An already compiled BNSCUtil.dll is supplied but BNSCUtil project and source are
 the ccbot project and replace the current binary if they do not experience any problem with the current libs, if problems occur try compiling all of the librares yourself, then CCBot then try again.
 
 
-==========================
+=========================
 Compiling CC Bot on Linux
-==========================
+=========================
 
 You will need a few libraries, all of which are installed, if you have apt, with following command:
 

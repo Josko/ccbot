@@ -106,6 +106,14 @@ string CConfig :: GetString( string key, string x )
 		return m_CFG[key];
 }
 
+const char* CConfig :: GetCString( string key, char* x )
+{
+	if( m_CFG.find( key ) == m_CFG.end( ) )
+		return x;
+	else
+		return m_CFG[key].c_str( );
+}
+
 void CConfig :: CreateNewLanguage( )
 {
 

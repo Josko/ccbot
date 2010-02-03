@@ -126,7 +126,6 @@ CBNET :: ~CBNET( )
 	}
 
 	delete m_BNCSUtil;
-
 }
 
 BYTEARRAY CBNET :: GetUniqueName( )
@@ -662,7 +661,8 @@ void CBNET :: ProcessPackets( )
 				m_Clans = Clans;
 			}		
 			
-			break;		
+			break;		
+
 				
 			}
 		}

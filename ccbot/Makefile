@@ -5,7 +5,7 @@ CC = gcc
 DFLAGS =
 OFLAGS = -O3
 LFLAGS = -L. -L../bncsutil/src/bncsutil/ -lbncsutil -lpthread -ldl -lrt -lnsl
-CFLAGS += -Wall
+CFLAGS += -Wall -Wno-write-strings
 
 ifeq ($(SYSTEM),Darwin)
 DFLAGS += -D__APPLE__
@@ -23,7 +23,7 @@ endif
 
 CFLAGS += $(OFLAGS) $(DFLAGS) -I. -I../bncsutil/src/
 
-OBJS = bncsutilinterface.o bnet.o bnetprotocol.o chatevent.o commandpacket.o config.o ccbot.o ccbotdb.o ccbotdbsqlite.o language.o socket.o util.o 
+OBJS = bncsutilinterface.o bnet.o bnetprotocol.o chatevent.o commandpacket.o config.o ccbot.o ccbotdb.o ccbotdbsqlite.o language.o socket.o util.o
 COBJS = sqlite3.o
 PROGS = ./ccbot++
 
