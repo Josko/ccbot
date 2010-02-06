@@ -95,7 +95,7 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_LastAnnounceTime = 0;
 	m_LastInvitationTime = 0;
 	m_LastSpamCacheCleaning = 0;
-	m_Delay = 5001;
+	m_Delay = 3001;
 	m_WaitingToConnect = true;
 	m_ActiveInvitation = false;
 	m_ActiveCreation = false;
@@ -157,7 +157,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		m_CCBot->EventBNETDisconnected( this );
 		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
 		m_Socket->Reset( );
-		m_NextConnectTime = GetTime( ) + 8;
+		m_NextConnectTime = GetTime( ) + 11;
 		m_LoggedIn = false;
 		m_InChat = false;
 		m_WaitingToConnect = true;
@@ -172,7 +172,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		m_CCBot->EventBNETDisconnected( this );
 		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
 		m_Socket->Reset( );
-		m_NextConnectTime = GetTime( ) + 8;
+		m_NextConnectTime = GetTime( ) + 11;
 		m_LoggedIn = false;
 		m_InChat = false;
 		m_WaitingToConnect = true;
@@ -185,12 +185,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 
 		m_Socket->DoRecv( (fd_set *)fd );
 		ExtractPackets( );
-		ProcessPackets( );
-
-		// check if at least one packet is waiting to be sent and if we've waited long enough to prevent flooding
-		// the original VB source used a formula based on the message length but 2.9 seconds seems to work fine
-		// note: updated this from 2 seconds to 2.5 then to 2.9 seconds because less is NOT enough
-		
+		ProcessPackets( );	
 		
 		if( !m_ChatCommands.empty( ) && GetTicks( ) >= m_LastChatCommandTicks + m_Delay )
 		{			
@@ -215,8 +210,8 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			m_LastSpamCacheCleaning = GetTime( );
 		}
 
-		// refresh the clan vector so it gets updated every 35 seconds
-		if( GetTime( ) >= m_LastGetClanTime + 75 && m_LoggedIn )
+		// refresh the clan vector so it gets updated every 70 seconds
+		if( GetTime( ) >= m_LastGetClanTime + 70 && m_LoggedIn )
 		{
 			SendGetClanList( );
 			m_LastGetClanTime = GetTime( );
@@ -243,7 +238,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			m_ActiveInvitation = false;
 		}
 
-		// wait 8 seconds before accepting the invitation otherwise the clan can get created but you would need to wait 30 seconds and get an error
+		// wait 5 seconds before accepting the invitation otherwise the clan can get created but you would get an false error
 		if( GetTime( ) >= ( m_LastInvitationTime + 5 ) && m_ActiveCreation && m_LoggedIn )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANCREATIONINVITATION( m_Protocol->GetClanCreationTag( ), m_Protocol->GetClanCreator( ) ) );
@@ -277,12 +272,12 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		}
 		else if( GetTime( ) >= m_NextConnectTime + 15 )
 		{
-			// the connection attempt timed out (8 seconds)
+			// the connection attempt timed out (11 seconds)
 
 			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connect timed out" );
 			m_CCBot->EventBNETConnectTimedOut( this );
 			m_Socket->Reset( );
-			m_NextConnectTime = GetTime( ) + 8;
+			m_NextConnectTime = GetTime( ) + 11;
 			m_WaitingToConnect = true;
 			return m_Exiting;
 		}
@@ -451,7 +446,6 @@ void CBNET :: ProcessPackets( )
 						return;
 					}
 				}
-
 				break;
 
 			case CBNETProtocol :: SID_AUTH_CHECK:
@@ -468,11 +462,11 @@ void CBNET :: ProcessPackets( )
 					switch( UTIL_ByteArrayToUInt32( m_Protocol->m_KeyState, false ) )
 					{
 						case 	CBNETProtocol :: KR_OLD_GAME_VERSION:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Old game version - update your hases and/or ccbot.cfg" );
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Old game version - update your hashes and/or ccbot.cfg" );
 							break;
 
 						case 	CBNETProtocol :: KR_INVALID_VERSION:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid game version - update your hases and/or ccbot.cfg" );
+							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid game version - update your hashes and/or ccbot.cfg" );
 							break;
 
 						case 	CBNETProtocol :: KR_INVALID_ROC_KEY:
@@ -652,18 +646,15 @@ void CBNET :: ProcessPackets( )
 				}
 
 			case CBNETProtocol :: SID_CLANMEMBERLIST:
-			{
-				vector<CIncomingClanList *> Clans = m_Protocol->RECEIVE_SID_CLANMEMBERLIST( Packet->GetData( ) );
+				{
+					vector<CIncomingClanList *> Clans = m_Protocol->RECEIVE_SID_CLANMEMBERLIST( Packet->GetData( ) );
 
-				for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
-					delete *i;
+					for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
+						delete *i;
 
-				m_Clans = Clans;
-			}		
-			
-			break;		
-
-				
+					m_Clans = Clans;
+				}			
+				break;				
 			}
 		}
 
@@ -702,6 +693,7 @@ void CBNET :: SendChatCommand( string chatCommand )
 		}
 
 		m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
+
 		if( chatCommand.substr( 0, 3 ) == "/w " )
 			{
 				string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
@@ -729,12 +721,8 @@ void CBNET :: SendChatCommandHidden( string chatCommand )
 				chatCommand = chatCommand.substr( 0, 199 );
 		}
 
-		m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
-
-		
-		
+		m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );		
 	}
-
 }
 
 void CBNET :: QueueChatCommand( string chatCommand )
@@ -743,7 +731,6 @@ void CBNET :: QueueChatCommand( string chatCommand )
 		return;
 
 	m_ChatCommands.push( chatCommand );
-
 }
 
 void CBNET :: QueueChatCommand( string chatCommand, string user, bool whisper )
@@ -757,8 +744,6 @@ void CBNET :: QueueChatCommand( string chatCommand, string user, bool whisper )
 		QueueChatCommand( "/w " + user + " " + chatCommand );
 	else
 		QueueChatCommand( chatCommand );
-	
-
 }
 
 void CBNET :: QueueWhisperCommand( string chatCommand, string user )
@@ -779,8 +764,7 @@ void CBNET :: ImmediateChatCommand( string chatCommand )
 	{
 		SendChatCommand( chatCommand );
 		m_LastChatCommandTicks = GetTicks( );
-	}
-	
+	}	
 }
 
 void CBNET :: ImmediateChatCommand( string chatCommand, string user, bool whisper )
@@ -931,10 +915,7 @@ bool CBNET :: Match( string string1, string string2 )
 	transform( string1.begin( ), string1.end( ), string1.begin( ), (int(*)(int))tolower );
 	transform( string2.begin( ), string2.end( ), string2.begin( ), (int(*)(int))tolower );
 
-	if ( string1 == string2 )
-		return true;
-
-	return false;
+	return string1 == string2;
 }
 
 //
@@ -959,8 +940,10 @@ CChannel *CBNET :: GetUserByName( string name )
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 
 	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+	{
 		if( name == (*i).first )
 			return i->second;
+	}
 
 	return NULL;
 }

@@ -1,12 +1,10 @@
-=================================
-Clan & Channel Bot - Version 0.31
-=================================
+=========================================
+CCBot - Clan & Channel Bot - Version 0.31
+=========================================
 
-CCBot is a heavily modified GHost++ project made by Varlock. Author of the modified version is h4x0rz88 from Eurobattle.net. The original GHost++ project can be found here: http://forum.codelain.com/
-You can compile and run GHost++ on Windows and Linux with this release although the code should be mostly portable to other operating systems such as OS X with only very minor changes.
-Since it is written in native code (C++) you do NOT need to install the .NET framework on Windows or Mono on Linux.
+CCBot is a modified GHost++ bot (made by Varlock) to moderate both the channel and the clan it's located in. It's written in C++ with the SQLite files in C and because of this it's multi-platform and works on Windows and Linux (and OS X with probable minor changes to source). It's meant to be small and powerful with almost no dependecies and to work on PvPGNs and B.NET. 
 
-Works best on Eurobattle.net - as it's esclusively written for it. Fawkz.com (or FAWKZBNET) and other PvPGNs should also work just fine. For original Battle.net it would need the bnlsclient code and stricter package control - all of this is a moderate modification. Only Eurobattle.net and Fawkz.com are supported directly.
+Its source is freely available on http://code.google.com/p/ccbot while the GHost++ source is available at http://code.google.com/p/ghostplusplus
 
 =============
 Configuration
@@ -15,14 +13,14 @@ Configuration
 CCBot is configured via the configuration files - ghost.cfg and language.cfg located in the "cfg" folder.
 The program itself runs in console mode and does not take any console input (it outputs messages to the console for information purposes only).
 
-***You need to edit ccbot.cfg before running CC Bot***
-***You need to edit ccbot.cfg before running CC Bot***
-***You need to edit ccbot.cfg before running CC Bot***
+***You need to edit ccbot.cfg before running CCBot***
+***You need to edit ccbot.cfg before running CCBot***
+***You need to edit ccbot.cfg before running CCBot***
 
 There is also a swears.cfg file in the "cfg" folder in which you configure banned words and/or phrases.
 
 =============
-Console input
+Console Input
 =============
 
 It's possible to input commands directly to the console. If you're using only one BNET then you just type the command (without the command trigger) directly as:
@@ -100,9 +98,9 @@ lang_0021 =
 
 Because lang_0021 message length is lower then 1 - it won't be printed and sent to the server.
 
-===============================
+==============================
 Using CCBot on Multiple Realms
-===============================
+==============================
 
 DOESN'T SUPPORT ORIGINAL B.NET! But it is possible to make it work on B.Net but that's something very complicated for most users. While the Warden is down - it's again viable for this bot to work on BNET as well.
 
@@ -229,9 +227,9 @@ An already compiled BNSCUtil.dll is supplied but BNSCUtil project and source are
 the ccbot project and replace the current binary if they do not experience any problem with the current libs, if problems occur try compiling all of the librares yourself, then CCBot then try again.
 
 
-=========================
+========================
 Compiling CCBot on Linux
-=========================
+========================
 
 You will need a few libraries, all of which are installed, if you have apt, with following command:
 
@@ -251,9 +249,9 @@ Once it's built you can continue:
 
 The binary will be located in ~/ccbot/ccbot.
 
-========================
+======================
 Running CCBot on Linux
-========================
+======================
 
 You will need to copy ~/ccbot/bncsutil/src/bncsutil/libbncutil.so to /usr/local/lib/ or otherwise set LD_LIBRARY_PATH so it can find the bncsutil library. (Install bncsutil)
 You will also need to copy game.dll, Storm.dll, and war3.exe from a valid Warcraft III installation to the location specified in your ccbot.cfg 
@@ -274,6 +272,7 @@ Version 0.31 ( 03.02.2009. )
 - Changed the process priority to High (from Above Normal)
 - Fixed an error in language.cfg
 - Updated the readme, fixed some typos
+- Tidied the source a bit and fixed/removed some comments
 
 Version 0.30 ( 14.12.2009. )
 

@@ -564,8 +564,7 @@ void CCCBot :: UpdateCommandAccess( )
 	m_Commands[ "squelch" ] = 5;
 	m_Commands[ "topic" ] = 5;
 	m_Commands[ "unban" ] = 7;
-	m_Commands[ "uptime" ] = 1;
-	
+	m_Commands[ "uptime" ] = 1;	
 
 	for( map<string, uint32_t> :: iterator i = m_Commands.begin( ); i != m_Commands.end( ); ++i )
 		if( m_DB->CommandAccess( (*i).first ) == 11 )
