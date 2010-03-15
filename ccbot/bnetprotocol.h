@@ -1,6 +1,6 @@
 /*
 
-   Copyright [2009] [Joško Nikolić]
+   Copyright [2009] [JoÅ¡ko NikoliÄ‡]
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -95,7 +95,8 @@ public:
 		EID_CHANNELRESTRICTED			= 15,	// channel is restricted
 		EID_INFO				= 18,	// broadcast/information message
 		EID_ERROR				= 19,	// error message
-		EID_EMOTE				= 23	// emote
+		EID_EMOTE				= 23,	// emote
+		CONSOLE_INPUT				= 99	// console input
 	};
 
 	enum RankCode {
@@ -111,7 +112,7 @@ public:
 		FLAG_CHANNELOPERATOR = 2,		// Channel operator - 0x02
 		FLAG_SPEAKER = 4,			// Speaker - 0x04
 		FLAG_ADMINISTRATOR = 8,			// B.Net administrator - 0x08
-		FLAG_NOUDP = 16,			// No UDP - 0x10
+		FLAG_NOUDP = 16				// No UDP - 0x10
 	};
 
 	BYTEARRAY m_ClanTag;
@@ -213,7 +214,8 @@ public:
 private:
 	bool AssignLength( BYTEARRAY &content );
 	bool ValidateLength( BYTEARRAY &content );
-};
+};
+
 
 //
 // CIncomingChatEvent

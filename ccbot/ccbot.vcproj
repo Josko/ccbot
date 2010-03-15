@@ -16,7 +16,7 @@
 	<ToolFiles>
 	</ToolFiles>
 	<Configurations>
-		<Configuration
+	<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
@@ -41,57 +41,56 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\bncsutil\src;..\pthread"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE,_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\bncsutil\src;..\pdcurses"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="0"					
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
-			<Tool
+			<Tool	
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 			/>
-			<Tool
+			<Tool					
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib pthreadVCE2.lib"
+				AdditionalDependencies="ws2_32.lib pdcurses.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\pthread"
+				AdditionalLibraryDirectories="..\pdcurses"								
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
 				SubSystem="1"
-				TargetMachine="1"
+				TargetMachine="1"						
 			/>
 			<Tool
 				Name="VCALinkTool"
 			/>
 			<Tool
 				Name="VCManifestTool"
-			/>
-			<Tool
+			/>					
+			<Tool	
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
 				Name="VCBscMakeTool"
 			/>
-			<Tool
+			<Tool						
 				Name="VCFxCopTool"
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
 			/>
-			<Tool
+			<Tool							
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
-
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
@@ -119,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\bncsutil\src;..\pthread"
+				AdditionalIncludeDirectories="..\bncsutil\src;..\pdcurses"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -138,9 +137,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib pthreadVCE2.lib"
+				AdditionalDependencies="ws2_32.lib pdcurses.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\pthread"
+				AdditionalLibraryDirectories="..\pdcurses"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
 				SubSystem="1"

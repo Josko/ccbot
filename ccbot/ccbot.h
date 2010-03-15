@@ -25,7 +25,6 @@
 
 #ifdef WIN32
  #include "ms_stdint.h"
- #include "pthread.h"
 #else
  #include <stdint.h>
 #endif
@@ -70,9 +69,18 @@ uint32_t GetTicks( );		// milliseconds since computer startup usually, overflows
 
 // output
 
+void LOG_Print( string message );
+void CONSOLE_PrintNoCRLF( string message, bool log = true );
 void CONSOLE_Print( string message );
 void DEBUG_Print( string message );
-void DEBUG_Print( BYTEARRAY b );
+void CONSOLE_ChangeChannel( string channel );
+void CONSOLE_AddChannelUser( string name );
+void CONSOLE_RemoveChannelUser( string name );
+void CONSOLE_RemoveChannelUsers( );
+void CONSOLE_Draw( );
+void CONSOLE_Resize( );
+void CONSOLE_ChannelWindowChanged( );
+void CONSOLE_MainWindowChanged( );
 
 //
 // CCCBot
@@ -100,10 +108,6 @@ public:
 	string m_CFGPath;					// config value:path to txt files
 	vector<string> m_SwearList;				// vector of words for swear kicking
 	bool tcp_nodelay;					// config value: if set to 1 - improves performance, else saves bandwidth and traffic
-
-	vector<string> stdInputMessages;
-  	pthread_t stdin_pthread;
-	pthread_mutex_t stdInMutex;
 
 	CCCBot( CConfig *CFG );
 	~CCCBot( );

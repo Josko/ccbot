@@ -40,6 +40,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 {
 
 	CBNETProtocol :: IncomingChatEvent Event = chatEvent->GetChatEvent( );
+	char Output = BNET;
 	bool Whisper = ( Event == CBNETProtocol :: EID_WHISPER );
 	string User = chatEvent->GetUser( );
 	string lowerUser = User;
@@ -59,8 +60,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	else if( Event == CBNETProtocol :: EID_EMOTE )
 			CONSOLE_Print( "[EMOTE: " + m_ServerAlias + ":" + m_CurrentChannel + "][" + User + "] " + Message );
 
-	if( Event == CBNETProtocol :: EID_WHISPER || Event == CBNETProtocol :: EID_TALK || Event == CBNETProtocol :: EID_EMOTE )
+	if( Event == CBNETProtocol :: EID_WHISPER || Event == CBNETProtocol :: EID_TALK || Event == CBNETProtocol :: EID_EMOTE || Event == CBNETProtocol :: CONSOLE_INPUT )
 	{
+
+		if( Event == CBNETProtocol :: CONSOLE_INPUT )
+			Output = CONSOLE;
 
 		// Anti-Spam
 
@@ -88,7 +92,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			}
 
 			if( mesgmatches > 2 || nickmatches > 3 )
-				SendChatCommand( "/kick " + User + " Anti-Spam®" );
+				SendChatCommand( "/kick " + User + " Anti-Spam®", Output );
 		}
 
 		// Swearing kick
@@ -101,7 +105,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			for( uint32_t i = 0; i < m_CCBot->m_SwearList.size( ); ++i )
 			{
 				if( message.find( m_CCBot->m_SwearList[i] ) != string :: npos )
-					QueueChatCommand( m_CCBot->m_Language->SwearKick( User, m_CCBot->m_SwearList[i] ) );
+					QueueChatCommand( m_CCBot->m_Language->SwearKick( User, m_CCBot->m_SwearList[i] ), Output );
 			}
 		}
 		
@@ -109,7 +113,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		
 		if( Match( Message, "?trigger" ) && Event != CBNETProtocol :: EID_EMOTE)
 		{
-			QueueChatCommand( m_CCBot->m_Language->CommandTrigger( m_CommandTriggerStr ), User, Whisper );	
+			QueueChatCommand( m_CCBot->m_Language->CommandTrigger( m_CommandTriggerStr ), User, Whisper, Output );	
 		}
 		
 		if( !Message.empty( ) && Message[0] == m_CommandTrigger && Event != CBNETProtocol :: EID_EMOTE)
@@ -144,7 +148,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			if( Command == "accept" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "accept" ) && m_ActiveInvitation )
 			{
 				m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_Protocol->GetClanTag( ), m_Protocol->GetInviter( ), true ) );
-				QueueChatCommand( m_CCBot->m_Language->InvitationAccepted( ), User, Whisper );
+				QueueChatCommand( m_CCBot->m_Language->InvitationAccepted( ), User, Whisper, Output );
 				SendGetClanList( );
 				m_ActiveInvitation = false;
 			}
@@ -155,7 +159,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 			else if( Command == "access" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "access" ) )
 			{
-				SendChatCommand( "/w " + User + " " + m_CCBot->m_Language->HasFollowingAccess( UTIL_ToString( Access ) ) );
+				SendChatCommand( "/w " + User + " " + m_CCBot->m_Language->HasFollowingAccess( UTIL_ToString( Access ) ), Output );
 				string Commands;
 				for( uint32_t i = 0; i <= Access; ++i )
 				{
@@ -166,7 +170,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					Commands = Commands.substr( 0, Commands.size( ) -2 );
 
 					if( m_CommandList.size ( ) >= 1 )
-						SendChatCommand( "/w " + User + " [" + UTIL_ToString( i ) + "]: " + Commands );
+						SendChatCommand( "/w " + User + " [" + UTIL_ToString( i ) + "]: " + Commands, Output );
 
 					Commands.erase( );
 				}
@@ -180,13 +184,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( ( Command == "addsafelist" || Command == "adds" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "addsafelist" ) )
 			{					
 				if( m_CCBot->m_DB->SafelistCheck( m_Server, Payload ) )
-					QueueChatCommand( m_CCBot->m_Language->UserAlreadySafelisted( Payload ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->UserAlreadySafelisted( Payload ), User, Whisper, Output );
 				else
 				{
 					if( m_CCBot->m_DB->SafelistAdd( m_Server, Payload ) )
-						QueueChatCommand( m_CCBot->m_Language->UserSafelisted( Payload ), User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->UserSafelisted( Payload ), User, Whisper, Output );
 					else
-						QueueChatCommand( m_CCBot->m_Language->ErrorSafelisting( Payload ), User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->ErrorSafelisting( Payload ), User, Whisper, Output );
 				}					
 			}
 				
@@ -217,12 +221,12 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					m_Announce = true;
 					m_AnnounceMsg = AnnounceMessage;	
 					m_AnnounceInterval = UTIL_ToInt32( Interval );
-					QueueChatCommand( m_CCBot->m_Language->AnnounceEnabled( Interval ), User, Whisper );				
+					QueueChatCommand( m_CCBot->m_Language->AnnounceEnabled( Interval ), User, Whisper, Output );				
 				}
 				else if( Interval == "off" && m_Announce == true )
 				{
 					m_Announce = false;
-					QueueChatCommand( m_CCBot->m_Language->AnnounceDisabled( ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->AnnounceDisabled( ), User, Whisper, Output );
 				}
 			}
 
@@ -240,7 +244,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					
 				if( !IsClanShaman( Victim ) && !IsClanChieftain( Victim ) )					
 				{
-					QueueChatCommand( "/ban " + Payload );
+					QueueChatCommand( "/ban " + Payload, BNET );
 					if( !SS.eof( ) )
 					{
 						getline( SS, Reason );
@@ -254,16 +258,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	
 					if( Ban )
 					{
-						QueueChatCommand( m_CCBot->m_Language->UserAlreadyBanned( Victim, Ban->GetAdmin( ) ), User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->UserAlreadyBanned( Victim, Ban->GetAdmin( ) ), User, Whisper, Output );
 						delete Ban;
 						Ban = NULL;
 					}
 					else
 					{
 						if( m_CCBot->m_DB->BanAdd( m_Server, Victim, User, Reason ) )
-							QueueChatCommand( m_CCBot->m_Language->SuccesfullyBanned( Victim, User ), User, Whisper );
+							QueueChatCommand( m_CCBot->m_Language->SuccesfullyBanned( Victim, User ), User, Whisper, Output );
 						else
-							QueueChatCommand( m_CCBot->m_Language->ErrorBanningUser( Victim ), User, Whisper );
+							QueueChatCommand( m_CCBot->m_Language->ErrorBanningUser( Victim ), User, Whisper, Output );
 					}
 				}
 			}
@@ -284,28 +288,28 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( IsClanPeon( Payload ) )
 					{							
 						if( Ban )							
-							QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( Access ) + "] access and banned from channel.", User, Whisper );			
+							QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( Access ) + "] access and banned from channel.", User, Whisper, Output );
 						else
-							QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( Access ) + "] access.", User, Whisper );
+							QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( Access ) + "] access.", User, Whisper, Output );
 					}
 					else if( IsClanGrunt( Payload ) )
 					{
 						if( Ban )
-							QueueChatCommand( Payload + " is in clan, rank Grunt, with [" + UTIL_ToString( Access ) + "] access and is banned from channel.", User, Whisper );		
+							QueueChatCommand( Payload + " is in clan, rank Grunt, with [" + UTIL_ToString( Access ) + "] access and is banned from channel.", User, Whisper, Output );
 						else
-							QueueChatCommand( Payload + " is in clan, rank Grunt with [" + UTIL_ToString( Access ) + "] access.", User, Whisper );					
+							QueueChatCommand( Payload + " is in clan, rank Grunt with [" + UTIL_ToString( Access ) + "] access.", User, Whisper, Output );				
 					}
 					else if( IsClanShaman( Payload ) )
-						QueueChatCommand( Payload + " is in clan, rank Shaman, with [" + UTIL_ToString( Access ) + "] access.", User, Whisper );
+						QueueChatCommand( Payload + " is in clan, rank Shaman, with [" + UTIL_ToString( Access ) + "] access.", User, Whisper, Output );
 					else if( IsClanChieftain( Payload ) )
-						QueueChatCommand( Payload + " is in clan, rank Chieftain, with [" + UTIL_ToString( Access ) + "] access.", User, Whisper );
+						QueueChatCommand( Payload + " is in clan, rank Chieftain, with [" + UTIL_ToString( Access ) + "] access.", User, Whisper, Output );
 				}
 				else
 				{
 					if( !Ban )
-						QueueChatCommand( Payload + " is not a clan member and has [" + UTIL_ToString( Access ) + "] access.", User, Whisper );
+						QueueChatCommand( Payload + " is not a clan member and has [" + UTIL_ToString( Access ) + "] access.", User, Whisper, Output );
 					else
-						QueueChatCommand( Payload + " is banned from the channel, not a clan member and has [" + UTIL_ToString( Access ) + "] access.", User, Whisper );
+						QueueChatCommand( Payload + " is banned from the channel, not a clan member and has [" + UTIL_ToString( Access ) + "] access.", User, Whisper, Output );
 				}
 			}
 		
@@ -328,7 +332,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( SS.fail( ) || SS.eof( ) )
 				{						
-					QueueChatCommand( "Bad input - use form " + m_CommandTriggerStr + "setaccess <access 0-10> <name>", User, Whisper );
+					QueueChatCommand( "Bad input - use form " + m_CommandTriggerStr + "setaccess <access 0-10> <name>", User, Whisper, Output );
 				}
 				else
 				{
@@ -347,31 +351,31 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 					if( Match( User, UserName ) && NewAccess > Access )
 					{
-						QueueChatCommand( "Cannot raise your own access.", User, Whisper );
+						QueueChatCommand( "Cannot raise your own access.", User, Whisper, Output );
 						CanSetAccess = false;
 					}
 					if( NewAccess >= Access && !Match( UserName, User ) && NewAccess != 10 )
 					{
-						QueueChatCommand( "Cannot set access level higher or equal then your own.", User, Whisper );
+						QueueChatCommand( "Cannot set access level higher or equal then your own.", User, Whisper, Output );
 						CanSetAccess = false;
 					}
 					if( OldAccess > NewAccess && !Match( UserName, User ) && OldAccess >= Access )
 					{
 						CanSetAccess = false;
-						QueueChatCommand( "Cannot set access level higher or equal then your own.", User, Whisper );
+						QueueChatCommand( "Cannot set access level higher or equal then your own.", User, Whisper, Output );
 					}
 					if( OldAccess > Access && !Match( UserName, User )  )
 					{
 						CanSetAccess = false;
-						QueueChatCommand( "Cannot set access level higher or equal then your own.", User, Whisper );
+						QueueChatCommand( "Cannot set access level higher or equal then your own.", User, Whisper, Output );
 					}					
 					
 					if( CanSetAccess )
 					{
 						if( m_CCBot->m_DB->AccessSet( m_Server, UserName, NewAccess ) )
-							QueueChatCommand( "Added user [" + UserName + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper );
+							QueueChatCommand( "Added user [" + UserName + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper, Output );
 						else
-							QueueChatCommand( "Error adding user [" + UserName + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper );
+							QueueChatCommand( "Error adding user [" + UserName + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper, Output );
 					}
 				}					
 			}
@@ -383,9 +387,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( Command == "checkaccess" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "checkaccess" ) )
 			{
 				if( m_CCBot->m_DB->AccessCheck( m_Server, Payload ) != 11 )
-					QueueChatCommand( "User [" + Payload + "] has access of [" + UTIL_ToString( m_CCBot->m_DB->AccessCheck( m_Server, Payload ) ) + "]", User, Whisper );
+					QueueChatCommand( "User [" + Payload + "] has access of [" + UTIL_ToString( m_CCBot->m_DB->AccessCheck( m_Server, Payload ) ) + "]", User, Whisper, Output );
 				else
-					QueueChatCommand( "User [" + Payload + "] has access of [" + UTIL_ToString( 0 ) + "]", User, Whisper );
+					QueueChatCommand( "User [" + Payload + "] has access of [" + UTIL_ToString( 0 ) + "]", User, Whisper, Output );
 			}
 
 			//
@@ -403,11 +407,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 			
 				if( Count == 0 )
-					QueueChatCommand( "There are no users with access of [" + Payload + "]", User, Whisper );
+					QueueChatCommand( "There are no users with access of [" + Payload + "]", User, Whisper, Output );
 				else if( Count == 1 )
-					QueueChatCommand( "There is only one user with access of [" + Payload + "]", User, Whisper );
+					QueueChatCommand( "There is only one user with access of [" + Payload + "]", User, Whisper, Output );
 				else
-					QueueChatCommand( "There are [" + UTIL_ToString( Count ) + "] users with access [" + Payload + "]", User, Whisper );
+					QueueChatCommand( "There are [" + UTIL_ToString( Count ) + "] users with access [" + Payload + "]", User, Whisper, Output );
 			}
 
 			//
@@ -417,13 +421,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( Command == "delaccess" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "delaccess" ) )
 			{
 				if( !m_CCBot->m_DB->AccessCheck( m_Server, Payload ) )
-					QueueChatCommand( "User has no set access.", User, Whisper );
+					QueueChatCommand( "User has no set access.", User, Whisper, Output );
 				else
 				{
 					if( m_CCBot->m_DB->AccessRemove( Payload ) )
-						QueueChatCommand( "Deleted user [" + Payload + "]'s set access." , User, Whisper );
+						QueueChatCommand( "Deleted user [" + Payload + "]'s set access." , User, Whisper, Output );
 					else
-						QueueChatCommand( "Error deleting user [" + Payload + "]'s access.", User, Whisper );
+						QueueChatCommand( "Error deleting user [" + Payload + "]'s access.", User, Whisper, Output );
 				}					
 			}
 
@@ -435,9 +439,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			if( ( Command == "checksafelist" || Command == "checks" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "checksafelist" ) )
 			{
 				if( m_CCBot->m_DB->SafelistCheck( m_Server, Payload ) )
-					QueueChatCommand( m_CCBot->m_Language->UserIsSafelisted( Payload ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->UserIsSafelisted( Payload ), User, Whisper, Output );
 				else
-					QueueChatCommand( m_CCBot->m_Language->UserNotSafelisted( Payload ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->UserNotSafelisted( Payload ), User, Whisper, Output );
 			}
 				
 			//
@@ -457,9 +461,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 
 				if( Exists )
-					QueueChatCommand( "Access needed for the [" + Payload + "] command is [" + UTIL_ToString( m_CCBot->m_DB->CommandAccess( Payload ) ) + "]", User, Whisper );
+					QueueChatCommand( "Access needed for the [" + Payload + "] command is [" + UTIL_ToString( m_CCBot->m_DB->CommandAccess( Payload ) ) + "]", User, Whisper, Output );
 				else
-					QueueChatCommand( "Error checking access for [" + Payload + "] command, doesn't exist.", User, Whisper );
+					QueueChatCommand( "Error checking access for [" + Payload + "] command, doesn't exist.", User, Whisper, Output );
 			}
 
 			//
@@ -478,7 +482,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( SS.fail( ) || SS.eof( ) )
 				{				
-					QueueChatCommand( "Bad input - use form " + m_CommandTriggerStr + "setcommand <access 0-10> <command>", User, Whisper );
+					QueueChatCommand( "Bad input - use form " + m_CommandTriggerStr + "setcommand <access 0-10> <command>", User, Whisper, Output );
 				}
 				else
 				{
@@ -498,12 +502,12 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( Exists )
 					{
 						if( m_CCBot->m_DB->CommandSetAccess( command, NewAccess ) )
-							QueueChatCommand( "Updated [" + command + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper );
+							QueueChatCommand( "Updated [" + command + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper, Output );
 						else
-							QueueChatCommand( "Error updating access for [" + command + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper );
+							QueueChatCommand( "Error updating access for [" + command + "] with access of [" + UTIL_ToString( NewAccess ) + "]", User, Whisper, Output );
 					}
 					else
-						QueueChatCommand( "Unable to set access for [" + command + "] because it doesn't exist.", User, Whisper );
+						QueueChatCommand( "Unable to set access for [" + command + "] because it doesn't exist.", User, Whisper, Output );
 				}
 			}
 
@@ -517,7 +521,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				while( !m_ChatCommands.empty( ) )
 					m_ChatCommands.pop( );
 
-				QueueChatCommand( m_CCBot->m_Language->MessageQueueCleared( ), User, Whisper );
+				QueueChatCommand( m_CCBot->m_Language->MessageQueueCleared( ), User, Whisper, Output );
 			}
 
 			//
@@ -529,11 +533,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				uint32_t Count = m_CCBot->m_DB->BanCount( m_Server );
 
 				if( Count == 0 )
-					QueueChatCommand( "There are no banned users from the channel.", User, Whisper );
+					QueueChatCommand( "There are no banned users from the channel.", User, Whisper, Output );
 				else if( Count == 1 )
-					QueueChatCommand( "There is one banned user from the channel.", User, Whisper );
+					QueueChatCommand( "There is one banned user from the channel.", User, Whisper, Output );
 				else
-					QueueChatCommand( "There are " + UTIL_ToString( Count ) + " banned users from the channel.", User, Whisper );
+					QueueChatCommand( "There are " + UTIL_ToString( Count ) + " banned users from the channel.", User, Whisper, Output );
 			}					
 
 			//
@@ -546,20 +550,20 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				uint32_t Count = m_CCBot->m_DB->SafelistCount( m_Server );
 
 				if( Count == 0 )
-					QueueChatCommand( "There are no safelisted users.", User, Whisper );
+					QueueChatCommand( "There are no safelisted users.", User, Whisper, Output );
 				else if( Count == 1 )
-					QueueChatCommand( "There is one safelisted user.", User, Whisper );
+					QueueChatCommand( "There is one safelisted user.", User, Whisper, Output );
 				else
-					QueueChatCommand( "There are " + UTIL_ToString( Count ) + " users safelisted.", User, Whisper );
+					QueueChatCommand( "There are " + UTIL_ToString( Count ) + " users safelisted.", User, Whisper, Output );
 			}
 
 			//
 			// !CHANNEL
 			//
 
-			else if( Command == "channel" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "channel" ) )
+			else if( ( Command == "channel" || Command == "join" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "channel" ) )
 			{
-				QueueChatCommand( "/join " + Payload );
+				QueueChatCommand( "/join " + Payload, BNET );
 				m_CurrentChannel = Payload;
 			}
 
@@ -569,7 +573,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 			else if( Command == "rejoin" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "channel" ) )
 			{
-				QueueChatCommand( "/rejoin" );
+				QueueChatCommand( "/rejoin", BNET );
 			}
 
 			//
@@ -586,7 +590,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( tempText.length( ) >= 2 )
 					tempText = tempText.substr( 0, tempText.length( ) - 2 );
 
-				QueueChatCommand( "Users in channel [" + UTIL_ToString( m_Channel.size( ) ) + "]: " + tempText + ".", User, Whisper );			
+				QueueChatCommand( "Users in channel [" + UTIL_ToString( m_Channel.size( ) ) + "]: " + tempText + ".", User, Whisper, Output );			
 			}
 
 			//
@@ -615,41 +619,41 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					ClanList1 = Chieftains.substr( 0, 179 );
 					ClanList2 = Chieftains.substr( 179, 180 );
-					SendChatCommand( "/w " + User + " Chieftains: " + ClanList1 );
-					SendChatCommand( "/w " + User + " " + ClanList2 );				
+					SendChatCommand( "/w " + User + " Chieftains: " + ClanList1, Output );
+					SendChatCommand( "/w " + User + " " + ClanList2, Output );				
 				}
 				else if( Chieftains.size() >= 2 )
-					SendChatCommand( "/w " + User + " Chieftains: " + Chieftains.substr( 0, Chieftains.size( )-2 ) );
+					SendChatCommand( "/w " + User + " Chieftains: " + Chieftains.substr( 0, Chieftains.size( )-2 ), Output );
 
 				if( Shamans.size( ) > 179 )
 				{
 					ClanList1 = Shamans.substr( 0, 179 );
 					ClanList2 = Shamans.substr( 179, 180 );
-					SendChatCommand( "/w " + User + " Shamans: " + ClanList1 );
-					SendChatCommand( "/w " + User + " " + ClanList2 );				
+					SendChatCommand( "/w " + User + " Shamans: " + ClanList1, Output );
+					SendChatCommand( "/w " + User + " " + ClanList2, Output );				
 				}
 				else if( Shamans.size() >= 2 )
-					SendChatCommand( "/w " + User + " Shamans: " + Shamans.substr( 0, Shamans.size( )-2) );
+					SendChatCommand( "/w " + User + " Shamans: " + Shamans.substr( 0, Shamans.size( )-2), Output );
 
 				if( Grunts.size( ) > 179 )
 				{
 					ClanList1 = Grunts.substr( 0, 179 );
 					ClanList2 = Grunts.substr( 179, 180 );
-					SendChatCommand( "/w " + User + " Grunts: " + ClanList1 );
-					SendChatCommand( "/w " + User + " " + ClanList2 );				
+					SendChatCommand( "/w " + User + " Grunts: " + ClanList1, Output );
+					SendChatCommand( "/w " + User + " " + ClanList2, Output );				
 				}
 				else if( Grunts.size() >= 2 )
-					SendChatCommand( "/w " + User + " Grunts: " + Grunts.substr( 0, Grunts.size( )-2) );
+					SendChatCommand( "/w " + User + " Grunts: " + Grunts.substr( 0, Grunts.size( )-2), Output );
 
 				if( Peons.size( ) > 179 )
 				{
 					ClanList1 = Peons.substr( 0, 179 );
 					ClanList2 = Peons.substr( 179, 180 );
-					SendChatCommand( "/w " + User + " Peons: " + ClanList1 );
-					SendChatCommand( "/w " + User + " " + ClanList2 );
+					SendChatCommand( "/w " + User + " Peons: " + ClanList1, Output );
+					SendChatCommand( "/w " + User + " " + ClanList2, Output );
 				}
 				else if( Peons.size() >= 2 )
-					SendChatCommand( "/w " + User + " Peons: " + Peons.substr( 0, Peons.size( )-2) );
+					SendChatCommand( "/w " + User + " Peons: " + Peons.substr( 0, Peons.size( )-2), Output );
 			}
 
 			//
@@ -667,11 +671,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( m_CCBot->m_DB->BanRemove( m_Server, Victim ) )
 				{
-					QueueChatCommand( "[" + Victim + "] successfully unbanned from the channel by " + User + ".", User, Whisper );
-					QueueChatCommand( "/unban " + Victim );
+					QueueChatCommand( "[" + Victim + "] successfully unbanned from the channel by " + User + ".", User, Whisper, Output );
+					QueueChatCommand( "/unban " + Victim, BNET );
 				}
 				else
-					QueueChatCommand( "Error unbanning [" + Victim + "] from the channel.", User, Whisper );
+					QueueChatCommand( "Error unbanning [" + Victim + "] from the channel.", User, Whisper, Output );
 			}
 
 			//
@@ -682,13 +686,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( ( Command == "delsafelist" || Command == "dels" ) && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "delsafelist" ) )
 			{					
 				if( !m_CCBot->m_DB->SafelistCheck( m_Server, Payload ) )
-					QueueChatCommand( "User " + Payload + " is not safelisted.", User, Whisper );
+					QueueChatCommand( "User " + Payload + " is not safelisted.", User, Whisper, Output );
 				else
 				{
 					if( m_CCBot->m_DB->SafelistRemove( m_Server, Payload ) )
-						QueueChatCommand( "User " + Payload + " is deleted from safelist.", User, Whisper );
+						QueueChatCommand( "User " + Payload + " is deleted from safelist.", User, Whisper, Output );
 					else
-						QueueChatCommand( "Error deleting user " + Payload + " from the safelist.", User, Whisper );
+						QueueChatCommand( "Error deleting user " + Payload + " from the safelist.", User, Whisper, Output );
 				}
 			}
 
@@ -710,12 +714,12 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			{
 				if( Match( Payload, "on" ) )
 				{
-					QueueChatCommand( m_CCBot->m_Language->GameAnnouncerEnabled( ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->GameAnnouncerEnabled( ), User, Whisper, Output );
 					m_AnnounceGames = true;
 				}
 				else if( Match( Payload, "off" ) )
 				{
-					QueueChatCommand( m_CCBot->m_Language->GameAnnouncerDisabled( ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->GameAnnouncerDisabled( ), User, Whisper, Output );
 					m_AnnounceGames = false;
 				}
 			}				
@@ -727,8 +731,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( Command == "getclan" && Access >= m_CCBot->m_DB->CommandAccess( "getclan" ) && m_ClanCommandsEnabled )
 			{
 				SendGetClanList( );
-				QueueChatCommand( m_CCBot->m_Language->UpdatedClanList( ), User, Whisper );
-				QueueWhisperCommand( m_CCBot->m_Language->ReceivedClanMembers( UTIL_ToString( m_Clans.size( ) ) ), User );
+				QueueChatCommand( m_CCBot->m_Language->UpdatedClanList( ), User, Whisper, Output );
+				QueueWhisperCommand( m_CCBot->m_Language->ReceivedClanMembers( UTIL_ToString( m_Clans.size( ) ) ), User, Output );
 			}
 
 			//
@@ -743,7 +747,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					m_LastKnown = Payload;
 				}
 				else
-					QueueChatCommand( m_CCBot->m_Language->MustBeAClanMember( Payload ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->MustBeAClanMember( Payload ), User, Whisper, Output );
 			}	
 
 			//
@@ -754,12 +758,12 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			{	
 				if( Match( Payload, "off" ) )
 				{
-					QueueChatCommand( m_CCBot->m_Language->GreetingDisabled( ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->GreetingDisabled( ), User, Whisper, Output );
 					m_GreetUsers = false;
 				}
 				else if( Match( Payload, "on" ) )
 				{
-					QueueChatCommand( m_CCBot->m_Language->GreetingEnabled( ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->GreetingEnabled( ), User, Whisper, Output );
 					m_GreetUsers = true;
 				}
 			}	 				
@@ -774,10 +778,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					SendClanChangeRank( Payload, CBNETProtocol :: CLAN_MEMBER );
 					SendGetClanList( );
-					QueueChatCommand( m_CCBot->m_Language->ChangedRank( Payload, "Grunt" ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->ChangedRank( Payload, "Grunt" ), User, Whisper, Output );
 				}
 				else
-					QueueChatCommand( "Bot's account needs to be at least Shaman to perform this action.", User, Whisper );
+					QueueChatCommand( "Bot's account needs to be at least Shaman to perform this action.", User, Whisper, Output );
 			}			
 
 			//
@@ -806,13 +810,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 								Reason = Reason.substr( Start );
 					}
 						
-					ImmediateChatCommand( "/kick " + Victim + " " + Reason );
+					ImmediateChatCommand( "/kick " + Victim + " " + Reason, BNET );
 				
 				}
 				else if ( GetUserFromNamePartial( Victim ).size( ) == 0 )
-					QueueChatCommand( "Can kick only users in channel.", User, Whisper );
+					QueueChatCommand( "Can kick only users in channel.", User, Whisper, Output );
 				else
-					QueueChatCommand( "Clan shamans, chieftains and safelisted users cannot be kicked.", User, Whisper );
+					QueueChatCommand( "Clan shamans, chieftains and safelisted users cannot be kicked.", User, Whisper, Output );
 			}
 			
 			//
@@ -830,7 +834,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					SS >> m_AccessRequired;
 				}
 				m_Lockdown = true;
-				QueueChatCommand( m_CCBot->m_Language->LockdownEnabled( UTIL_ToString( m_AccessRequired ) ), User, Whisper );	
+				QueueChatCommand( m_CCBot->m_Language->LockdownEnabled( UTIL_ToString( m_AccessRequired ) ), User, Whisper, Output );	
 			}
 				
 			//
@@ -840,10 +844,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( Command == "lockdown" && Match( "off", Payload ) && m_Lockdown && Access >= m_CCBot->m_DB->CommandAccess( "lockdown" ) )
 			{
 				m_Lockdown = false;
-				QueueChatCommand( m_CCBot->m_Language->LockdownDisabled( ), User, Whisper );
+				QueueChatCommand( m_CCBot->m_Language->LockdownDisabled( ), User, Whisper, Output );
 
 				for( vector<string> :: iterator i = LockdownNames.begin( ); i != LockdownNames.end( ); ++i )
-					ImmediateChatCommand( "/unban " + *i );
+					ImmediateChatCommand( "/unban " + *i, BNET );
 
 				LockdownNames.clear( );
 			}
@@ -855,7 +859,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( Command == "motd" && Access >= m_CCBot->m_DB->CommandAccess( "motd" ) && m_ClanCommandsEnabled )
 			{					
 				m_Socket->PutBytes( m_Protocol->SEND_SID_CLANSETMOTD( Payload ) );
-				QueueChatCommand( m_CCBot->m_Language->SetMOTD( Payload ), User, Whisper );
+				QueueChatCommand( m_CCBot->m_Language->SetMOTD( Payload ), User, Whisper, Output );
 			}
 				
 			//
@@ -867,10 +871,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( IsClanShaman( m_UserName ) || IsClanChieftain( m_UserName ) )
 				{
 					SendClanChangeRank( Payload, CBNETProtocol :: CLAN_PARTIAL_MEMBER );
-					QueueChatCommand( m_CCBot->m_Language->ChangedRank( Payload, "Peon" ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->ChangedRank( Payload, "Peon" ), User, Whisper, Output );
 				}
 				else
-					QueueChatCommand( "Bot's account needs to be at least Shaman to perform this action.", User, Whisper );
+					QueueChatCommand( "Bot's account needs to be at least Shaman to perform this action.", User, Whisper, Output );
 			}				
 				
 			//
@@ -886,7 +890,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					m_UsedRemove = User;
 				}
 				else
-					QueueChatCommand( "Removing Chieftains and Shamans is prohibited.", User, Whisper );
+					QueueChatCommand( "Removing Chieftains and Shamans is prohibited.", User, Whisper, Output );
 			}
 
 			//
@@ -898,7 +902,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				SendGetClanList( );
 				m_CCBot->UpdateSwearList( );					
 				m_CCBot->ReloadConfigs( );
-				QueueChatCommand( m_CCBot->m_Language->CFGReloaded( ), User, Whisper );
+				QueueChatCommand( m_CCBot->m_Language->CFGReloaded( ), User, Whisper, Output );
 			}
 
 			//
@@ -908,11 +912,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( Command == "say" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "say" ) )
 			{
 				if( Access > 8 )
-					QueueChatCommand( Payload );
+					QueueChatCommand( Payload, BNET );
 				else if( Payload[0] != '/' )
-					QueueChatCommand( Payload );
+					QueueChatCommand( Payload, BNET );
 				else
-					QueueChatCommand( m_CCBot->m_Language->NotAllowedUsingSay( ), User, Whisper );					
+					QueueChatCommand( m_CCBot->m_Language->NotAllowedUsingSay( ), User, Whisper, Output );					
 			}
 
 			//
@@ -930,21 +934,21 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( m_CCBot->GetServerFromNamePartial( server ).size( ) > 0 )
 						server = m_CCBot->GetServerFromNamePartial( server );
 					else
-						QueueChatCommand( m_CCBot->m_Language->UnableToPartiallyMatchServer( ) );
+						QueueChatCommand( m_CCBot->m_Language->UnableToPartiallyMatchServer( ), Output );
 	
 					for( vector<CBNET *> :: iterator i = m_CCBot->m_BNETs.begin( ); i != m_CCBot->m_BNETs.end( ); ++i )
 					{
 						if( Access > 8 && Match( (*i)->GetServer( ), server ) )
 						{
-							(*i)->QueueChatCommand( command );
+							(*i)->QueueChatCommand( command, BNET );
 						}
 						else if( command[0] != '/' && Match( (*i)->GetServer( ), server ) )
 						{
-							(*i)->QueueChatCommand( command );
+							(*i)->QueueChatCommand( command, BNET );
 						}
 						else if( (*i)->GetServer( ) == m_Server && Payload[0] == '/' )
 						{
-							QueueChatCommand( m_CCBot->m_Language->NotAllowedUsingSay( ), User, Whisper );
+							QueueChatCommand( m_CCBot->m_Language->NotAllowedUsingSay( ), User, Whisper, Output );
 						}
 					}
 				}
@@ -960,15 +964,15 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					if( Access > 8 )
 					{
-						(*i)->QueueChatCommand( Payload );
+						(*i)->QueueChatCommand( Payload, BNET );
 					}
 					else if( Payload[0] != '/' )
 					{
-						(*i)->QueueChatCommand( Payload );
+						(*i)->QueueChatCommand( Payload, BNET );
 					}
 					else if( (*i)->GetServer( ) == m_Server )
 					{
-						QueueChatCommand( m_CCBot->m_Language->NotAllowedUsingSay( ), User, Whisper );
+						QueueChatCommand( m_CCBot->m_Language->NotAllowedUsingSay( ), User, Whisper, Output );
 					}
 				}
 			}
@@ -982,10 +986,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( IsClanChieftain( m_UserName ) )
 				{
 					SendClanChangeRank( Payload, CBNETProtocol :: CLAN_OFFICER );
-					QueueChatCommand( m_CCBot->m_Language->ChangedRank( Payload, "Shaman" ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->ChangedRank( Payload, "Shaman" ), User, Whisper, Output );
 				}
 				else
-					QueueChatCommand( "Bot's account needs to be Chieftain to perform this action.", User, Whisper );
+					QueueChatCommand( "Bot's account needs to be Chieftain to perform this action.", User, Whisper, Output );
 			}
 
 			//
@@ -997,13 +1001,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			{
 				if( !IsAlreadySquelched( Payload ) )
 				{
-					QueueChatCommand( "/ignore " + Payload );
-					QueueChatCommand( "Ignoring user " + Payload + ".", User, Whisper );
+					QueueChatCommand( "/ignore " + Payload, BNET );
+					QueueChatCommand( "Ignoring user " + Payload + ".", User, Whisper, Output );
 					transform( Payload.begin( ), Payload.end( ), Payload.begin( ), (int(*)(int))tolower );
 					SquelchedUsers.push_back( string ( Payload ) );
 				}
 				else
-					QueueChatCommand( "User [" + Payload + "] is already ignored.", User, Whisper );						
+					QueueChatCommand( "User [" + Payload + "] is already ignored.", User, Whisper, Output );						
 			}
 
 			//
@@ -1021,9 +1025,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 
 				if ( tempText.size( ) == 0 || SquelchedUsers.size( ) == 0 )
-					QueueChatCommand( "There are no squelched users." , User, Whisper );
+					QueueChatCommand( "There are no squelched users." , User, Whisper, Output );
 				else if( tempText.size( ) >= 2 )
-					QueueChatCommand( "Squelched users: " + tempText.substr( 0, tempText.size( )-2 ) + ".", User, Whisper );
+					QueueChatCommand( "Squelched users: " + tempText.substr( 0, tempText.size( )-2 ) + ".", User, Whisper, Output );
 			}
 
 			//
@@ -1032,8 +1036,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 			else if( Command == "topic" && Access >= m_CCBot->m_DB->CommandAccess( "topic" ) )
 			{					
-				QueueChatCommand( "/topic " + m_CurrentChannel + " \"" + Payload + "\"" );
-				QueueChatCommand( m_CCBot->m_Language->SetTopic( Payload ), User, Whisper );
+				QueueChatCommand( "/topic " + m_CurrentChannel + " \"" + Payload + "\"", BNET );
+				QueueChatCommand( m_CCBot->m_Language->SetTopic( Payload ), User, Whisper, Output );
 			}
 				
 			//
@@ -1045,16 +1049,16 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			{
 				if( IsAlreadySquelched( Payload ) )
 				{
-					QueueChatCommand( "/unignore " + Payload );						
+					QueueChatCommand( "/unignore " + Payload, BNET );						
 					for( vector<string> :: iterator i = SquelchedUsers.begin( ); i != SquelchedUsers.end( ); ++i )
 					{
 						if( Match( (*i), Payload ) )						
 							(*i) = "";						
 					}
-					QueueChatCommand( "Unignoring user " + Payload + ".", User, Whisper );
+					QueueChatCommand( "Unignoring user " + Payload + ".", User, Whisper, Output );
 				}
 				else
-					QueueChatCommand( "User " + Payload + " is not ignored.", User, Whisper );
+					QueueChatCommand( "User " + Payload + " is not ignored.", User, Whisper, Output );
 			}
 
 			//
@@ -1085,7 +1089,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					date += UTIL_ToString( minutes ) + "m ";
 				}
 				date += UTIL_ToString( time ) + "s";
-					QueueChatCommand( m_CCBot->m_Language->Uptime( m_UserName, date ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->Uptime( m_UserName, date ), User, Whisper, Output );
 			}
 					
 			//
@@ -1101,14 +1105,14 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( Ban )
 				{	
 					if( Ban->GetReason( ).empty( ) )
-						QueueChatCommand( "User [" + Payload + "] was banned on " + Ban->GetDate( ) + " by " + Ban->GetAdmin( ) + ".", User, Whisper );
+						QueueChatCommand( "User [" + Payload + "] was banned on " + Ban->GetDate( ) + " by " + Ban->GetAdmin( ) + ".", User, Whisper, Output );
 					else
-						QueueChatCommand( "User [" + Payload + "] was banned on " + Ban->GetDate( ) + " because \"" + Ban->GetReason( ) + "\" by " + Ban->GetAdmin( ) + ".", User, Whisper );
+						QueueChatCommand( "User [" + Payload + "] was banned on " + Ban->GetDate( ) + " because \"" + Ban->GetReason( ) + "\" by " + Ban->GetAdmin( ) + ".", User, Whisper, Output );
 					delete Ban;
 					Ban = NULL;
 				}
 				else
-					QueueChatCommand( "User [" + Payload + "] is not banned.", User, Whisper );
+					QueueChatCommand( "User [" + Payload + "] is not banned.", User, Whisper, Output );
 			}
 
 			//
@@ -1116,7 +1120,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			//
 				
 			else if( Command == "gn8" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "gn8" ) )
-				QueueChatCommand( m_CCBot->m_Language->GN8( User ) ); 
+				QueueChatCommand( m_CCBot->m_Language->GN8( User ), BNET ); 
 
 			//
 			// !INVITE
@@ -1131,13 +1135,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						m_LastKnown = GetUserFromNamePartial( Payload );
 				
 						m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATION( Payload ) );							
-						QueueChatCommand( "Clan invitation was sent.", User, Whisper );
+						QueueChatCommand( "Clan invitation was sent.", User, Whisper, Output );
 					}
 					else
-				   		QueueChatCommand( "Bot needs to have at least a Shaman rank to invite.", User, Whisper );
+				   		QueueChatCommand( "Bot needs to have at least a Shaman rank to invite.", User, Whisper, Output );
 				}
 				else
-					QueueChatCommand( "You can't invite people already in clan!", User, Whisper );                                      	
+					QueueChatCommand( "You can't invite people already in clan!", User, Whisper, Output );                                      	
 			}						
 				
 			//
@@ -1159,7 +1163,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					}
 				}
 				else
-					QueueChatCommand( m_CCBot->m_Language->CommandDisabled( ), User, Whisper ); 	
+					QueueChatCommand( m_CCBot->m_Language->CommandDisabled( ), User, Whisper, Output ); 	
 			}
 
 			//
@@ -1181,19 +1185,19 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 
 				if( OnlineNumber == 0 )
-					SendChatCommand( "/w " + User + " " + "There are no " + m_ClanTag + " members online." );
+					SendChatCommand( "/w " + User + " " + "There are no " + m_ClanTag + " members online.", Output );
 				else if( Online.size( ) < 3 )
 				{
-					SendChatCommand( "/w " + User + " " + m_ClanTag + " members online [" + UTIL_ToString(OnlineNumber) + "]: " + Online.substr(0,3) );
+					SendChatCommand( "/w " + User + " " + m_ClanTag + " members online [" + UTIL_ToString(OnlineNumber) + "]: " + Online.substr(0,3), Output );
 				}
 				else
 				{					
 					if( Online.size( ) < 156 ) 
-						SendChatCommand( "/w " + User + " " + m_ClanTag + " members online [" + UTIL_ToString(OnlineNumber) + "]: " + Online.substr(0,Online.size( )-2) );
+						SendChatCommand( "/w " + User + " " + m_ClanTag + " members online [" + UTIL_ToString(OnlineNumber) + "]: " + Online.substr(0,Online.size( )-2), Output );
 					else
 					{
-						SendChatCommand( "/w " + User + " " + m_ClanTag + " members online [" + UTIL_ToString(OnlineNumber) + "]: " + Online.substr(0,155) );
-						SendChatCommand( "/w " + User + " " + Online.substr(155,Online.size( )-157) );
+						SendChatCommand( "/w " + User + " " + m_ClanTag + " members online [" + UTIL_ToString(OnlineNumber) + "]: " + Online.substr(0,155), Output );
+						SendChatCommand( "/w " + User + " " + Online.substr(155,Online.size( )-157), Output );
 					}
 				}
 			}
@@ -1215,19 +1219,19 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				switch( Random )
 				{
-					case 0: QueueChatCommand( User + " slaps " + Payload + " around a bit with a large trout." );
+					case 0: QueueChatCommand( User + " slaps " + Payload + " around a bit with a large trout.", BNET );
 						break;
 
-					case 1: QueueChatCommand( User + " slaps " + Payload + " around a bit with a pink Macintosh." );
+					case 1: QueueChatCommand( User + " slaps " + Payload + " around a bit with a pink Macintosh.", BNET );
 						break;
 
-					case 2: QueueChatCommand( User + " throws a Playstation 3 at " + Payload + "." );
+					case 2: QueueChatCommand( User + " throws a Playstation 3 at " + Payload + ".", BNET );
 						break;
 
-					case 3: QueueChatCommand( User + " drives a car over " + Payload + "." );
+					case 3: QueueChatCommand( User + " drives a car over " + Payload + ".", BNET );
 						break;
 
-					case 4: QueueChatCommand( User + " finds " + Payload + " on uglypeople.com." );
+					case 4: QueueChatCommand( User + " finds " + Payload + " on uglypeople.com.", BNET );
 						break;
 
 					case 5: Random = rand( );
@@ -1235,7 +1239,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						stringstream out;
 						out << Random;
 						s = out.str();
-						QueueChatCommand( User + " searches google.com for \"goatsex + " + Payload + "\". " + s + " hits WEEE!" );	
+						QueueChatCommand( User + " searches google.com for \"goatsex + " + Payload + "\". " + s + " hits WEEE!", BNET );	
 						break; 
 				}
 			}
@@ -1254,22 +1258,22 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				switch( Random )
 				{
-					case 0: QueueChatCommand( User + " spits " + Payload + " but misses completely!" );
+					case 0: QueueChatCommand( User + " spits " + Payload + " but misses completely!", BNET );
 						break;
 
-					case 1: QueueChatCommand( User + " spits " + Payload + " and hits him in the eye!" );
+					case 1: QueueChatCommand( User + " spits " + Payload + " and hits him in the eye!", BNET );
 						break;
 
-					case 2: QueueChatCommand( User + " spits " + Payload + " and hits him in his mouth!" );
+					case 2: QueueChatCommand( User + " spits " + Payload + " and hits him in his mouth!", BNET );
 						break;
 
-					case 3: QueueChatCommand( User + " spits " + Payload + " and nails it into his ear!" );
+					case 3: QueueChatCommand( User + " spits " + Payload + " and nails it into his ear!", BNET );
 						break;
 
-					case 4: QueueChatCommand( User + " spits " + Payload + " but he accidentaly hits himself!" );
+					case 4: QueueChatCommand( User + " spits " + Payload + " but he accidentaly hits himself!", BNET );
 						break;
 
-					case 5: QueueChatCommand( Payload + " counterspits " + User + ". Lame." );
+					case 5: QueueChatCommand( Payload + " counterspits " + User + ". Lame.", BNET );
 						break;
 				}
 			}
@@ -1299,9 +1303,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					Victim = GetUserFromNamePartial( Victim );
 
 				if ( Object == "shit" && !IsRootAdmin( User ) )				
-					  QueueChatCommand( "/kick " + User + " Abusing the power of the Shit." );				
+					  QueueChatCommand( "/kick " + User + " Abusing the power of the Shit.", BNET );				
 				else
-					  QueueChatCommand( User + " serves " + Victim + " a " + Object + "." );				 
+					  QueueChatCommand( User + " serves " + Victim + " a " + Object + ".", BNET );				 
 			}
 
 			//
@@ -1320,7 +1324,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 						message += (*i)->GetUserName( ) + " [Offline], ";
 				}
 
-				QueueChatCommand( message.substr( 0, message.size( ) - 2 ) + ".", User, Whisper );						 
+				QueueChatCommand( message.substr( 0, message.size( ) - 2 ) + ".", User, Whisper, Output );						 
 			}				
 
 			//
@@ -1328,7 +1332,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			//
 
 			else if( Command == "version" && Payload.empty( ) )					
-					QueueChatCommand( m_CCBot->m_Language->Version( m_CCBot->m_Version ), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->Version( m_CCBot->m_Version ), User, Whisper, Output );
 
 			//
 			// !PING
@@ -1344,10 +1348,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				CChannel *Result = GetUserByName( Payload );
 
 				if( Result )
-					QueueChatCommand( m_CCBot->m_Language->Ping( Payload, UTIL_ToString( Result->GetPing( ) ) , m_ServerAlias), User, Whisper );
+					QueueChatCommand( m_CCBot->m_Language->Ping( Payload, UTIL_ToString( Result->GetPing( ) ) , m_ServerAlias), User, Whisper, Output );
 				else
-					QueueChatCommand( m_CCBot->m_Language->CannotAccessPing( ), User, Whisper );
-			}
+					QueueChatCommand( m_CCBot->m_Language->CannotAccessPing( ), User, Whisper, Output );
+			}	
 				
 			//
 			// !RESTART
@@ -1364,7 +1368,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	{
 		CONSOLE_Print( "[INFO: " + m_ServerAlias + "] " + Message );
 
-		if( m_AnnounceGames )		
+		if( m_AnnounceGames && m_Channel.size( ) > 1 )		
 		{
 			if( Message.find("private game") != string::npos || Message.find("in  game") != string::npos )
 			{
@@ -1373,7 +1377,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( !Match( user, m_HostbotName ) )
 				{			
 					Message = Message.substr( Message.find_first_of("\"") + 1, Message.find_last_of("\"") - Message.find_first_of("\"") - 1 );				
-					QueueChatCommand( m_CCBot->m_Language->AnnounceGame( user, Message ) );
+					QueueChatCommand( m_CCBot->m_Language->AnnounceGame( user, Message ), BNET );
 				}
 			}			
 		}							
@@ -1392,7 +1396,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			if( !Ban->GetReason( ).empty( ) )
 				Info += ": " + Ban->GetReason( );
 			Info += " on " + Ban->GetDate( );
-			SendChatCommand( "/ban " + User + " " + Info );
+			SendChatCommand( "/ban " + User + " " + Info, BNET );
 
 			delete Ban;
 			Ban = NULL;
@@ -1407,7 +1411,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( m_AccessRequired > Access && !Match( User, m_HostbotName ) )
 				{
 					CanJoinChannel = false;
-					SendChatCommand( "/ban " + User + " Lockdown: only users with " + UTIL_ToString( m_AccessRequired ) + "+ access can join" );
+					SendChatCommand( "/ban " + User + " Lockdown: only users with " + UTIL_ToString( m_AccessRequired ) + "+ access can join", BNET );
 
 					if( !IsInLockdownNames( User ) )
 						LockdownNames.push_back( User );					
@@ -1421,9 +1425,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				string Line2 = m_CCBot->m_Language->WelcomeMessageLine2( m_FirstChannel, User );
 
 				if( Line1.size( ) > 1 )
-					ImmediateChatCommand( Line1 );
+					ImmediateChatCommand( Line1, BNET );
 				if( Line2.size( ) > 1 )
-					QueueChatCommand( Line2 );				
+					QueueChatCommand( Line2, BNET );				
 			}
 
 			if ( CanJoinChannel )
@@ -1441,7 +1445,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 				else if( m_BanChat && Message == "TAHC" && !m_CCBot->m_DB->SafelistCheck( m_Server, User ) )
 				{
-					ImmediateChatCommand( "/kick " + User + " Chat clients are forbidden to enter the channel" );
+					ImmediateChatCommand( "/kick " + User + " Chat clients are forbidden to enter the channel", BNET );
 				}
 
 				m_Channel[lowerUser] = user;
@@ -1452,21 +1456,23 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					CONSOLE_Print( "[ACCESS: " + m_ServerAlias + "] Setting [" + User + "] access to clan default of " + UTIL_ToString( m_ClanDefaultAccess ) ); 
 				}
 
-				CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + ":" + m_CurrentChannel + "] user [" + User + "] joined the channel." );													
+				CONSOLE_ChannelWindowChanged( );
+				CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + ":" + m_CurrentChannel + "] user [" + User + "] joined the channel." );		
 			}			
 		}		
 	}
 
 	else if( Event == CBNETProtocol :: EID_LEAVE )
 	{
-		CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + ":" + m_CurrentChannel + "] user [" + User + "] left the channel." );
-
 		if ( m_AnnounceGames && !Match( m_HostbotName, User ) )
-			SendChatCommandHidden( "/whereis " + User );
+			SendChatCommandHidden( "/whereis " + User, BNET );
 
 		for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )		
 			if( (*i).first == lowerUser )
-				m_Channel.erase( i );			
+				m_Channel.erase( i );
+
+		CONSOLE_ChannelWindowChanged( );
+		CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + ":" + m_CurrentChannel + "] user [" + User + "] left the channel." );
 	}
 
 	else if( Event == CBNETProtocol :: EID_ERROR )
@@ -1475,19 +1481,21 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		
 		if( Message == "You are banned from that channel." )
 			m_RejoinInterval = 300;
+		else if( Message == "Your message quota has been exceeded!" )
+			m_Delay = m_Delay + 1800;
 	}
 
 	else if( Event == CBNETProtocol :: EID_CHANNEL )
 	{
+		CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + "] Joining channel [" + Message + "]" );
+
 		if( !Match( Message, m_CurrentChannel ) )
 			m_Rejoin = true;
 		else
-		{
-			m_Rejoin = false;
-			m_RejoinInterval = 15;
-		}
+			m_Rejoin = false;	
 
 		m_Channel.clear( );
+		CONSOLE_ChannelWindowChanged( );		
 	}
 
 	else if( Event == CBNETProtocol :: EID_SHOWUSER )
@@ -1505,9 +1513,12 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		}
 		else if( m_BanChat && Message == "TAHC" && !m_CCBot->m_DB->SafelistCheck( m_Server, User ) )
 		{
-			ImmediateChatCommand( "/kick " + User + " Chat clients are banned from channel" );
+			ImmediateChatCommand( "/kick " + User + " Chat clients are banned from channel", BNET );
 		}
 
 		m_Channel[lowerUser] = user;
+		CONSOLE_ChannelWindowChanged( );
 	}
+	
+	CONSOLE_MainWindowChanged( );
 }

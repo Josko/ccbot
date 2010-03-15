@@ -22,6 +22,10 @@
 #ifndef BNET_H
 #define BNET_H
 
+#define BNET	0
+#define CONSOLE	1
+#define IRC	2
+
 #include "bnetprotocol.h"
 
 //
@@ -51,7 +55,7 @@ private:
 	vector<string> m_Admins;					// vector of cached admins
 	vector<string> LockdownNames;					// vector of tempbanned users whom will be unbanned later
 	vector<string> SquelchedUsers;					// vector of squelched users, lowercase names
-	map<string, CChannel *> m_Channel;				// map of users in channel
+	multimap<string, string> m_SpamCache;				// cache used to store ( loweruser, lowermessage ) for detecting spam
 	bool m_Exiting;							// set to true and this class will be deleted next update
 	string m_Server;						// battle.net server to connect to
 	string m_ServerAlias;						// alias to the connected battle.net
@@ -66,12 +70,18 @@ private:
 	string m_ClanRank;						// clan rank of bot's user
 	string m_CurrentChannel;					// the current chat channel
 	string m_RootAdmin;						// the root admin
+	string m_HostbotName;						// hostbot's name if present
+	string m_AnnounceMsg;						// text printed on X interval by the announce command
 	char m_CommandTrigger;						// the character prefix to identify commands
 	string m_CommandTriggerStr;					// the character prefix to identify commands
 	unsigned char m_War3Version;					// custom warcraft 3 version for PvPGN users
 	BYTEARRAY m_EXEVersion;						// custom exe version for PvPGN users
 	BYTEARRAY m_EXEVersionHash;					// custom exe version hash for PvPGN users
 	string m_PasswordHashType;					// password hash type for PvPGN users
+	int m_AnnounceInterval;						// interval of two consecutive announce messages
+	uint32_t m_AccessRequired;					// access required to join the channel when lockdown is on
+	uint32_t m_Delay;						// delay of the next QueueChatCommand based on the length of the past one		
+	uint32_t m_ClanDefaultAccess;					// default access a clan members has
 	uint32_t m_MaxMessageLength;					// maximum message length for PvPGN users
 	uint32_t m_NextConnectTime;					// GetTime when we should try connecting to battle.net next (after we get disconnected)
 	uint32_t m_LastNullTime;					// GetTime when the last null packet was sent for detecting disconnects
@@ -101,22 +111,15 @@ private:
 	bool m_SwearingKick;						// set to true and every message containing swears (contained in swears.cfg) will get the user kicked
 	bool m_SelfJoin;						// set to true and !join command will be enabled
 	bool m_GreetUsers;						// greet users on join
-	string m_ClanTag;						// clan tag
-	uint32_t m_AccessRequired;					// access required to join the channel when lockdown is on
-	uint32_t m_Delay;						// delay of the next QueueChatCommand based on the length of the past one	
-	string m_AnnounceMsg;						// text printed on X interval by the announce command
-	int m_AnnounceInterval;						// interval of two consecutive announce messages
-	
-	uint32_t m_ClanDefaultAccess;					// default access a clan members has
-	string m_HostbotName;						// hostbot's name if present
-	multimap<string, string> m_SpamCache;				// cache used to store ( loweruser, lowermessage ) for detecting spam
-	
+	string m_ClanTag;						// clan tag	
 
 public:
 	CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotname, bool nAntiSPam );
 	~CBNET( );
 
 	vector<CIncomingClanList *> m_Clans;		// vector of clan members
+	map<string, CChannel *> m_Channel;		// map of users in channel
+
 	bool GetExiting( )				{ return m_Exiting; }
 	string GetServer( )				{ return m_Server; }
 	string GetCDKeyROC( )				{ return m_CDKeyROC; }
@@ -148,18 +151,18 @@ public:
 
 	void SendEnterChat( );
 	void SendJoinChannel( string channel );
-	void SendChatCommand( string chatCommand );
-	void SendChatCommandHidden( string chatCommand );
+	void SendChatCommand( string chatCommand, int destination );
+	void SendChatCommandHidden( string chatCommand, int destination );
 	void SendGetClanList( );
 	void SendClanChangeRank( string accountName, CBNETProtocol::RankCode rank );
 	
 	// other functions
 
-	void QueueChatCommand( string chatCommand );
-	void QueueChatCommand( string chatCommand, string user, bool whisper );
-	void QueueWhisperCommand( string chatCommand, string user );
-	void ImmediateChatCommand( string chatCommand );
-	void ImmediateChatCommand( string chatCommand, string user, bool whisper );
+	void QueueChatCommand( string chatCommand, int destination );
+	void QueueChatCommand( string chatCommand, string user, bool whisper, int destination );
+	void QueueWhisperCommand( string chatCommand, string user, int destination );
+	void ImmediateChatCommand( string chatCommand, int destination );
+	void ImmediateChatCommand( string chatCommand, string user, bool whisper, int destination );
 	bool IsRootAdmin( string name );
 	bool IsAlreadySquelched( string name );
 	bool IsInChannel( string name );

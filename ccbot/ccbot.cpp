@@ -35,15 +35,28 @@
 #include <string.h>
 
 #ifdef WIN32
- #include "pthread.h"
  #include <process.h>
+ #include "curses.h"
 #else
  #include <sys/time.h>
+ #include <curses.h>
 #endif
 
 #ifdef __APPLE__
  #include <mach/mach_time.h>
 #endif
+
+bool gCurses = false;
+vector<string> gMainBuffer;
+string gInputBuffer;
+WINDOW *gMainWindow = NULL;
+WINDOW *gBottomBorder = NULL;
+WINDOW *gRightBorder = NULL;
+WINDOW *gInputWindow = NULL;
+WINDOW *gChannelWindow = NULL;
+bool gMainWindowChanged = false;
+bool gInputWindowChanged = false;
+bool gChannelWindowChanged = false;
 
 string gLogFile;
 CCCBot *gCCBot = NULL;
@@ -85,7 +98,7 @@ void SignalCatcher( int signal )
 	CONSOLE_Print( "[!!!] caught signal, shutting down" );
 
 	if( gCCBot )
-	{
+	{		
 		if( gCCBot->m_Exiting )
 			exit( 1 );
 		else
@@ -95,22 +108,181 @@ void SignalCatcher( int signal )
 		exit( 1 );
 }
 
+void CONSOLE_ChannelWindowChanged( )
+{
+	gChannelWindowChanged = true;
+}
+
+void CONSOLE_MainWindowChanged( )
+{
+	gMainWindowChanged = true;
+}
+
+void LOG_Print( string message )
+{
+	time_t Now;
+        time( &Now );
+        char datestr[100];
+        strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
+        char str[80];
+	char timestr[100];
+        strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
+
+        if( !gLogFile.empty( ) )
+        {
+                ofstream Log;
+                
+#ifdef WIN32
+                strcpy(str, "logs\\");
+#else
+                strcpy(str, "logs/");
+#endif
+
+                strcat(str, datestr);
+                strcat(str, ".log");
+                Log.open(str, ios :: app );
+
+                if( !Log.fail( ) )
+                {
+                        Log << "[" << timestr << "] " << message << endl;
+                        Log.close( );
+                }
+        }
+}
+
+void CONSOLE_Draw( )
+{
+	if( !gCurses )
+		return;
+
+	// draw main window
+
+	if( gMainWindowChanged )
+	{
+		wclear( gMainWindow );
+		wmove( gMainWindow, 0, 0 );
+
+		for( vector<string> :: iterator i = gMainBuffer.begin( ); i != gMainBuffer.end( ); i++ )
+		{
+			for( string :: iterator j = (*i).begin( ); j != (*i).end( ); j++ )
+				waddch( gMainWindow, *j );
+
+			if( i != gMainBuffer.end( ) - 1 )
+				waddch( gMainWindow, '\n' );
+		}
+
+		wrefresh( gMainWindow );
+		gMainWindowChanged = false;
+	}
+
+	// draw input window
+
+	if( gInputWindowChanged )
+	{
+		wclear( gInputWindow );
+		wmove( gInputWindow, 0, 0 );
+
+		for( string :: iterator i = gInputBuffer.begin( ); i != gInputBuffer.end( ); i++ )
+			waddch( gInputWindow, *i );
+
+		wrefresh( gInputWindow );
+		gInputWindowChanged = false;
+	}
+
+	// draw channel window
+
+	if( gChannelWindowChanged )
+	{
+		wclear( gChannelWindow );
+		mvwaddnstr( gChannelWindow, 0, gCCBot->m_BNETs[0]->GetCurrentChannel( ).size( ) < 16 ? ( 16 - gCCBot->m_BNETs[0]->GetCurrentChannel( ).size( ) ) / 2 : 0, gCCBot->m_BNETs[0]->GetCurrentChannel( ).c_str( ), 16 );
+		mvwhline( gChannelWindow, 1, 0, 0, 16 );
+		int y = 2;
+
+		// for( vector<string> :: iterator i = gChannelUsers.begin( ); i != gChannelUsers.end( ); i++ )
+		
+		for( map<string, CChannel *> :: iterator i = gCCBot->m_BNETs[0]->m_Channel.begin( ); i != gCCBot->m_BNETs[0]->m_Channel.end( ); ++i )
+		{
+			mvwaddnstr( gChannelWindow, y, 0, (*i).second->GetUser( ).c_str( ), 16 );
+			y++;
+
+			if( y >= LINES - 3 )
+				break;
+		}
+
+		wrefresh( gChannelWindow );
+		gChannelWindowChanged = false;
+	}
+}
+
+void CONSOLE_PrintNoCRLF( string message, bool log )
+{
+	gMainBuffer.push_back( message );
+
+	if( gMainBuffer.size( ) > 100 )
+		gMainBuffer.erase( gMainBuffer.begin( ) );
+
+	gMainWindowChanged = true;
+	CONSOLE_Draw( );
+
+	if( log )
+		LOG_Print( message );
+
+	if( !gCurses )
+		cout << message;
+}
+
+void CONSOLE_Print( string message )
+{
+	CONSOLE_PrintNoCRLF( message );
+
+	if( !gCurses )
+		cout << endl;
+}
+
+void DEBUG_Print( string message )
+{
+	CONSOLE_PrintNoCRLF( message, false );
+
+	if( !gCurses )
+		cout << endl;
+}
+
+void CONSOLE_Resize( )
+{
+	if( !gCurses )
+		return;
+
+	wresize( gMainWindow, LINES - 3, COLS - 17 );
+	wresize( gBottomBorder, 1, COLS );
+	wresize( gRightBorder, LINES - 3, 1 );
+	wresize( gInputWindow, 2, COLS );
+	wresize( gChannelWindow, LINES - 3, 16 );
+	// mvwin( gMainWindow, 0, 0 );
+	mvwin( gBottomBorder, LINES - 3, 0 );
+	mvwin( gRightBorder, 0, COLS - 17 );
+	mvwin( gInputWindow, LINES - 2, 0 );
+	mvwin( gChannelWindow, 0, COLS - 16 );
+	mvwhline( gBottomBorder, 0, 0, 0, COLS );
+	mvwvline( gRightBorder, 0, 0, 0, LINES );
+	wrefresh( gBottomBorder );
+	wrefresh( gRightBorder );
+	gMainWindowChanged = true;
+	gInputWindowChanged = true;
+	gChannelWindowChanged = true;
+	CONSOLE_Draw( );
+}
+
 //
 // main
 //
 
 int main( )
 {
-
 	// read config file
 
 	CConfig CFG;
 	CFG.Read( CFGFile );
-	gLogFile = CFG.GetString( "bot_log", string( ) );
-
-	// print something for logging purposes
-
-	CONSOLE_Print( "[CCBOT] starting up" );
+	gLogFile = CFG.GetString( "bot_log", string( ) );	
 
 	// catch SIGABRT and SIGINT
 
@@ -123,9 +295,34 @@ int main( )
 	signal( SIGPIPE, SIG_IGN );
 #endif
 
-	// initialize the start time
-	// gStartTime = 0;
-	// gStartTime = GetTime( );
+	// initialize curses
+
+	gCurses = true;
+	initscr( );
+#ifdef WIN32
+	resize_term( 28, 97 );
+#endif
+	clear( );
+	noecho( );
+	cbreak( );
+	gMainWindow = newwin( LINES - 3, COLS - 17, 0, 0 );
+	gBottomBorder = newwin( 1, COLS, LINES - 3, 0 );
+	gRightBorder = newwin( LINES - 3, 1, 0, COLS - 17 );
+	gInputWindow = newwin( 2, COLS, LINES - 2, 0 );
+	gChannelWindow = newwin( LINES - 3, 16, 0, COLS - 16 );
+	mvwhline( gBottomBorder, 0, 0, 0, COLS );
+	mvwvline( gRightBorder, 0, 0, 0, LINES );
+	wrefresh( gBottomBorder );
+	wrefresh( gRightBorder );
+	scrollok( gMainWindow, TRUE );
+	keypad( gInputWindow, TRUE );
+	scrollok( gInputWindow, TRUE );
+	CONSOLE_Draw( );
+	nodelay( gInputWindow, TRUE );
+
+	// print something for logging purposes
+
+	CONSOLE_Print( "[CCBOT] starting up" );
 
 #ifdef WIN32
 
@@ -157,6 +354,99 @@ int main( )
 
 		if( gCCBot->Update( 10000 ) )
 			break;
+
+		bool Quit = false;
+		int c = wgetch( gInputWindow );
+		
+		while( c != ERR )
+		{ 
+			if( c == 8 || c == 127 || c == KEY_BACKSPACE || c == KEY_DC )
+			{
+				// Backspace, Delete
+
+				if( !gInputBuffer.empty( ) )
+					gInputBuffer.erase( gInputBuffer.size( ) - 1, 1 );
+			}
+			else if( c == 9 )
+			{
+				// Tab
+			}
+#ifdef WIN32
+			else if( c == 10 || c == 13 || c == PADENTER )
+#else
+			else if( c == 10 || c == 13 )
+#endif
+			{
+				// CR, LF
+				// process input buffer now
+
+				string Command = gInputBuffer;
+
+				if( Command[0] == gCCBot->m_BNETs[0]->GetCommandTrigger( ) )
+				{
+					CONSOLE_Print( "[CONSOLE] " + Command );
+					
+					CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: CONSOLE_INPUT, 0, 0, gCCBot->m_BNETs[0]->GetRootAdmin( ), Command );
+					gCCBot->m_BNETs[0]->ProcessChatEvent( &event );
+				}
+				else
+					gCCBot->m_BNETs[0]->QueueChatCommand( Command, BNET );				
+
+				gInputBuffer.clear( );
+			}
+#ifdef WIN32
+			else if( c == 22 )
+			{
+				// Paste
+
+				char *clipboard = NULL;
+				long length = 0;
+
+				if( PDC_getclipboard( &clipboard, &length ) == PDC_CLIP_SUCCESS )
+				{
+					gInputBuffer += string( clipboard, length );
+					PDC_freeclipboard( clipboard );
+				}
+			}
+#endif
+			else if( c == 27 )
+			{
+				// Escape button
+
+				gInputBuffer.clear( );
+			}
+			else if( c >= 32 && c <= 255 )
+			{
+				// Printable characters
+
+				gInputBuffer.push_back( c );
+			}
+#ifdef WIN32
+			else if( c == PADSLASH )
+				gInputBuffer.push_back( '/' );
+			else if( c == PADSTAR )
+				gInputBuffer.push_back( '*' );
+			else if( c == PADMINUS )
+				gInputBuffer.push_back( '-' );
+			else if( c == PADPLUS )
+				gInputBuffer.push_back( '+' );
+#endif
+			else if( c == KEY_RESIZE )
+				CONSOLE_Resize( );
+
+			// clamp input buffer size
+
+			if( gInputBuffer.size( ) > 200 )
+				gInputBuffer.erase( 200 );
+
+			c = wgetch( gInputWindow );
+			gInputWindowChanged = true;
+		}
+
+		CONSOLE_Draw( );
+
+		if( Quit )
+			break;
 	}
 
 	// shutdown ghost
@@ -172,134 +462,11 @@ int main( )
 	WSACleanup( );
 #endif
 
+	// shutdown curses
+
+	endwin( );
+
 	return 0;
-}
-
-void CONSOLE_Print( string message )
-{
-        // logging
-
-	time_t Now;
-        time( &Now );
-        char datestr[100];
-        strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
-        char str[80];
-	char timestr[100];
-        strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
-
-        if( !gLogFile.empty( ) )
-        {
-                ofstream Log;
-                
-#ifdef WIN32
-                strcpy(str, "logs\\");
-#else
-                strcpy(str, "logs/");
-#endif
-
-                strcat(str, datestr);
-                strcat(str, ".log");
-                Log.open(str, ios :: app );
-
-                if( !Log.fail( ) )
-                {
-                        Log << "[" << timestr << "] " << message << endl;
-                        Log.close( );
-                }
-        }
-
-	cout << "[" << timestr << "]" << message << endl;
-}
-
-void DEBUG_Print( string message )
-{
-	time_t Now;
-        time( &Now );
-	char timestr[100];
-        strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
-
-	cout << "[" << timestr << "] " << message << endl;
-}
-
-void DEBUG_Print( BYTEARRAY b )
-{
-	time_t Now;
-        time( &Now );
-	char timestr[100];
-        strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
-	cout << "[" << timestr << "] " << "{ ";
-
-	for( unsigned int i = 0; i < b.size( ); ++i )
-		cout << hex << (int)b[i] << " ";
-
-	cout << "}" << endl;
-}
-
-void * stdin_thread( void* in )
-{
-    CCCBot* ccbot = ( CCCBot* ) in;
-
-    while( true )
-    {
-	string input;
-	getline( cin, input );
-
-	if( !cin.good( ) )
-		cin.clear( );
-
-	// print current input
-	CONSOLE_Print( "[CONSOLE]: " + input );
-
-        if( pthread_mutex_lock( &( ccbot->stdInMutex ) ) == 0 )
-        {
-            ccbot->stdInputMessages.push_back( input );
-            pthread_mutex_unlock( &( ccbot->stdInMutex ) );
-        }
-    }
-
-	return in;
-}
-
-void CCCBot :: readStdInMessages( )
-{
-    if( pthread_mutex_trylock( &stdInMutex ) == 0 )
-    {
-
-        for( vector<string> :: iterator i = stdInputMessages.begin( ); i !=stdInputMessages.end( ); ++i )
-        {
-		string input = *i;
-
-		if( m_BNETs.size( ) == 1 )
-		{
-			CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, m_BNETs[0]->GetRootAdmin( ), m_BNETs[0]->GetCommandTrigger( ) + input );
-			m_BNETs[0]->ProcessChatEvent( &event );     
-			
-		}
-		else if( input.find( " " ) != string::npos && m_BNETs.size( ) > 1  )
-		{
-			string :: size_type CommandStart = input.find( " " );
-			string server = input.substr( 0, CommandStart );
-			string command = input.substr( CommandStart + 1 );
-
-			if( GetServerFromNamePartial( server ).size( ) > 0 )
-				server = GetServerFromNamePartial( server );
-			else
-				DEBUG_Print( "Unable to partially match with a server." );
-           
-			for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
-			{
-                		if( !(*i)->GetExiting( ) && server == (*i)->GetServer( ) )
-                		{
-                			CIncomingChatEvent event = CIncomingChatEvent( CBNETProtocol :: EID_WHISPER, 0, 0, (*i)->GetRootAdmin( ), (*i)->GetCommandTrigger( ) + command );
-           		  		(*i)->ProcessChatEvent( &event );
-               			}            
-			}
-		}				
-        }
-
-        stdInputMessages.clear( );
-        pthread_mutex_unlock( &stdInMutex);
-     }
 }
 
 //
@@ -311,7 +478,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Exiting = false;
-	m_Version = "0.31";
+	m_Version = "0.32";
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
 	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;
@@ -371,9 +538,6 @@ CCCBot :: CCCBot( CConfig *CFG )
 
 	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++" );
 
-	pthread_mutex_init(&stdInMutex, NULL);
-	pthread_create( &stdin_pthread, NULL, stdin_thread,(void *) this);
-
 	// Update the swears.cfg file
 	UpdateSwearList( );	
 	
@@ -391,9 +555,6 @@ CCCBot :: ~CCCBot( )
 
 	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
         	delete *i;
-
-	pthread_cancel( stdin_pthread );
-	pthread_mutex_destroy( &stdInMutex );	
 }
 
 bool CCCBot :: Update( long usecBlock )
@@ -433,7 +594,7 @@ bool CCCBot :: Update( long usecBlock )
 
 	if( NumFDs == 0 )
 	{
-		// we don't have any sockets (i.e. we aren't connected to battle.net maybe due to a lost connection and there aren't any games running)
+		// we don't have any sockets (i.e. we aren't connected to battle.net maybe due to a lost connection)
 		// select will return immediately and we'll chew up the CPU if we let it loop so just sleep for 50ms to kill some time
 
 		MILLISLEEP( 100 );
@@ -449,52 +610,28 @@ bool CCCBot :: Update( long usecBlock )
 			BNETExit = true;
 	}
 
-	readStdInMessages( );
-
 	return m_Exiting || BNETExit;
 }
 
-void CCCBot :: UpdateSwearList( )
+void CCCBot :: Restart ( )
 {
+	// shutdown ghost
 
-	string line, filestr = SwearsFile;
+	CONSOLE_Print( "[CCBOT] restarting" );
+	delete gCCBot;
+	gCCBot = NULL;	
 
-	ifstream file( filestr.c_str( ) );
+#ifdef WIN32
+	// shutdown winsock
 
-	if( !file.fail( ) )
-	{
-		m_SwearList.clear( );
+	CONSOLE_Print( "[CCBOT] shutting down winsock" );
+	WSACleanup( );
 
-		while( !file.eof( ) )
-		{
-			getline( file, line );
-			if( !line.empty( ) )
-			{
-				if( find( m_SwearList.begin( ), m_SwearList.end( ), line ) != m_SwearList.end( ) && line.substr(0,1) != "#" )
-					CONSOLE_Print( "[CONFIG] duplicate swear: " + line );			
-				else if( line.substr(0,1) != "#" )
-					m_SwearList.push_back( line );
-			}
-		}
-		CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
-	}
-	else
-	{		
-		ofstream file( filestr.c_str( ), ios :: app );
+	_spawnl( _P_OVERLAY, "ccbot.exe", "ccbot.exe", NULL );
+#else		
+	execl( "ccbot++", "ccbot++", NULL );				
+#endif	
 
-		if( file.fail( ) )
-			CONSOLE_Print( "[CONFIG] error updating swears from swear list" );
-		else
-		{
-			CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
-			file << "#############################################################################################################" << endl;
-			file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! WRITE EVERYTHING HERE IN lowercase OR IT WONT WORK! ####" << endl;
-			file << "#############################################################################################################" << endl;
-			file << "# setting the # character on the first position will comment out your line" << endl;
-		}
-	}
-	file.close( );
-	file.clear( );
 }
 
 void CCCBot :: ReloadConfigs( )
@@ -567,11 +704,56 @@ void CCCBot :: UpdateCommandAccess( )
 	m_Commands[ "uptime" ] = 1;	
 
 	for( map<string, uint32_t> :: iterator i = m_Commands.begin( ); i != m_Commands.end( ); ++i )
+	{
 		if( m_DB->CommandAccess( (*i).first ) == 11 )
 		{
 			m_DB->CommandSetAccess( (*i).first, (*i).second );
 			CONSOLE_Print( "[ACCESS] no value found for command [" + (*i).first + "] - setting default value of [" + UTIL_ToString( (*i).second ) + "]" );			
-		}		
+		}
+	}
+}
+
+void CCCBot :: UpdateSwearList( )
+{
+
+	string line, filestr = SwearsFile;
+
+	ifstream file( filestr.c_str( ) );
+
+	if( !file.fail( ) )
+	{
+		m_SwearList.clear( );
+
+		while( !file.eof( ) )
+		{
+			getline( file, line );
+			if( !line.empty( ) )
+			{
+				if( find( m_SwearList.begin( ), m_SwearList.end( ), line ) != m_SwearList.end( ) && line.substr(0,1) != "#" )
+					CONSOLE_Print( "[CONFIG] duplicate swear: " + line );			
+				else if( line.substr(0,1) != "#" )
+					m_SwearList.push_back( line );
+			}
+		}
+		CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
+	}
+	else
+	{		
+		ofstream file( filestr.c_str( ), ios :: app );
+
+		if( file.fail( ) )
+			CONSOLE_Print( "[CONFIG] error updating swears from swear list" );
+		else
+		{
+			CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
+			file << "#############################################################################################################" << endl;
+			file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! WRITE EVERYTHING HERE IN lowercase OR IT WONT WORK! ####" << endl;
+			file << "#############################################################################################################" << endl;
+			file << "# setting the # character on the first position will comment out your line" << endl;
+		}
+	}
+	file.close( );
+	file.clear( );
 }
 
 string CCCBot :: GetServerFromNamePartial( string name )
@@ -631,26 +813,5 @@ void CCCBot :: EventBNETLoggedIn( CBNET *bnet )
 
 void CCCBot :: EventBNETConnectTimedOut( CBNET *bnet )
 {
-
-}
-
-void CCCBot :: Restart ( )
-{
-	// shutdown ghost
-
-	CONSOLE_Print( "[CCBOT] restarting" );
-	delete gCCBot;
-	gCCBot = NULL;	
-
-#ifdef WIN32
-	// shutdown winsock
-
-	CONSOLE_Print( "[CCBOT] shutting down winsock" );
-	WSACleanup( );
-
-	_spawnl( _P_OVERLAY, "ccbot.exe", "ccbot.exe", NULL );
-#else		
-	execl( "ccbot++", "ccbot++", NULL );				
-#endif	
 
 }

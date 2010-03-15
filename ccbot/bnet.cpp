@@ -191,8 +191,8 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		{			
 			string ChatCommand = m_ChatCommands.front( );
 			m_ChatCommands.pop( );
-			m_Delay = 1100 + ChatCommand.length( )*41;
-			SendChatCommand( ChatCommand );
+			m_Delay = 1100 + ChatCommand.length( )*40;
+			SendChatCommand( ChatCommand, BNET );
 			m_LastChatCommandTicks = GetTicks( );
 			m_LastOutPacketTicks = GetTicks( );
 		}
@@ -220,14 +220,14 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		// part of !Announce
 		if( ( GetTime( ) >= m_LastAnnounceTime + m_AnnounceInterval ) && m_Announce  )
 		{
-			QueueChatCommand( m_AnnounceMsg );
+			QueueChatCommand( m_AnnounceMsg, BNET );
 			m_LastAnnounceTime = GetTime( );
 		}
 
 		// rejoining the channel when not in the set channel
 		if( GetTime( ) >= m_LastRejoinTime + m_RejoinInterval && m_LoggedIn && m_Rejoin )
 		{
-			QueueChatCommand( "/join " + m_CurrentChannel );
+			SendChatCommandHidden( "/join " + m_CurrentChannel, BNET );
 			m_LastRejoinTime = GetTime( );
 		}
 
@@ -320,37 +320,46 @@ void CBNET :: ExtractPackets( )
 {
 	// extract as many packets as possible from the socket's receive buffer and put them in the m_Packets queue
 
-	string *RecvBuffer = m_Socket->GetBytes( );
-	BYTEARRAY Bytes = UTIL_CreateByteArray( (unsigned char *)RecvBuffer->c_str( ), RecvBuffer->size( ) );
+        string *RecvBuffer = m_Socket->GetBytes( );
+        BYTEARRAY Bytes = UTIL_CreateByteArray( (unsigned char *)RecvBuffer->c_str( ), RecvBuffer->size( ) );
 
-	// a packet is at least 4 bytes so loop as long as the buffer contains 4 bytes
+        // a packet is at least 4 bytes so loop as long as the buffer contains 4 bytes
 
-	while( Bytes.size( ) >= 4 )
-	{
-		// byte 0 is always 255
+        while( Bytes.size( ) >= 4 )
+        {
+                // byte 0 is always 255
 
-		if( Bytes[0] == BNET_HEADER_CONSTANT )
-		{
-			// bytes 2 and 3 contain the length of the packet
+                if( Bytes[0] == BNET_HEADER_CONSTANT )
+                {
+                        // bytes 2 and 3 contain the length of the packet
 
-			uint16_t Length = UTIL_ByteArrayToUInt16( Bytes, false, 2 );
+                        uint16_t Length = UTIL_ByteArrayToUInt16( Bytes, false, 2 );
 
-			if( Bytes.size( ) >= Length )
-			{
-				m_Packets.push( new CCommandPacket( BNET_HEADER_CONSTANT, Bytes[1], BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) );
-				*RecvBuffer = RecvBuffer->substr( Length );
-				Bytes = BYTEARRAY( Bytes.begin( ) + Length, Bytes.end( ) );
-			}
-			else
-				return;
-		}
-		else
-		{
-			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] error - received invalid packet from battle.net, disconnecting" );
-			m_Socket->Disconnect( );
-			return;
-		}
-	}
+                        if( Length >= 4 )
+                        {
+                                if( Bytes.size( ) >= Length )
+                                {
+                                        m_Packets.push( new CCommandPacket( BNET_HEADER_CONSTANT, Bytes[1], BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) );
+                                        *RecvBuffer = RecvBuffer->substr( Length );
+                                        Bytes = BYTEARRAY( Bytes.begin( ) + Length, Bytes.end( ) );
+                                }
+                                else
+                                        return;
+                        }
+                        else
+                        {
+                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] error - received invalid packet from battle.net (bad length), disconnecting" );
+                                m_Socket->Disconnect( );
+                                return;
+                        }
+                }
+                else
+                {
+                        CONSOLE_Print( "[BNET: " + m_ServerAlias + "] error - received invalid packet from battle.net (bad header constant), disconnecting" );
+                        m_Socket->Disconnect( );
+                        return;
+                }
+        }
 }
 
 void CBNET :: ProcessPackets( )
@@ -552,24 +561,24 @@ void CBNET :: ProcessPackets( )
 				{
 
 					case 9:
-						QueueChatCommand( m_ClanTag + " is currently full, please contact a shaman/chieftain." );
+						QueueChatCommand( m_ClanTag + " is currently full, please contact a shaman/chieftain.", BNET );
 						break;
 								
 					case 5:
-						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan." );
+						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", BNET );
 						break;
 
 					case 0:					
-						QueueChatCommand( m_LastKnown + " has successfully joined " + m_ClanTag + "." );
+						QueueChatCommand( m_LastKnown + " has successfully joined " + m_ClanTag + ".", BNET );
 						SendGetClanList( );					
 						break;
 
 					case 4:
-						QueueChatCommand( m_LastKnown + " has rejected a clan invitation for " + m_ClanTag + "." );
+						QueueChatCommand( m_LastKnown + " has rejected a clan invitation for " + m_ClanTag + ".", BNET );
 						break;
 
 					case 8:
-						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan." );
+						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", BNET );
 						break;
 
 					default:
@@ -580,8 +589,8 @@ void CBNET :: ProcessPackets( )
 			case CBNETProtocol :: SID_CLANINVITATIONRESPONSE:
 				if( m_Protocol->RECEIVE_SID_CLANINVITATIONRESPONSE( Packet->GetData( ) ) )
 				{
-					QueueChatCommand( "Clan invitation received for [" + m_Protocol->GetClanName( ) + "] from [" + m_Protocol->GetInviterStr( ) + "]." );
-					QueueChatCommand( "Type " + m_CommandTriggerStr + "accept to accept the clan invitation." );
+					QueueChatCommand( "Clan invitation received for [" + m_Protocol->GetClanName( ) + "] from [" + m_Protocol->GetInviterStr( ) + "].", BNET );
+					QueueChatCommand( "Type " + m_CommandTriggerStr + "accept to accept the clan invitation.", BNET );
 
 					m_ActiveInvitation = true;
 					m_LastInvitationTime = GetTime( );										
@@ -591,7 +600,7 @@ void CBNET :: ProcessPackets( )
 			case CBNETProtocol :: SID_CLANCREATIONINVITATION:
 				if( m_Protocol->RECEIVE_SID_CLANCREATIONINVITATION( Packet->GetData( ) ) )
 				{
-					QueueChatCommand( "Clan creation of [" + m_Protocol->GetClanCreationName( ) + "] by [" + m_Protocol->GetClanCreatorStr( ) + "] received - accepting..." );
+					QueueChatCommand( "Clan creation of [" + m_Protocol->GetClanCreationName( ) + "] by [" + m_Protocol->GetClanCreatorStr( ) + "] received - accepting...", BNET );
 
 					m_ActiveCreation = true;
 					m_LastInvitationTime = GetTime( );
@@ -602,12 +611,12 @@ void CBNET :: ProcessPackets( )
 				switch( m_Protocol->RECEIVE_SID_CLANMAKECHIEFTAIN( Packet->GetData( ) ) )
 				{
 					case 0:
-						QueueChatCommand( m_LastKnown + " successfuly promoted to chieftain." );
+						QueueChatCommand( m_LastKnown + " successfuly promoted to chieftain.", BNET );
 						SendGetClanList( );
 						break;
 
 					default:
-						QueueChatCommand( "Error setting user to Chieftain." );					
+						QueueChatCommand( "Error setting user to Chieftain.", BNET );					
 				}
 				break;
 
@@ -615,28 +624,28 @@ void CBNET :: ProcessPackets( )
 				switch( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( Packet->GetData( ) ) )
 				{
 					case 1:
-						QueueChatCommand( "Error: " + m_Removed + " - removal failed by " + m_UsedRemove + "." );
+						QueueChatCommand( "Error: " + m_Removed + " - removal failed by " + m_UsedRemove + ".", BNET );
 						m_Removed = "Unknown User";
 						break;
 			
 					case 2:
-						QueueChatCommand( "Error: " + m_Removed + " - can't be removed yet from " + m_ClanTag + "." );
+						QueueChatCommand( "Error: " + m_Removed + " - can't be removed yet from " + m_ClanTag + ".", BNET );
 						m_Removed = "Unknown User";
 						break;
 
 					case 0:
-						QueueChatCommand( m_Removed + " has been kicked from " + m_ClanTag + " by " + m_UsedRemove + "." );
+						QueueChatCommand( m_Removed + " has been kicked from " + m_ClanTag + " by " + m_UsedRemove + ".", BNET );
 						m_Removed = "Unknown User";
 						SendGetClanList( );
 						break;
 
 					case 7:
-						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, bot not authorised to remove." );
+						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, bot not authorised to remove.", BNET );
 						m_Removed = "Unknown User";
 						break;
 
 					case 8:
-						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, not allowed." );
+						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, not allowed.", BNET );
 						m_Removed = "Unknown User";
                                 		break;
 
@@ -676,106 +685,144 @@ void CBNET :: SendJoinChannel( string channel )
 		m_Socket->PutBytes( m_Protocol->SEND_SID_JOINCHANNEL( channel ) );
 }
 
-void CBNET :: SendChatCommand( string chatCommand )
+void CBNET :: SendChatCommand( string chatCommand, int destination )
 {
 	// don't call this function directly, use QueueChatCommand instead to prevent getting kicked for flooding
 	if( m_LoggedIn )
 	{
-		if( m_PasswordHashType != "pvpgn" )
-		{
-			if( chatCommand.size( ) > 200 )
-				chatCommand = chatCommand.substr( 0, 200 );
-		}
-		else
-		{
-			if( chatCommand.size( ) > 199 )
-				chatCommand = chatCommand.substr( 0, 199 );
-		}
 
-		m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
-
-		if( chatCommand.substr( 0, 3 ) == "/w " )
+		if( destination == BNET )
+		{
+			if( m_PasswordHashType != "pvpgn" )
 			{
-				string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
-				CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
+				if( chatCommand.size( ) > 200 )
+					chatCommand = chatCommand.substr( 0, 200 );
 			}
-		else
-			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
+			else
+			{
+				if( chatCommand.size( ) > 199 )
+					chatCommand = chatCommand.substr( 0, 199 );
+			}
+
+			m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
+
+			if( chatCommand.substr( 0, 3 ) == "/w " )
+				{
+					string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
+					CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
+				}
+			else
+				CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
+		}
+		else if( destination == CONSOLE )
+		{
+			if( chatCommand.substr( 0, 3 ) == "/w " )
+				{
+					string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
+					CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
+				}
+			else
+				CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
+		}
 	}
 
 }
 
-void CBNET :: SendChatCommandHidden( string chatCommand )
+void CBNET :: SendChatCommandHidden( string chatCommand, int destination )
 {
 	// don't call this function directly, use QueueChatCommand instead to prevent getting kicked for flooding
 	if( m_LoggedIn )
 	{
-		if( m_PasswordHashType != "pvpgn" )
+		if( destination == BNET )
 		{
-			if( chatCommand.size( ) > 200 )
-				chatCommand = chatCommand.substr( 0, 200 );
-		}
-		else
-		{
-			if( chatCommand.size( ) > 199 )
-				chatCommand = chatCommand.substr( 0, 199 );
-		}
+			if( m_PasswordHashType != "pvpgn" )
+			{
+				if( chatCommand.size( ) > 200 )
+					chatCommand = chatCommand.substr( 0, 200 );
+			}
+			else
+			{
+				if( chatCommand.size( ) > 199 )
+					chatCommand = chatCommand.substr( 0, 199 );
+			}
 
-		m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );		
+			m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
+		}
 	}
 }
 
-void CBNET :: QueueChatCommand( string chatCommand )
+void CBNET :: QueueChatCommand( string chatCommand, int destination )
 {
 	if( chatCommand.empty( ) )
 		return;
-
-	m_ChatCommands.push( chatCommand );
+	
+	if( destination == BNET )
+		m_ChatCommands.push( chatCommand );
 }
 
-void CBNET :: QueueChatCommand( string chatCommand, string user, bool whisper )
+void CBNET :: QueueChatCommand( string chatCommand, string user, bool whisper, int destination )
 {
 	if( chatCommand.empty( ) )
 		return;
 
 	// if whisper is true send the chat command as a whisper to user, otherwise just queue the chat command
 
-	if( whisper )
-		QueueChatCommand( "/w " + user + " " + chatCommand );
-	else
-		QueueChatCommand( chatCommand );
-}
-
-void CBNET :: QueueWhisperCommand( string chatCommand, string user )
-{
-
-	if( chatCommand.empty( ) )
-		return;
-
-	m_ChatCommands.push( "/w " + user + " " + chatCommand );
-}
-
-void CBNET :: ImmediateChatCommand( string chatCommand )
-{
-	if( chatCommand.empty( ) )
-		return;
-
-	if( GetTicks( ) >= m_LastChatCommandTicks + 800 )
+	if( whisper && destination == BNET )
+		QueueChatCommand( "/w " + user + " " + chatCommand, destination );
+	else if( destination == BNET )
+		QueueChatCommand( chatCommand, destination );
+	else if ( whisper && destination == CONSOLE )
 	{
-		SendChatCommand( chatCommand );
+		string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
+		CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
+	}
+	else if ( destination == CONSOLE )
+		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
+}
+
+void CBNET :: QueueWhisperCommand( string chatCommand, string user, int destination )
+{
+
+	if( chatCommand.empty( ) )
+		return;
+
+	if( destination == BNET )
+		m_ChatCommands.push( "/w " + user + " " + chatCommand );
+	else if( destination == CONSOLE )
+	{
+		string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
+		CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
+	}
+}
+
+void CBNET :: ImmediateChatCommand( string chatCommand, int destination )
+{
+	if( chatCommand.empty( ) )
+		return;
+
+	if( GetTicks( ) >= m_LastChatCommandTicks + 950 )
+	{
+		SendChatCommand( chatCommand, destination );
 		m_LastChatCommandTicks = GetTicks( );
 	}	
 }
 
-void CBNET :: ImmediateChatCommand( string chatCommand, string user, bool whisper )
+void CBNET :: ImmediateChatCommand( string chatCommand, string user, bool whisper, int destination )
 {
 	if( chatCommand.empty( ) )
 		return;
 
-	if( whisper )
-		ImmediateChatCommand( "/w " + user + " " + chatCommand );
-	else
-		ImmediateChatCommand( chatCommand );
+	if( whisper && destination == BNET )
+		ImmediateChatCommand( "/w " + user + " " + chatCommand, destination );
+	else if( destination == BNET )
+		ImmediateChatCommand( chatCommand, destination );
+	else if ( whisper && destination == CONSOLE )
+	{
+		string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
+		CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
+	}
+	else if ( destination == CONSOLE )
+		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 }
 
 bool CBNET :: IsRootAdmin( string name )

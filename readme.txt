@@ -1,5 +1,5 @@
 =========================================
-CCBot - Clan & Channel Bot - Version 0.31
+CCBot - Clan & Channel Bot - Version 0.32
 =========================================
 
 CCBot is a modified GHost++ bot (made by Varlock) to moderate both the channel and the clan it's located in. It's written in C++ with the SQLite files in C and because of this it's multi-platform and works on Windows and Linux (and OS X with probable minor changes to source). It's meant to be small and powerful with almost no dependecies and to work on PvPGNs and B.NET. 
@@ -23,18 +23,11 @@ There is also a swears.cfg file in the "cfg" folder in which you configure banne
 Console Input
 =============
 
-It's possible to input commands directly to the console. If you're using only one BNET then you just type the command (without the command trigger) directly as:
+Input via console and the channel user list only work for the first B.NET connection. Commands via console work the same way as on B.NET - input starting with the
+set command trigger will be executed while other input is sent to B.NET similar to chat bots. The console refresh might be flickery with a lot of activity (several
+connections and high channel activity).
 
-<command> [payload]
-example: slap Radiant
-
-If you're running on multiple (different) BNETs you need to type the server's name. Example running server.eurobattle.net and playdota.eu and you want to slap Radiant on eurobattle.net:
-
-<server, uses partial matching> <command> [payload]
-example: euro slap Radiant
-
-Note: Parameters in angled brackets <like this> are required and parameters in square brackets [like this] are optional.
-Note: If you use two or more identical servers (like two bots on eurobattle.net) you must always type the full name as the server name and the command will be sent to BOTH servers.
+To chat via other connections - use !saybnets and !saybnet commands.
 
 ==============
 Required Files
@@ -42,7 +35,7 @@ Required Files
 
 If you want to be able to connect to battle.net:
 
--> "game.dll" in your bot_war3path
+-> "Game.dll" in your bot_war3path
 -> "Storm.dll" in your bot_war3path
 -> "war3.exe" in your bot_war3path
 
@@ -149,11 +142,12 @@ Parameters in angled brackets <like this> are required and parameters in square 
 !addban <name> [reason]		add a new ban to the database for this realm
 !ban                    	alias to !addban
 !channel <name>          	change battle.net channel
+!join <name>			alias to !channel
 !countbans               	display the total number of bans for this realm
 !delban <name>           	remove a ban from the database for all realms
 !exit	                 	shutdown ccbot
-!getclan                 	refresh the internal copy of the clan members list
-!quit	                 	alias to !exit
+!quit	                 	alias to !exit!getclan                 	refresh the internal copy of the clan members list
+
 !say <text>              	send <text> to battle.net as a chat command
 !unban <name>            	alias to !delban
 !version                 	display version information
@@ -233,7 +227,7 @@ Compiling CCBot on Linux
 
 You will need a few libraries, all of which are installed, if you have apt, with following command:
 
-1. sudo apt-get install build-essential m4 libgmp3-dev
+1. sudo apt-get install build-essential m4 libgmp3-dev libncurses5-dev
 
 Then, assuming you extracted this archive to your home dir (~):
 
@@ -260,6 +254,16 @@ Then when in the CCBot binary directory just type in terminal "./ccbot++" withou
 =========
 CHANGELOG
 =========
+
+Version 0.32 ( 12.03.2010. )
+
+- Minimalistic terminal "GUI" using curses library
+- Added pdcurses, edited makefile, ghost.vcproj and updated readme
+- Removed (now) obsolete input thread
+- Some bug fixes and visual improvements
+- Added !join alias to !channel command
+- Better Eurobattle.net quota handling (in case of a warning increase the delay for the next message)
+- Removed pthreads
 
 Version 0.31 ( 03.02.2009. )
 
