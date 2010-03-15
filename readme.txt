@@ -146,8 +146,8 @@ Parameters in angled brackets <like this> are required and parameters in square 
 !countbans               	display the total number of bans for this realm
 !delban <name>           	remove a ban from the database for all realms
 !exit	                 	shutdown ccbot
-!quit	                 	alias to !exit!getclan                 	refresh the internal copy of the clan members list
-
+!quit	                 	alias to !exit
+!getclan                 	refresh the internal copy of the clan members list
 !say <text>              	send <text> to battle.net as a chat command
 !unban <name>            	alias to !delban
 !version                 	display version information
