@@ -35,40 +35,40 @@ class CBNETProtocol
 {
 public:
 	enum Protocol {
-		SID_NULL				= 0,	// 0x00
-		SID_STOPADV				= 2,	// 0x02
+		SID_NULL					= 0,	// 0x00
+		SID_STOPADV					= 2,	// 0x02
 		SID_GETADVLISTEX			= 9,	// 0x09
 		SID_ENTERCHAT				= 10,	// 0x0A
 		SID_JOINCHANNEL				= 12,	// 0x0C
 		SID_CHATCOMMAND				= 14,	// 0x0E
 		SID_CHATEVENT				= 15,	// 0x0F
 		SID_FLOODDETECTED			= 19,	// 0x13
-		SID_CHECKAD				= 21,	// 0x15
+		SID_CHECKAD					= 21,	// 0x15
 		SID_STARTADVEX3				= 28,	// 0x1C
 		SID_DISPLAYAD				= 33,	// 0x21
 		SID_NOTIFYJOIN				= 34,	// 0x22
-		SID_PING				= 37,	// 0x25
+		SID_PING					= 37,	// 0x25
 		SID_LOGONRESPONSE			= 41,	// 0x29
 		SID_NETGAMEPORT				= 69,	// 0x45
 		SID_AUTH_INFO				= 80,	// 0x50
 		SID_AUTH_CHECK				= 81,	// 0x51
-		SID_AUTH_ACCOUNTLOGON			= 83,	// 0x53
-		SID_AUTH_ACCOUNTLOGONPROOF		= 84,	// 0x54
+		SID_AUTH_ACCOUNTLOGON		= 83,	// 0x53
+		SID_AUTH_ACCOUNTLOGONPROOF	= 84,	// 0x54
 		SID_FRIENDSLIST				= 101,	// 0x65
 		SID_FRIENDSUPDATE			= 102,	// 0x66
-		SID_CLANCREATIONINVITATION		= 114,	// 0x72
-		SID_CLANMAKECHIEFTAIN			= 116,	// 0x74
+		SID_CLANCREATIONINVITATION	= 114,	// 0x72
+		SID_CLANMAKECHIEFTAIN		= 116,	// 0x74
 		SID_CLANINVITATION 			= 119,  // 0x77
-		SID_CLANREMOVEMEMBER			= 120,  // 0x78
-		SID_CLANINVITATIONRESPONSE		= 121,  // 0x79
+		SID_CLANREMOVEMEMBER		= 120,  // 0x78
+		SID_CLANINVITATIONRESPONSE	= 121,  // 0x79
 		SID_CLANCHANGERANK			= 122,	// 0x7A
 		SID_CLANSETMOTD				= 123,	// 0x7B
 		SID_CLANMEMBERLIST			= 125,	// 0x7D
-		SID_CLANMEMBERSTATUSCHANGE		= 127	// 0x7F		
+		SID_CLANMEMBERSTATUSCHANGE	= 127	// 0x7F		
 	};
 
 	enum KeyResult {
-		KR_GOOD					= 0,
+		KR_GOOD						= 0,
 		KR_OLD_GAME_VERSION			= 256,
 		KR_INVALID_VERSION			= 257,
 		KR_INVALID_ROC_KEY			= 512,
@@ -82,26 +82,26 @@ public:
 
 	enum IncomingChatEvent {
 		EID_SHOWUSER				= 1,	// received when you join a channel (includes users in the channel and their information)
-		EID_JOIN				= 2,	// received when someone joins the channel you're currently in
-		EID_LEAVE				= 3,	// received when someone leaves the channel you're currently in
-		EID_WHISPER				= 4,	// received a whisper message
-		EID_TALK				= 5,	// received when someone talks in the channel you're currently in
+		EID_JOIN					= 2,	// received when someone joins the channel you're currently in
+		EID_LEAVE					= 3,	// received when someone leaves the channel you're currently in
+		EID_WHISPER					= 4,	// received a whisper message
+		EID_TALK					= 5,	// received when someone talks in the channel you're currently in
 		EID_BROADCAST				= 6,	// server broadcast
-		EID_CHANNEL				= 7,	// received when you join a channel (includes the channel's name, flags)
+		EID_CHANNEL					= 7,	// received when you join a channel (includes the channel's name, flags)
 		EID_USERFLAGS				= 9,	// user flags updates
 		EID_WHISPERSENT				= 10,	// sent a whisper message
 		EID_CHANNELFULL				= 13,	// channel is full
-		EID_CHANNELDOESNOTEXIST			= 14,	// channel does not exist
-		EID_CHANNELRESTRICTED			= 15,	// channel is restricted
-		EID_INFO				= 18,	// broadcast/information message
-		EID_ERROR				= 19,	// error message
-		EID_EMOTE				= 23,	// emote
+		EID_CHANNELDOESNOTEXIST		= 14,	// channel does not exist
+		EID_CHANNELRESTRICTED		= 15,	// channel is restricted
+		EID_INFO					= 18,	// broadcast/information message
+		EID_ERROR					= 19,	// error message
+		EID_EMOTE					= 23,	// emote
 		CONSOLE_INPUT				= 99	// console input
 	};
 
 	enum RankCode {
 		CLAN_INITIATE = 0,			// 0x00 First week member
-		CLAN_PARTIAL_MEMBER = 1,		// 0x01 Peon
+		CLAN_PARTIAL_MEMBER = 1,	// 0x01 Peon
 		CLAN_MEMBER = 2,			// 0x02 Grunt
 		CLAN_OFFICER = 3,			// 0x03 Shaman
 		CLAN_LEADER = 4				// 0x04 Chieftain
@@ -109,9 +109,9 @@ public:
 
 	enum UserFlags {
 		FLAG_BLIZZARD = 1,			// Blizzard representative - 0x01
-		FLAG_CHANNELOPERATOR = 2,		// Channel operator - 0x02
+		FLAG_CHANNELOPERATOR = 2,	// Channel operator - 0x02
 		FLAG_SPEAKER = 4,			// Speaker - 0x04
-		FLAG_ADMINISTRATOR = 8,			// B.Net administrator - 0x08
+		FLAG_ADMINISTRATOR = 8,		// B.Net administrator - 0x08
 		FLAG_NOUDP = 16				// No UDP - 0x10
 	};
 
@@ -124,44 +124,44 @@ public:
 	BYTEARRAY m_ClanCreationName;
 
 	BYTEARRAY m_KeyState;				// set in RECEIVE_SID_AUTH_CHECK
-	BYTEARRAY m_KeyStateDescription;		// set in RECEIVE_SID_AUTH_CHECK
+	BYTEARRAY m_KeyStateDescription;	// set in RECEIVE_SID_AUTH_CHECK
 
 private:
 	BYTEARRAY m_ClientToken;			// set in constructor
 	BYTEARRAY m_LogonType;				// set in RECEIVE_SID_AUTH_INFO
 	BYTEARRAY m_ServerToken;			// set in RECEIVE_SID_AUTH_INFO
 	BYTEARRAY m_MPQFileTime;			// set in RECEIVE_SID_AUTH_INFO
-	BYTEARRAY m_IX86VerFileName;			// set in RECEIVE_SID_AUTH_INFO
-	BYTEARRAY m_ValueStringFormula;			// set in RECEIVE_SID_AUTH_INFO	
-	BYTEARRAY m_Salt;				// set in RECEIVE_SID_AUTH_ACCOUNTLOGON
-	BYTEARRAY m_ServerPublicKey;			// set in RECEIVE_SID_AUTH_ACCOUNTLOGON
+	BYTEARRAY m_IX86VerFileName;		// set in RECEIVE_SID_AUTH_INFO
+	BYTEARRAY m_ValueStringFormula;		// set in RECEIVE_SID_AUTH_INFO	
+	BYTEARRAY m_Salt;					// set in RECEIVE_SID_AUTH_ACCOUNTLOGON
+	BYTEARRAY m_ServerPublicKey;		// set in RECEIVE_SID_AUTH_ACCOUNTLOGON
 	BYTEARRAY m_UniqueName;				// set in RECEIVE_SID_ENTERCHAT
 
 public:
 	CBNETProtocol( );
 	~CBNETProtocol( );
 
-	BYTEARRAY GetClientToken( )			{ return m_ClientToken; }
-	BYTEARRAY GetLogonType( )			{ return m_LogonType; }
-	BYTEARRAY GetServerToken( )			{ return m_ServerToken; }
-	BYTEARRAY GetMPQFileTime( )			{ return m_MPQFileTime; }
+	BYTEARRAY GetClientToken( )				{ return m_ClientToken; }
+	BYTEARRAY GetLogonType( )				{ return m_LogonType; }
+	BYTEARRAY GetServerToken( )				{ return m_ServerToken; }
+	BYTEARRAY GetMPQFileTime( )				{ return m_MPQFileTime; }
 	BYTEARRAY GetIX86VerFileName( )			{ return m_IX86VerFileName; }
 	string GetIX86VerFileNameString( )		{ return string( m_IX86VerFileName.begin( ), m_IX86VerFileName.end( ) ); }
 	BYTEARRAY GetValueStringFormula( )		{ return m_ValueStringFormula; }
-	string GetValueStringFormulaString( )		{ return string( m_ValueStringFormula.begin( ), m_ValueStringFormula.end( ) ); }
-	BYTEARRAY GetKeyState( )			{ return m_KeyState; }
+	string GetValueStringFormulaString( )	{ return string( m_ValueStringFormula.begin( ), m_ValueStringFormula.end( ) ); }
+	BYTEARRAY GetKeyState( )				{ return m_KeyState; }
 	string GetKeyStateDescription( )		{ return string( m_KeyStateDescription.begin( ), m_KeyStateDescription.end( ) ); }
-	BYTEARRAY GetSalt( )				{ return m_Salt; }
+	BYTEARRAY GetSalt( )					{ return m_Salt; }
 	BYTEARRAY GetServerPublicKey( )			{ return m_ServerPublicKey; }
-	BYTEARRAY GetUniqueName( )			{ return m_UniqueName; }
-	string GetInviterStr( )				{ return string( m_InviterStr.begin( ), m_InviterStr.end( ) ); }
-	BYTEARRAY GetClanTag( )				{ return m_ClanTag; }
-	BYTEARRAY GetInviter( )				{ return m_Inviter; }
-	string GetClanName( )				{ return string( m_ClanName.begin( ), m_ClanName.end( ) ); }
+	BYTEARRAY GetUniqueName( )				{ return m_UniqueName; }
+	string GetInviterStr( )					{ return string( m_InviterStr.begin( ), m_InviterStr.end( ) ); }
+	BYTEARRAY GetClanTag( )					{ return m_ClanTag; }
+	BYTEARRAY GetInviter( )					{ return m_Inviter; }
+	string GetClanName( )					{ return string( m_ClanName.begin( ), m_ClanName.end( ) ); }
 	BYTEARRAY GetClanCreationTag( )			{ return m_ClanCreationTag; }
 	string GetClanCreationName( )			{ return string( m_ClanCreationName.begin( ), m_ClanCreationName.end( ) ); }
-	BYTEARRAY GetClanCreator( )			{ return m_ClanCreator; }
-	string GetClanCreatorStr( )			{ return string( m_ClanCreator.begin( ), m_ClanCreator.end( ) ); }
+	BYTEARRAY GetClanCreator( )				{ return m_ClanCreator; }
+	string GetClanCreatorStr( )				{ return string( m_ClanCreator.begin( ), m_ClanCreator.end( ) ); }
 
 	// receive functions
 

@@ -175,19 +175,5 @@ public:
 	virtual bool CheckConnect( );
 };
 
-//
-// CTCPServer
-//
-
-class CTCPServer : public CTCPSocket
-{
-public:
-	CTCPServer( );
-	virtual ~CTCPServer( );
-
-	virtual bool Listen( string address, uint16_t port );
-	virtual CTCPSocket *Accept( fd_set *fd );
-};
-
 #endif
 

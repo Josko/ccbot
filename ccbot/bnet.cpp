@@ -61,11 +61,11 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 
 	// needed only on BNET
 
-	// if( m_CDKeyROC.size( ) != 26 )
-	//	CONSOLE_Print( "[BNET: " + m_ServerAlias + "] warning - your ROC CD key is not 26 characters long and is probably invalid" );
+	if( m_CDKeyROC.size( ) != 26 )
+		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] warning - your ROC CD key is not 26 characters long and is probably invalid" );
 
-	// if( !m_CDKeyTFT.empty( ) && m_CDKeyTFT.size( ) != 26 )
-	//	CONSOLE_Print( "[BNET: " + m_ServerAlias + "] warning - your TFT CD key is not 26 characters long and is probably invalid" );
+	if( !m_CDKeyTFT.empty( ) && m_CDKeyTFT.size( ) != 26 )
+		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] warning - your TFT CD key is not 26 characters long and is probably invalid" );
 
 	transform( m_CDKeyROC.begin( ), m_CDKeyROC.end( ), m_CDKeyROC.begin( ), (int(*)(int))toupper );
 	transform( m_CDKeyTFT.begin( ), m_CDKeyTFT.end( ), m_CDKeyTFT.begin( ), (int(*)(int))toupper );
@@ -101,7 +101,7 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_ActiveCreation = false;
 	m_LoggedIn = false;
 	m_InChat = false;
-	m_Lockdown = false;
+	m_IsLockdown = false;
 	m_Announce = false;	
 	m_ClanTag = "Clan " + nClanTag;
 	m_GreetUsers = nGreetUsers;
@@ -191,7 +191,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		{			
 			string ChatCommand = m_ChatCommands.front( );
 			m_ChatCommands.pop( );
-			m_Delay = 1100 + ChatCommand.length( )*40;
+			m_Delay = 1100 + ChatCommand.length( ) * 40;
 			SendChatCommand( ChatCommand, BNET );
 			m_LastChatCommandTicks = GetTicks( );
 			m_LastOutPacketTicks = GetTicks( );
@@ -316,7 +316,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 	return m_Exiting;
 }
 
-void CBNET :: ExtractPackets( )
+inline void CBNET :: ExtractPackets( )
 {
 	// extract as many packets as possible from the socket's receive buffer and put them in the m_Packets queue
 
@@ -879,34 +879,33 @@ bool CBNET :: IsClanMember( string name )
 	return false;
 }
 
-bool CBNET :: IsAlreadySquelched( string name )
+vector<string> :: iterator CBNET :: GetSquelched( string name )
 {
-
-	for( vector<string> :: iterator i = SquelchedUsers.begin( ); i != SquelchedUsers.end( ); ++i )	
+	for( vector<string> :: iterator i = m_Squelched.begin( ); i != m_Squelched.end( ); ++i )	
 		if( Match( name, *i ) )
-			return true;	
+			return i;
 
-	return false;
+	return m_Squelched.end( );
 }
 
 bool CBNET :: IsInChannel( string name )
 {
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 
-	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+	for( map<string,  CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 		if( (*i).first == name )
 			return true;
 
 	return false;
 }
 
-bool CBNET :: IsInLockdownNames( string name )
+vector<string> :: iterator CBNET :: GetLockdown( string name )
 {
-	for( vector<string> :: iterator i = LockdownNames.begin( ); i != LockdownNames.end( ); ++i )
+	for( vector<string> :: iterator i = m_Lockdown.begin( ); i != m_Lockdown.end( ); ++i )
 		if( Match( name, (*i) ) )	
-			return true;
+			return i;
 
-	return false;					
+	return m_Lockdown.end( );	
 }
 
 void CBNET :: SendClanChangeRank( string accountName, CBNETProtocol :: RankCode rank )
@@ -923,38 +922,28 @@ void CBNET :: SendGetClanList( )
 
 string CBNET :: GetUserFromNamePartial( string name )
 {
-
-	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
-
-	uint32_t PartialMatches = 0;
-	uint32_t DirectMatches = 0;
-	string DirectMatch;
-	string PartialMatch;
+	int Matches = 0;
+	string Partial = string( );
+	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );	
 
 	// try to match each username with the passed string (e.g. "Varlock" would be matched with "lock")
 
-	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+	for( map<string,  CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 	{
-
+		if( (*i).first.find( name ) != string :: npos )
+		{
+			++Matches;
+			Partial = (*i).first;
+		
 			if( (*i).first == name )
-			{
-				DirectMatches++;
-				DirectMatch = (*i).second->GetUser( );
-			}
-
-			if( (*i).first.find( name ) != string :: npos )
-			{
-				PartialMatches++;
-				PartialMatch = (*i).second->GetUser( );
-			}		
+				return (*i).first;
+		}
 	}
 
-	if ( DirectMatches == 1 )
-		return DirectMatch;
-	else if ( PartialMatches == 1 )
-		return PartialMatch;
+	if( Matches == 1 )
+		return Partial;
 
-	return "";
+	return string( );
 }
 
 bool CBNET :: Match( string string1, string string2 )
@@ -966,27 +955,19 @@ bool CBNET :: Match( string string1, string string2 )
 }
 
 //
-// CChannel
+// CUser
 //
 
-CChannel :: CChannel( string nUser )
-{
-	m_User = nUser;	
-	m_Ping = 0;
-	m_UserFlags = 0;
-	m_Clan = "";
-}
-
-CChannel :: ~CChannel( )
+CUser :: CUser( string nUser, uint32_t nPing, uint32_t nUserflags ) : m_User ( nUser ), m_Ping( nPing ), m_UserFlags( nUserflags ), m_Clan( string( ) )
 {
 
 }
 
-CChannel *CBNET :: GetUserByName( string name )
+CUser* CBNET :: GetUserByName( string name )
 {
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 
-	for( map<string,  CChannel *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+	for( map<string,  CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 	{
 		if( name == (*i).first )
 			return i->second;

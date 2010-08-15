@@ -33,12 +33,9 @@
 // CSocket
 //
 
-CSocket :: CSocket( )
+CSocket :: CSocket( ) : m_Socket( INVALID_SOCKET ), m_HasError( false ), m_Error( 0 )
 {
-	m_Socket = INVALID_SOCKET;
 	memset( &m_SIN, 0, sizeof( m_SIN ) );
-	m_HasError = false;
-	m_Error = 0;
 }
 
 CSocket :: CSocket( SOCKET nSocket, struct sockaddr_in nSIN )
@@ -197,7 +194,7 @@ void CTCPSocket :: SetFD( fd_set *fd, fd_set *send_fd, int *nfds )
 #endif
 }
 
-CTCPSocket :: CTCPSocket( SOCKET nSocket, struct sockaddr_in nSIN ) : CSocket( nSocket, nSIN )
+CTCPSocket :: CTCPSocket( SOCKET nSocket, struct sockaddr_in nSIN ) : CSocket( nSocket, nSIN ), m_Connected( true )
 {
 	m_Connected = true;
 	m_LastRecv = GetTime( );
@@ -453,87 +450,4 @@ bool CTCPClient :: CheckConnect( )
 	return false;
 }
 
-//
-// CTCPServer
-//
-
-CTCPServer :: CTCPServer( ) : CTCPSocket( )
-{
-	// set the socket to reuse the address in case it hasn't been released yet
-
-	int optval = 1;
-
-#ifdef WIN32
-	setsockopt( m_Socket, SOL_SOCKET, SO_REUSEADDR, (const char *)&optval, sizeof( int ) );
-#else
-	setsockopt( m_Socket, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval, sizeof( int ) );
-#endif
-}
-
-CTCPServer :: ~CTCPServer( )
-{
-
-}
-
-bool CTCPServer :: Listen( string address, uint16_t port )
-{
-	if( m_Socket == INVALID_SOCKET || m_HasError )
-		return false;
-
-	m_SIN.sin_family = AF_INET;
-
-	if( !address.empty( ) )
-	{
-		if( ( m_SIN.sin_addr.s_addr = inet_addr( address.c_str( ) ) ) == INADDR_NONE )
-			m_SIN.sin_addr.s_addr = INADDR_ANY;
-	}
-	else
-		m_SIN.sin_addr.s_addr = INADDR_ANY;
-
-	m_SIN.sin_port = htons( port );
-
-	// listen, queue length 8
-
-	if( listen( m_Socket, 8 ) == SOCKET_ERROR )
-	{
-		m_HasError = true;
-		m_Error = GetLastError( );
-		CONSOLE_Print( "[TCPSERVER] error (listen) - " + GetErrorString( ) );
-		return false;
-	}
-
-	return true;
-}
-
-CTCPSocket *CTCPServer :: Accept( fd_set *fd )
-{
-	if( m_Socket == INVALID_SOCKET || m_HasError )
-		return NULL;
-
-	if( FD_ISSET( m_Socket, fd ) )
-	{
-		// a connection is waiting, accept it
-
-		struct sockaddr_in Addr;
-		int AddrLen = sizeof( Addr );
-		SOCKET NewSocket;
-
-#ifdef WIN32
-		if( ( NewSocket = accept( m_Socket, (struct sockaddr *)&Addr, &AddrLen ) ) == INVALID_SOCKET )
-#else
-		if( ( NewSocket = accept( m_Socket, (struct sockaddr *)&Addr, (socklen_t *)&AddrLen ) ) == INVALID_SOCKET )
-#endif
-		{
-			// accept error, ignore it
-		}
-		else
-		{
-			// success! return the new socket
-
-			return new CTCPSocket( NewSocket, Addr );
-		}
-	}
-
-	return NULL;
-}
 

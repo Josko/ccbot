@@ -85,19 +85,9 @@ int CSQLITE3 :: Reset( void *Statement )
 	return sqlite3_reset( (sqlite3_stmt *)Statement );
 }
 
-int CSQLITE3 :: ClearBindings( void *Statement )
-{
-	return sqlite3_clear_bindings( (sqlite3_stmt *)Statement );
-}
-
 int CSQLITE3 :: Exec( string query )
 {
 	return sqlite3_exec( (sqlite3 *)m_DB, query.c_str( ), NULL, NULL, NULL );
-}
-
-uint32_t CSQLITE3 :: LastRowID( )
-{
-	return (uint32_t)sqlite3_last_insert_rowid( (sqlite3 *)m_DB );
 }
 
 //
@@ -132,14 +122,7 @@ CCCBotDBSQLite :: CCCBotDBSQLite( CConfig *CFG ) : CCCBotDB( CFG )
 		int RC = m_DB->Step( Statement );
 
 		if( RC == SQLITE_ROW )
-		{
-			vector<string> *Row = m_DB->GetRow( );
-
-			if( Row->size( ) == 1 )
-				SchemaNumber = (*Row)[0];
-			else
-				CONSOLE_Print( "[SQLITE3] error getting schema number - row doesn't have 1 column" );
-		}
+			SchemaNumber = (*m_DB->GetRow( ))[0];
 		else if( RC == SQLITE_ERROR )
 			CONSOLE_Print( "[SQLITE3] error getting schema number - " + m_DB->GetError( ) );
 
@@ -218,9 +201,7 @@ CCCBotDBSQLite :: CCCBotDBSQLite( CConfig *CFG ) : CCCBotDB( CFG )
 				m_DB->Finalize( Statement );
 			}
 			else
-				CONSOLE_Print( "[SQLITE3] prepare error inserting schema number [" + SchemaNumber + "] - " + m_DB->GetError( ) );
-
-			
+				CONSOLE_Print( "[SQLITE3] prepare error inserting schema number [" + SchemaNumber + "] - " + m_DB->GetError( ) );			
 		}
 	}
 	else
@@ -242,8 +223,6 @@ CCCBotDBSQLite :: CCCBotDBSQLite( CConfig *CFG ) : CCCBotDB( CFG )
 		Upgrade3_4( );
 		SchemaNumber = "4";
 	}
-
-
 }
 
 CCCBotDBSQLite :: ~CCCBotDBSQLite( )
@@ -305,6 +284,7 @@ void CCCBotDBSQLite :: Upgrade2_3( )
 
 	CONSOLE_Print( "[SQLITE3] schema upgrade v2 to v3 finished" );
 }
+
 void CCCBotDBSQLite :: Upgrade3_4( )
 {
 	CONSOLE_Print( "[SQLITE3] schema upgrade v3 to v4 started" );
@@ -324,6 +304,7 @@ void CCCBotDBSQLite :: Upgrade3_4( )
 
 	CONSOLE_Print( "[SQLITE3] schema upgrade v3 to v4 finished" );
 }
+
 bool CCCBotDBSQLite :: Begin( )
 {
 	return m_DB->Exec( "BEGIN TRANSACTION" ) == SQLITE_OK;
@@ -346,7 +327,7 @@ uint32_t CCCBotDBSQLite :: SafelistCount( string server )
 		int RC = m_DB->Step( Statement );
 
 		if( RC == SQLITE_ROW )
-			Count = sqlite3_column_int( Statement, 0 );
+			Count = UTIL_ToUInt32( ( *m_DB->GetRow( ) )[0] );
 		else if( RC == SQLITE_ERROR )
 			CONSOLE_Print( "[SQLITE3] error counting safelist [" + server + "] - " + m_DB->GetError( ) );
 
@@ -629,14 +610,7 @@ uint32_t CCCBotDBSQLite :: AccessCheck( string server, string user )
 		// we're checking to see if the query returned a row then we extract the data (access level)
 
 		if( RC == SQLITE_ROW )
-		{
-			vector<string> *Row = m_DB->GetRow( );
-
-			if( Row->size( ) == 1 )
-				Access = UTIL_ToUInt32( (*Row)[0] );
-			else
-				CONSOLE_Print( "[SQLITE3] error checking access [" + server + " : " + user + "] - row doesn't have 3 columns" );
-		}
+			Access = UTIL_ToUInt32( (*m_DB->GetRow( ) )[0] );
 		else if( RC == SQLITE_ERROR )
 			CONSOLE_Print( "[SQLITE3] error checking access [" + server + " : " + user + "] - " + m_DB->GetError( ) );
 
@@ -660,6 +634,7 @@ uint32_t CCCBotDBSQLite :: AccessCount( string server, uint32_t access )
 	if( Statement )
 	{
 		sqlite3_bind_text( Statement, 1, server.c_str( ), -1, SQLITE_TRANSIENT );
+
 		if( access != 0 )
 			sqlite3_bind_int( Statement, 2, access );
 
@@ -713,19 +688,11 @@ uint32_t CCCBotDBSQLite :: CommandAccess( string command )
 	if( Statement )
 	{
 		sqlite3_bind_text( Statement, 1, command.c_str( ), -1, SQLITE_TRANSIENT );
+
 		int RC = m_DB->Step( Statement );
 
-		// we're checking to see if the query returned a row then we extract the data (access level)
-
 		if( RC == SQLITE_ROW )
-		{
-			vector<string> *Row = m_DB->GetRow( );
-
-			if( Row->size( ) == 1 )
-				Access = UTIL_ToUInt32( (*Row)[0] );
-			else
-				CONSOLE_Print( "[SQLITE3] error checking access for [" + command + "] - row doesn't have 2 columns" );
-		}
+			Access = UTIL_ToUInt32( (*m_DB->GetRow( ) )[0] );
 		else if( RC == SQLITE_ERROR )
 			CONSOLE_Print( "[SQLITE3] error checking access for [" + command + "] - " + m_DB->GetError( ) );
 
@@ -811,14 +778,9 @@ vector<string> CCCBotDBSQLite :: CommandList( uint32_t access )
 		// we're checking to see if the query returned a row then we extract the data
 
 		while( RC == SQLITE_ROW )
-		{			
-			vector<string> *Row = m_DB->GetRow( );
-			
-			if( Row->size( ) == 1 )
-				CommandList.push_back( (*Row)[0] );
-
+		{
+			CommandList.push_back( (*m_DB->GetRow( ))[0] );
 			RC = m_DB->Step( Statement );
-
 		}
 
 		if( RC == SQLITE_ERROR )
@@ -827,8 +789,7 @@ vector<string> CCCBotDBSQLite :: CommandList( uint32_t access )
 		m_DB->Finalize( Statement );
 	}
 	else
-		CONSOLE_Print( "[SQLITE3] prepare error checking commands with access of [" + UTIL_ToString( access ) + "] - " + m_DB->GetError( ) );
-	
+		CONSOLE_Print( "[SQLITE3] prepare error checking commands with access of [" + UTIL_ToString( access ) + "] - " + m_DB->GetError( ) );	
 
 	return CommandList;
 }

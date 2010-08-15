@@ -87,9 +87,7 @@ public:
 	int Step( void *Statement );
 	int Finalize( void *Statement );
 	int Reset( void *Statement );
-	int ClearBindings( void *Statement );
 	int Exec( string query );
-	uint32_t LastRowID( );
 };
 
 //
@@ -118,21 +116,25 @@ public:
 
 	virtual bool Begin( );
 	virtual bool Commit( );
+
 	// safelist
 	virtual uint32_t SafelistCount( string server );
 	virtual bool SafelistCheck( string server, string user );
 	virtual bool SafelistAdd( string server, string user );
 	virtual bool SafelistRemove( string server, string user );
+
 	// bans
 	virtual uint32_t BanCount( string server );
 	virtual CDBBan *BanCheck( string server, string user );
 	virtual bool BanAdd( string server, string user, string admin, string reason );
 	virtual bool BanRemove( string server, string user );
+
 	// access
 	virtual bool AccessSet( string server, string user, uint32_t access );
 	virtual uint32_t AccessCheck( string server, string user );
 	virtual uint32_t AccessCount( string server, uint32_t access );
 	virtual bool AccessRemove( string user );
+
 	// commands
 	virtual uint32_t CommandAccess( string command );
 	virtual bool CommandSetAccess( string command, uint32_t access );

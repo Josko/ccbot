@@ -936,28 +936,25 @@ bool CBNETProtocol :: ValidateLength( BYTEARRAY &content )
 // CIncomingChatEvent
 //
 
-CIncomingChatEvent :: CIncomingChatEvent( CBNETProtocol :: IncomingChatEvent nChatEvent, uint32_t nUserFlags, uint32_t nPing, string nUser, string nMessage )
+CIncomingChatEvent :: CIncomingChatEvent( CBNETProtocol :: IncomingChatEvent nChatEvent, uint32_t nUserFlags, uint32_t nPing, string nUser, string nMessage ) \
+					: m_ChatEvent( nChatEvent ), m_UserFlags( nUserFlags ), m_Ping( nPing ), m_User( nUser ), m_Message( nMessage )
 {
-	m_ChatEvent = nChatEvent;
-	m_UserFlags = nUserFlags;
-	m_Ping = nPing;
-	m_User = nUser;
-	m_Message = nMessage;
+
 }
 
 CIncomingChatEvent :: ~CIncomingChatEvent( )
 {
 
 }
+
+
 //
 // CIncomingClanList
 //
 
-CIncomingClanList :: CIncomingClanList( string nName, unsigned char nRank, unsigned char nStatus )
+CIncomingClanList :: CIncomingClanList( string nName, unsigned char nRank, unsigned char nStatus ) : m_Name( nName ), m_Rank( nRank ), m_Status( nStatus )
 {
-	m_Name = nName;
-	m_Rank = nRank;
-	m_Status = nStatus;
+
 }
 
 CIncomingClanList :: ~CIncomingClanList( )
@@ -983,8 +980,8 @@ string CIncomingClanList :: GetStatus( )
 {
 	if( m_Status == 0 )
 		return "Offline";
-	else
-		return "Online";
+
+	return "Online";
 }
 
 string CIncomingClanList :: GetDescription( )
@@ -993,5 +990,6 @@ string CIncomingClanList :: GetDescription( )
 	Description += GetName( ) + "\n";
 	Description += GetStatus( ) + "\n";
 	Description += GetRank( ) + "\n\n";
+
 	return Description;
 }

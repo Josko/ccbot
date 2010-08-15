@@ -121,33 +121,33 @@ void CONSOLE_MainWindowChanged( )
 void LOG_Print( string message )
 {
 	time_t Now;
-        time( &Now );
-        char datestr[100];
-        strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
-        char str[80];
+	time( &Now );
+    char datestr[100];
+    strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
+    char str[80];
 	char timestr[100];
-        strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
+    strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
 
-        if( !gLogFile.empty( ) )
-        {
-                ofstream Log;
+    if( !gLogFile.empty( ) )
+    {
+		ofstream Log;
                 
 #ifdef WIN32
-                strcpy(str, "logs\\");
+        strcpy(str, "logs\\");
 #else
-                strcpy(str, "logs/");
+        strcpy(str, "logs/");
 #endif
 
-                strcat(str, datestr);
-                strcat(str, ".log");
-                Log.open(str, ios :: app );
+        strcat(str, datestr);
+        strcat(str, ".log");
+        Log.open(str, ios :: app );
 
-                if( !Log.fail( ) )
-                {
-                        Log << "[" << timestr << "] " << message << endl;
-                        Log.close( );
-                }
-        }
+        if( !Log.fail( ) )
+        {
+			Log << "[" << timestr << "] " << message << endl;
+            Log.close( );
+		}
+	}
 }
 
 void CONSOLE_Draw( )
@@ -162,9 +162,9 @@ void CONSOLE_Draw( )
 		wclear( gMainWindow );
 		wmove( gMainWindow, 0, 0 );
 
-		for( vector<string> :: iterator i = gMainBuffer.begin( ); i != gMainBuffer.end( ); i++ )
+		for( vector<string> :: iterator i = gMainBuffer.begin( ); i != gMainBuffer.end( ); ++i )
 		{
-			for( string :: iterator j = (*i).begin( ); j != (*i).end( ); j++ )
+			for( string :: iterator j = (*i).begin( ); j != (*i).end( ); ++j )
 				waddch( gMainWindow, *j );
 
 			if( i != gMainBuffer.end( ) - 1 )
@@ -182,7 +182,7 @@ void CONSOLE_Draw( )
 		wclear( gInputWindow );
 		wmove( gInputWindow, 0, 0 );
 
-		for( string :: iterator i = gInputBuffer.begin( ); i != gInputBuffer.end( ); i++ )
+		for( string :: iterator i = gInputBuffer.begin( ); i != gInputBuffer.end( ); ++i )
 			waddch( gInputWindow, *i );
 
 		wrefresh( gInputWindow );
@@ -198,12 +198,12 @@ void CONSOLE_Draw( )
 		mvwhline( gChannelWindow, 1, 0, 0, 16 );
 		int y = 2;
 
-		// for( vector<string> :: iterator i = gChannelUsers.begin( ); i != gChannelUsers.end( ); i++ )
+		// for( vector<string> :: iterator i = gChannelUsers.begin( ); i != gChannelUsers.end( ); ++i )
 		
-		for( map<string, CChannel *> :: iterator i = gCCBot->m_BNETs[0]->m_Channel.begin( ); i != gCCBot->m_BNETs[0]->m_Channel.end( ); ++i )
+		for( map<string, CUser *> :: iterator i = gCCBot->m_BNETs[0]->m_Channel.begin( ); i != gCCBot->m_BNETs[0]->m_Channel.end( ); ++i )
 		{
 			mvwaddnstr( gChannelWindow, y, 0, (*i).second->GetUser( ).c_str( ), 16 );
-			y++;
+			++y;
 
 			if( y >= LINES - 3 )
 				break;
@@ -347,7 +347,7 @@ int main( )
 
 	gCCBot = new CCCBot( &CFG );
 
-	while( 1 )
+	while( true )
 	{
 		// block for 100ms on all sockets - if you intend to perform any timed actions more frequently you should change this
 		// that said it's likely we'll loop more often than this due to there being data waiting on one of the sockets but there aren't any guarantees
@@ -473,12 +473,10 @@ int main( )
 // CCBot
 //
 
-CCCBot :: CCCBot( CConfig *CFG )
+CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "0.33" )
 {
-
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Exiting = false;
-	m_Version = "0.32";
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
 	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;
@@ -496,6 +494,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 			Prefix = "bnet" + UTIL_ToString( i ) + "_";
 
 		string Server = CFG->GetString( Prefix + "server", string( ) );
+		transform( Server.begin( ), Server.end( ), Server.begin( ), (int(*)(int))tolower );
 		string CDKeyROC = CFG->GetString( Prefix + "cdkeyroc", string( ) );
 		string CDKeyTFT = CFG->GetString( Prefix + "cdkeytft", string( ) );
 		string CountryAbbrev = CFG->GetString( Prefix + "countryabbrev", "FIN" );
@@ -514,7 +513,7 @@ CCCBot :: CCCBot( CConfig *CFG )
 		bool AnnounceGames = CFG->GetInt( Prefix + "announcegames", 0 ) == 0 ? false : true;
 		bool SelfJoin = CFG->GetInt( Prefix + "selfjoin", 0 ) == 0 ? false : true;
 		bool BanChat = CFG->GetInt( Prefix + "banchat", 0 ) == 0 ? false : true;		
-		uint32_t ClanDefaultAccess = CFG->GetInt( Prefix + "clanmembersdefaultaccess", 4 );
+		unsigned int ClanDefaultAccess = CFG->GetInt( Prefix + "clanmembersdefaultaccess", 4 );
 
 		if( ClanDefaultAccess > 9 )
 			ClanDefaultAccess = 9;
@@ -549,7 +548,6 @@ CCCBot :: CCCBot( CConfig *CFG )
 
 CCCBot :: ~CCCBot( )
 {
-	m_DB = NULL;
 	delete m_DB;
 	delete m_Language;
 
@@ -715,80 +713,67 @@ void CCCBot :: UpdateCommandAccess( )
 
 void CCCBot :: UpdateSwearList( )
 {
-
-	string line, filestr = SwearsFile;
-
-	ifstream file( filestr.c_str( ) );
+	ifstream file( SwearsFile );
 
 	if( !file.fail( ) )
 	{
 		m_SwearList.clear( );
+		string line;
 
 		while( !file.eof( ) )
 		{
 			getline( file, line );
+
 			if( !line.empty( ) )
 			{
-				if( find( m_SwearList.begin( ), m_SwearList.end( ), line ) != m_SwearList.end( ) && line.substr(0,1) != "#" )
-					CONSOLE_Print( "[CONFIG] duplicate swear: " + line );			
-				else if( line.substr(0,1) != "#" )
+				if( find( m_SwearList.begin( ), m_SwearList.end( ), line ) == m_SwearList.end( ) && line.substr(0,1) != "#" ) 
+				{
+					transform( line.begin( ), line.end( ), line.begin( ), (int(*)(int))tolower );
 					m_SwearList.push_back( line );
+				}					
 			}
 		}
-		CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
-	}
-	else
-	{		
-		ofstream file( filestr.c_str( ), ios :: app );
 
-		if( file.fail( ) )
-			CONSOLE_Print( "[CONFIG] error updating swears from swear list" );
+		if( m_SwearList.size( ) )
+			CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
 		else
 		{
-			CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
-			file << "#############################################################################################################" << endl;
-			file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! WRITE EVERYTHING HERE IN lowercase OR IT WONT WORK! ####" << endl;
-			file << "#############################################################################################################" << endl;
-			file << "# setting the # character on the first position will comment out your line" << endl;
+			ofstream new_file( SwearsFile );
+			if( !file.fail( ) )
+			{
+				CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
+
+				new_file << "#########################################################" << endl;
+				new_file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! ####" << endl;
+				new_file << "#########################################################" << endl;
+				new_file << "# setting the # character on the first position will comment out your line" << endl;
+			}
 		}
 	}
+
 	file.close( );
-	file.clear( );
 }
 
-string CCCBot :: GetServerFromNamePartial( string name )
+vector<CBNET *> :: iterator CCCBot :: GetServerFromNamePartial( string name )
 {
-
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
-	uint32_t PartialMatches = 0;
-	uint32_t DirectMatches = 0;
-	string DirectMatch;
-	string PartialMatch;
+
+	int Matches = 0;
+	vector<CBNET *> :: iterator it = m_BNETs.end( );
 
 	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
 	{
-		string servername = (*i)->GetServer( );
-		transform( servername.begin( ), servername.end( ), servername.begin( ), (int(*)(int))tolower );
-
-			if( servername == name )
+			if( (*i)->GetServer( ).find( name ) != string :: npos )
 			{
-				++DirectMatches;
-				DirectMatch = (*i)->GetServer( );
-			}
+				++Matches;
+				it = i;
 
-			if( servername.find( name ) != string :: npos )
-			{
-				++PartialMatches;
-				PartialMatch = (*i)->GetServer( );
+				if( (*i)->GetServer( ) == name )
+					return i;
 			}		
 	}
 
-	if ( DirectMatches > 0 )
-		return DirectMatch;
-	else if ( PartialMatches == 1 )
-		return PartialMatch;	
-
-	return "";
+	return it;
 }
 
 void CCCBot :: EventBNETConnecting( CBNET *bnet )

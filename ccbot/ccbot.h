@@ -69,6 +69,10 @@ uint32_t GetTicks( );		// milliseconds since computer startup usually, overflows
 
 // output
 
+#define BNET	0
+#define CONSOLE	1
+#define IRC		2
+
 void LOG_Print( string message );
 void CONSOLE_PrintNoCRLF( string message, bool log = true );
 void CONSOLE_Print( string message );
@@ -132,7 +136,8 @@ public:
 	void SetConfigs( CConfig *CFG );
 	void ReloadConfigs( );
 	void UpdateSwearList( );
-	string GetServerFromNamePartial( string name );
+	// string GetServerFromNamePartial( string name );
+	vector<CBNET *> :: iterator GetServerFromNamePartial( string name );
 };
 
 #endif
