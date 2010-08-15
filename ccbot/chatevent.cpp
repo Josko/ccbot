@@ -1418,9 +1418,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				string FirstLine = m_CCBot->m_Language->WelcomeMessageLine1( m_FirstChannel, User );
 				string SecondLine = m_CCBot->m_Language->WelcomeMessageLine2( m_FirstChannel, User );
 
-				if( FirstLine.size( ) > 1 )
+				if( FirstLine.size( ) )
 					ImmediateChatCommand( FirstLine, BNET );
-				if( SecondLine.size( ) > 1 )
+				if( SecondLine.size( ) )
 					QueueChatCommand( SecondLine, BNET );
 			}
 

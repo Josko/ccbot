@@ -162,7 +162,7 @@ string CLanguage :: ConnectingToBNETTimedOut( string server )
 
 string CLanguage :: WelcomeMessageLine1( string channel, string user )
 {
-	string Out = m_CFG->GetString( "lang_0019", "lang_0019" );
+	string Out = m_CFG->GetString( "lang_0019", string( ) );
 	Replace( Out, "$CHANNEL$", channel );
 	Replace( Out, "$USER$", user );
 	return Out;
@@ -170,7 +170,7 @@ string CLanguage :: WelcomeMessageLine1( string channel, string user )
 
 string CLanguage :: WelcomeMessageLine2( string channel, string user )
 {
-	string Out = m_CFG->GetString( "lang_0020", "lang_0020" );
+	string Out = m_CFG->GetString( "lang_0020", string( ) );
 	Replace( Out, "$CHANNEL$", channel );
 	Replace( Out, "$USER$", user );
 	return Out;

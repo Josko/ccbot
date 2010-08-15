@@ -259,6 +259,7 @@ Version 0.33 ( 15.08.2010. )
 
 - Major optimisations
 - Language.cfg creation if one not present already
+- Fixed the annoying welcome message bug
 
 Version 0.32 ( 12.03.2010. )
 
