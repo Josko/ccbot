@@ -601,21 +601,38 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( Command == "clanlist" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "clanlist" ) && m_ClanCommandsEnabled )
 			{
 				string ClanList1, ClanList2, Chieftains = "Chieftains: ", Shamans = "Shamans: ", Grunts = "Grunts: ", Peons = "Peons: ";
+				bool ShowChief, ShowShama, ShowGrunt, ShowPeon = false;
 
 				for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
 				{
 					if( (*i)->GetRank( ) == "Recruit" )
-							Peons = Peons + (*i)->GetName( ) + ", ";
+					{
+						ShowPeon = true;
+						Peons = Peons + (*i)->GetName( ) + ", ";
+					}
 					else if( (*i)->GetRank( ) == "Peon" )
-							Peons = Peons + (*i)->GetName( ) + ", ";
+					{
+						ShowPeon = true;
+						Peons = Peons + (*i)->GetName( ) + ", ";
+					}
 					else if( (*i)->GetRank( ) == "Grunt" )
-							Grunts = Grunts + (*i)->GetName( ) + ", ";
+					{
+						ShowGrunt = true;
+						Grunts = Grunts + (*i)->GetName( ) + ", ";
+					}
 					else if( (*i)->GetRank( ) == "Shaman" )
-							Shamans = Shamans + (*i)->GetName( ) + ", ";
+					{
+						ShowShama = true;
+						Shamans = Shamans + (*i)->GetName( ) + ", ";
+					}
 					else if( (*i)->GetRank( ) == "Chieftain" )
-							Chieftains = Chieftains + (*i)->GetName( ) + ", ";
+					{
+						ShowChief = true;
+						Chieftains = Chieftains + (*i)->GetName( ) + ", ";
+					}
 				}
 
+				if( ShowChief )
 				if( Chieftains.size( ) > 179 )
 				{
 					ClanList1 = Chieftains.substr( 0, 179 );
@@ -626,6 +643,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				else
 					SendChatCommand( "/w " + User + " " + Chieftains.substr( 0, Chieftains.size( )-2 ), Output );
 
+				if( ShowShama )
 				if( Shamans.size( ) > 179 )
 				{
 					ClanList1 = Shamans.substr( 0, 179 );
@@ -636,6 +654,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				else
 					SendChatCommand( "/w " + User + " " + Shamans.substr( 0, Shamans.size( )-2), Output );
 
+				if( ShowGrunt )
 				if( Grunts.size( ) > 179 )
 				{
 					ClanList1 = Grunts.substr( 0, 179 );
@@ -646,6 +665,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				else
 					SendChatCommand( "/w " + User + " " + Grunts.substr( 0, Grunts.size( )-2), Output );
 
+				if( ShowPeon )
 				if( Peons.size( ) > 179 )
 				{
 					ClanList1 = Peons.substr( 0, 179 );
@@ -1343,7 +1363,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	{
 		CONSOLE_Print( "[INFO: " + m_ServerAlias + "] " + Message );
 
-		if( m_AnnounceGames && m_Channel.size( ) > 1 )		
+		if( m_AnnounceGames && m_Channel.size( ) >= 2 )		
 		{
 			if( Message.find("private game") != string::npos || Message.find("in  game") != string::npos )
 			{
@@ -1398,9 +1418,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				string FirstLine = m_CCBot->m_Language->WelcomeMessageLine1( m_FirstChannel, User );
 				string SecondLine = m_CCBot->m_Language->WelcomeMessageLine2( m_FirstChannel, User );
 
-				if( FirstLine.size( ) )
+				if( FirstLine.size( ) > 1 )
 					ImmediateChatCommand( FirstLine, BNET );
-				if( SecondLine.size( ) )
+				if( SecondLine.size( ) > 1 )
 					QueueChatCommand( SecondLine, BNET );
 			}
 

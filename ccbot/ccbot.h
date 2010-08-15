@@ -111,7 +111,6 @@ public:
 	string m_Warcraft3Path;					// config value: Warcraft 3 path
 	string m_CFGPath;					// config value:path to txt files
 	vector<string> m_SwearList;				// vector of words for swear kicking
-	bool tcp_nodelay;					// config value: if set to 1 - improves performance, else saves bandwidth and traffic
 
 	CCCBot( CConfig *CFG );
 	~CCCBot( );

@@ -479,7 +479,6 @@ CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "0.33" )
 	m_Exiting = false;
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
-	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;
 
 	// load the battle.net connections
 	// we're just loading the config data and creating the CBNET classes here, the connections are established later (in the Update function)
@@ -645,7 +644,6 @@ void CCCBot :: SetConfigs( CConfig *CFG )
 
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
-	tcp_nodelay = CFG->GetInt( "tcp_nodelay", 0 ) == 0 ? false : true;	
 }
 
 void CCCBot :: UpdateCommandAccess( )
