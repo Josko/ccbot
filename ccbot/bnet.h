@@ -132,7 +132,6 @@ public:
 	string GetPasswordHashType( )		{ return m_PasswordHashType; }
 	bool GetLoggedIn( )					{ return m_LoggedIn; }
 	bool GetInChat( )					{ return m_InChat; }
-	BYTEARRAY GetUniqueName( );
 
 	vector<string> :: iterator GetSquelched( string name );
 	vector<string> :: iterator GetLockdown( string name );
@@ -142,13 +141,11 @@ public:
 	unsigned int SetFD( void *fd, void *send_fd, int *nfds );
 	bool Update( void *fd, void *send_fd );
 	inline void ExtractPackets( );
-	void ProcessPackets( );
+	inline void ProcessPackets( );
 	void ProcessChatEvent( CIncomingChatEvent *chatEvent );
 
 	// functions to send packets to battle.net
 
-	void SendEnterChat( );
-	void SendJoinChannel( string channel );
 	void SendChatCommand( string chatCommand, int destination );
 	void SendChatCommandHidden( string chatCommand, int destination );
 	void SendGetClanList( );
@@ -171,9 +168,9 @@ public:
 	bool IsClanMember( string name );
 
 	string GetUserFromNamePartial( string name );
-	bool Match( string string1, string string2 );
-
 	CUser *GetUserByName( string name );
+
+	inline bool Match( string string1, string string2 );	
 };
 
 //

@@ -969,6 +969,9 @@ string CIncomingClanList :: GetRank( )
 		case 0: return "Recruit";
 		case 1: return "Peon";
 		case 2: return "Grunt";
+	}
+	switch( m_Rank )
+	{
 		case 3: return "Shaman";
 		case 4: return "Chieftain";
 	}

@@ -128,11 +128,6 @@ CBNET :: ~CBNET( )
 	delete m_BNCSUtil;
 }
 
-BYTEARRAY CBNET :: GetUniqueName( )
-{
-	return m_Protocol->GetUniqueName( );
-}
-
 unsigned int CBNET :: SetFD( void *fd, void *send_fd, int *nfds )
 {
 	if( !m_Socket->HasError( ) && m_Socket->GetConnected( ) )
@@ -362,7 +357,7 @@ inline void CBNET :: ExtractPackets( )
         }
 }
 
-void CBNET :: ProcessPackets( )
+inline void CBNET :: ProcessPackets( )
 {
 	CIncomingChatEvent *ChatEvent = NULL;
 
@@ -406,7 +401,9 @@ void CBNET :: ProcessPackets( )
 				delete ChatEvent;
 				ChatEvent = NULL;
 				break;
-
+			}
+			switch( Packet->GetID( ) )
+			{
 			case CBNETProtocol :: SID_FLOODDETECTED:
 				if( m_Protocol->RECEIVE_SID_FLOODDETECTED( Packet->GetData( ) ) )
 				{
@@ -456,7 +453,9 @@ void CBNET :: ProcessPackets( )
 					}
 				}
 				break;
-
+			}
+			switch( Packet->GetID( ) )
+			{
 			case CBNETProtocol :: SID_AUTH_CHECK:
 				if( m_Protocol->RECEIVE_SID_AUTH_CHECK( Packet->GetData( ) ) )
 				{
@@ -513,7 +512,9 @@ void CBNET :: ProcessPackets( )
 				}
 
 				break;
-
+			}
+			switch( Packet->GetID( ) )
+			{
 			case CBNETProtocol :: SID_AUTH_ACCOUNTLOGON:
 				if( m_Protocol->RECEIVE_SID_AUTH_ACCOUNTLOGON( Packet->GetData( ) ) )
 				{
@@ -585,7 +586,9 @@ void CBNET :: ProcessPackets( )
 						CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANINVITATION value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANINVITATION( Packet->GetData( ) ) ) + "]" );
 						break;
 				}				
-
+			}
+			switch( Packet->GetID( ) )
+			{
 			case CBNETProtocol :: SID_CLANINVITATIONRESPONSE:
 				if( m_Protocol->RECEIVE_SID_CLANINVITATIONRESPONSE( Packet->GetData( ) ) )
 				{
@@ -619,7 +622,9 @@ void CBNET :: ProcessPackets( )
 						QueueChatCommand( "Error setting user to Chieftain.", BNET );					
 				}
 				break;
-
+			}
+			switch( Packet->GetID( ) )
+			{
 			case CBNETProtocol :: SID_CLANREMOVEMEMBER:
 				switch( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( Packet->GetData( ) ) )
 				{
@@ -669,20 +674,6 @@ void CBNET :: ProcessPackets( )
 
 		delete Packet;
 	}
-}
-
-
-
-void CBNET :: SendEnterChat( )
-{
-	if( m_LoggedIn )
-		m_Socket->PutBytes( m_Protocol->SEND_SID_ENTERCHAT( ) );
-}
-
-void CBNET :: SendJoinChannel( string channel )
-{
-	if( m_LoggedIn && m_InChat )
-		m_Socket->PutBytes( m_Protocol->SEND_SID_JOINCHANNEL( channel ) );
 }
 
 void CBNET :: SendChatCommand( string chatCommand, int destination )
@@ -946,7 +937,7 @@ string CBNET :: GetUserFromNamePartial( string name )
 	return string( );
 }
 
-bool CBNET :: Match( string string1, string string2 )
+inline bool CBNET :: Match( string string1, string string2 )
 {
 	transform( string1.begin( ), string1.end( ), string1.begin( ), (int(*)(int))tolower );
 	transform( string2.begin( ), string2.end( ), string2.begin( ), (int(*)(int))tolower );

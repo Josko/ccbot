@@ -936,9 +936,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 			else if( Command == "say" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "say" ) )
 			{
-				if( Access > 8 )
-					QueueChatCommand( Payload, BNET );
-				else if( Payload[0] != '/' )
+				if( Access > 8 || Payload[0] != '/' )
 					QueueChatCommand( Payload, BNET );
 				else
 					QueueChatCommand( m_CCBot->m_Language->NotAllowedUsingSay( ), User, Whisper, Output );					

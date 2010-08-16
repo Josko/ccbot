@@ -125,13 +125,9 @@ vector<string> CCCBotDB :: CommandList( uint32_t access )
 // CDBBan
 //
 
-CDBBan :: CDBBan( string nServer, string nName, string nDate, string nAdmin, string nReason )
+CDBBan :: CDBBan( string nServer, string nName, string nDate, string nAdmin, string nReason ) : m_Server( nServer ), m_Name( nName ), m_Date( nDate ), m_Admin( nAdmin ), m_Reason( nReason )
 {
-	m_Server = nServer;
-	m_Name = nName;
-	m_Date = nDate;
-	m_Admin = nAdmin;
-	m_Reason = nReason;
+
 }
 
 CDBBan :: ~CDBBan( )
