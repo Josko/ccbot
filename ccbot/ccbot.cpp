@@ -773,28 +773,3 @@ vector<CBNET *> :: iterator CCCBot :: GetServerFromNamePartial( string name )
 
 	return it;
 }
-
-void CCCBot :: EventBNETConnecting( CBNET *bnet )
-{
-
-}
-
-void CCCBot :: EventBNETConnected( CBNET *bnet )
-{
-	
-}
-
-void CCCBot :: EventBNETDisconnected( CBNET *bnet )
-{
-		
-}
-
-void CCCBot :: EventBNETLoggedIn( CBNET *bnet )
-{
-		
-}
-
-void CCCBot :: EventBNETConnectTimedOut( CBNET *bnet )
-{
-
-}

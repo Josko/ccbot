@@ -1309,12 +1309,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			{
 				string message = "Status: ";
 
-		       		for( vector<CBNET *> :: iterator i = m_CCBot->m_BNETs.begin( ); i != m_CCBot->m_BNETs.end( ); ++i )
+		       	for( vector<CBNET *> :: iterator i = m_CCBot->m_BNETs.begin( ); i != m_CCBot->m_BNETs.end( ); ++i )
 				{
-					if( (*i)->GetLoggedIn( ) == true )
-						message += (*i)->GetUserName( ) + " [Online], ";
-					else
-						message += (*i)->GetUserName( ) + " [Offline], ";
+					message += (*i)->GetUserName( ) + ( (*i)->GetLoggedIn( ) ? " [Online], " : " [Offline], " );
 				}
 
 				QueueChatCommand( message.substr( 0, message.size( ) - 2 ) + ".", User, Whisper, Output );						 
@@ -1480,7 +1477,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + "] Joining channel [" + Message + "]" );
 
 		if( !Match( Message, m_CurrentChannel ) )
+		{
 			m_Rejoin = true;
+			m_RejoinInterval = 15;
+		}
 		else
 			m_Rejoin = false;	
 

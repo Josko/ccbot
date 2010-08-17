@@ -121,14 +121,6 @@ public:
 	void UpdateCommandAccess( );
 	void readStdInMessages( );
 
-	// events
-
-	void EventBNETConnecting( CBNET *bnet );
-	void EventBNETConnected( CBNET *bnet );
-	void EventBNETDisconnected( CBNET *bnet );
-	void EventBNETLoggedIn( CBNET *bnet );
-	void EventBNETConnectTimedOut( CBNET *bnet );
-
 	// other functions
 
 	void Restart( );

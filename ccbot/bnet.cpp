@@ -149,7 +149,6 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		// the socket has an error
 
 		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket error" );
-		m_CCBot->EventBNETDisconnected( this );
 		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
 		m_Socket->Reset( );
 		m_NextConnectTime = GetTime( ) + 11;
@@ -164,7 +163,6 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		// the socket was disconnected
 
 		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket not connected" );
-		m_CCBot->EventBNETDisconnected( this );
 		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
 		m_Socket->Reset( );
 		m_NextConnectTime = GetTime( ) + 11;
@@ -253,7 +251,6 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			// the connection attempt completed
 
 			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connected" );
-			m_CCBot->EventBNETConnected( this );
 			m_Socket->PutBytes( m_Protocol->SEND_PROTOCOL_INITIALIZE_SELECTOR( ) );
 			m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_INFO( m_War3Version, !m_CDKeyTFT.empty( ), m_CountryAbbrev, m_Country ) );
 			m_Socket->DoSend( (fd_set*)send_fd );
@@ -270,7 +267,6 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			// the connection attempt timed out (11 seconds)
 
 			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connect timed out" );
-			m_CCBot->EventBNETConnectTimedOut( this );
 			m_Socket->Reset( );
 			m_NextConnectTime = GetTime( ) + 11;
 			m_WaitingToConnect = true;
@@ -283,7 +279,6 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		// attempt to connect to battle.net
 
                 CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connecting to server [" + m_Server + "] on port 6112" );
-                m_CCBot->EventBNETConnecting( this );
 
                 if( m_ServerIP.empty( ) )
                 {
@@ -539,7 +534,6 @@ inline void CBNET :: ProcessPackets( )
 
 					CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon successful" );
 					m_LoggedIn = true;
-					m_CCBot->EventBNETLoggedIn( this );
 					m_Socket->PutBytes( m_Protocol->SEND_SID_ENTERCHAT( ) );
 					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANMEMBERLIST( ) );
 

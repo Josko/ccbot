@@ -108,11 +108,11 @@ public:
 	};
 
 	enum UserFlags {
-		FLAG_BLIZZARD = 1,			// Blizzard representative - 0x01
-		FLAG_CHANNELOPERATOR = 2,	// Channel operator - 0x02
-		FLAG_SPEAKER = 4,			// Speaker - 0x04
-		FLAG_ADMINISTRATOR = 8,		// B.Net administrator - 0x08
-		FLAG_NOUDP = 16				// No UDP - 0x10
+		FLAG_BLIZZARD = 1,			// Blizzard representative	- 00000001
+		FLAG_CHANNELOPERATOR = 2,	// Channel operator			- 00000010
+		FLAG_SPEAKER = 4,			// Speaker					- 00000100
+		FLAG_ADMINISTRATOR = 8,		// B.Net administrator		- 00001000
+		FLAG_NOUDP = 16				// No UDP					- 00010000
 	};
 
 	BYTEARRAY m_ClanTag;
@@ -212,8 +212,8 @@ public:
 	// other functions
 
 private:
-	bool AssignLength( BYTEARRAY &content );
-	bool ValidateLength( BYTEARRAY &content );
+	inline bool AssignLength( BYTEARRAY &content );
+	inline bool ValidateLength( BYTEARRAY &content );
 };
 
 

@@ -895,7 +895,7 @@ BYTEARRAY CBNETProtocol :: SEND_SID_CLANCREATIONINVITATION( BYTEARRAY clantag, B
 // OTHER FUNCTIONS //
 /////////////////////
 
-bool CBNETProtocol :: AssignLength( BYTEARRAY &content )
+inline bool CBNETProtocol :: AssignLength( BYTEARRAY &content )
 {
 	// insert the actual length of the content array into bytes 3 and 4 (indices 2 and 3)
 
@@ -912,7 +912,7 @@ bool CBNETProtocol :: AssignLength( BYTEARRAY &content )
 	return false;
 }
 
-bool CBNETProtocol :: ValidateLength( BYTEARRAY &content )
+inline bool CBNETProtocol :: ValidateLength( BYTEARRAY &content )
 {
 	// verify that bytes 3 and 4 (indices 2 and 3) of the content array describe the length
 
