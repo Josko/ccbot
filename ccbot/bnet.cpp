@@ -943,7 +943,7 @@ inline bool CBNET :: Match( string string1, string string2 )
 // CUser
 //
 
-CUser :: CUser( string nUser, uint32_t nPing, uint32_t nUserflags ) : m_User ( nUser ), m_Ping( nPing ), m_UserFlags( nUserflags ), m_Clan( string( ) )
+CUser :: CUser( string nUser, int nPing, uint32_t nUserflags ) : m_User ( nUser ), m_Ping( nPing ), m_UserFlags( nUserflags ), m_Clan( string( ) )
 {
 
 }

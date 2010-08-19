@@ -936,8 +936,7 @@ inline bool CBNETProtocol :: ValidateLength( BYTEARRAY &content )
 // CIncomingChatEvent
 //
 
-CIncomingChatEvent :: CIncomingChatEvent( CBNETProtocol :: IncomingChatEvent nChatEvent, uint32_t nUserFlags, uint32_t nPing, string nUser, string nMessage ) \
-					: m_ChatEvent( nChatEvent ), m_UserFlags( nUserFlags ), m_Ping( nPing ), m_User( nUser ), m_Message( nMessage )
+CIncomingChatEvent :: CIncomingChatEvent( CBNETProtocol :: IncomingChatEvent nChatEvent, uint32_t nUserFlags, int nPing, string nUser, string nMessage ) : m_ChatEvent( nChatEvent ), m_UserFlags( nUserFlags ), m_Ping( nPing ), m_User( nUser ), m_Message( nMessage )
 {
 
 }

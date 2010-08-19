@@ -181,19 +181,19 @@ class CUser
 {
 private:
 	string m_User;
-	uint32_t m_Ping;
+	int m_Ping;
 	uint32_t m_UserFlags;
 	string m_Clan;
 public:
-	CUser( string nUser, uint32_t nPing, uint32_t nUserFlags );
+	CUser( string nUser, int nPing, uint32_t nUserFlags );
 	~CUser( );
 
 	string GetUser( )							{ return m_User; }
-	uint32_t GetPing( )							{ return m_Ping; }
+	int GetPing( )								{ return m_Ping; }
 	uint32_t GetUserFlags( )					{ return m_UserFlags; }
 	string GetClan( )							{ return m_Clan; }
 	
-	void SetPing( uint32_t nPing )				{ m_Ping = nPing; }
+	void SetPing( int nPing )					{ m_Ping = nPing; }
 	void SetUserFlags( uint32_t nUserFlags )	{ m_UserFlags = nUserFlags; }
 	void SetClan( string nClan )				{ m_Clan = nClan; }
 };
