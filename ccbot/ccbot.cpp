@@ -473,7 +473,7 @@ int main( )
 // CCBot
 //
 
-CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "0.33" )
+CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.00" )
 {
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Exiting = false;

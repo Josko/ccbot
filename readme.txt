@@ -1,5 +1,5 @@
 =========================================
-CCBot - Clan & Channel Bot - Version 0.33
+CCBot - Clan & Channel Bot - Version 1.00
 =========================================
 
 CCBot is a modified GHost++ bot (made by Varlock) to moderate both the channel and the clan it's located in. It's written in C++ with the SQLite files in C and because of this it's multi-platform and works on Windows and Linux (and OS X with probable minor changes to source). It's meant to be small and powerful with almost no dependecies and to work on PvPGNs and B.NET. 
@@ -254,6 +254,17 @@ Then when in the CCBot binary directory just type in terminal "./ccbot++" withou
 =========
 CHANGELOG
 =========
+
+
+Version 1.00 ( 21.08.2010. )
+
+- Fixed a bug with ping
+- Fixed a bug with swears.cfg not loading
+- Fixed a bug with swears.cfg not generating when not present
+- Couple of miscellanous fixes
+- Updated SQLite to version 3.7.0.1
+
+- First stable version - version changed to 1.00
 
 Version 0.33 ( 15.08.2010. )
 
