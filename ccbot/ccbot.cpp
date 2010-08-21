@@ -537,7 +537,7 @@ CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "0.33" )
 	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++" );
 
 	// Update the swears.cfg file
-	UpdateSwearList( );	
+	UpdateSwearList( );
 	
 	// Check for the default access system values
 	UpdateCommandAccess( );
@@ -711,7 +711,8 @@ void CCCBot :: UpdateCommandAccess( )
 
 void CCCBot :: UpdateSwearList( )
 {
-	ifstream file( SwearsFile );
+	ifstream file;
+	file.open( SwearsFile, ios :: app );
 
 	if( !file.fail( ) )
 	{
@@ -732,12 +733,16 @@ void CCCBot :: UpdateSwearList( )
 			}
 		}
 
+		file.close( );
+
 		if( m_SwearList.size( ) )
 			CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
 		else
 		{
-			ofstream new_file( SwearsFile );
-			if( !file.fail( ) )
+			ofstream new_file;
+			new_file.open( SwearsFile );
+
+			if( !new_file.fail( ) )
 			{
 				CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
 
@@ -746,10 +751,10 @@ void CCCBot :: UpdateSwearList( )
 				new_file << "#########################################################" << endl;
 				new_file << "# setting the # character on the first position will comment out your line" << endl;
 			}
-		}
-	}
 
-	file.close( );
+			new_file.close( );
+		}
+	}	
 }
 
 vector<CBNET *> :: iterator CCCBot :: GetServerFromNamePartial( string name )
