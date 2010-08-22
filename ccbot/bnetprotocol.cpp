@@ -513,7 +513,7 @@ BYTEARRAY CBNETProtocol :: SEND_SID_ENTERCHAT( )
 BYTEARRAY CBNETProtocol :: SEND_SID_JOINCHANNEL( string channel )
 {
 	unsigned char NoCreateJoin[]	= { 2, 0, 0, 0 };
-	unsigned char FirstJoin[]	= { 1, 0, 0, 0 };
+	unsigned char FirstJoin[]		= { 1, 0, 0, 0 };
 
 	BYTEARRAY packet;
 	packet.push_back( BNET_HEADER_CONSTANT );				// BNET header constant

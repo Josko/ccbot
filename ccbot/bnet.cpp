@@ -52,10 +52,12 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	m_Server = nServer;
 	m_ServerAlias = m_Server;
  	transform( m_ServerAlias.begin( ), m_ServerAlias.end( ), m_ServerAlias.begin( ), (int(*)(int))tolower );
+
 	if( m_ServerAlias == "server.eurobattle.net" )
 		m_ServerAlias = "eurobattle.net";
-	if( m_ServerAlias == "playdota.eu" )
+	else if( m_ServerAlias == "playdota.eu" )
 		m_ServerAlias = "playdota";
+
 	m_CDKeyROC = nCDKeyROC;
 	m_CDKeyTFT = nCDKeyTFT;
 
@@ -126,6 +128,9 @@ CBNET :: ~CBNET( )
 	}
 
 	delete m_BNCSUtil;
+
+	for( map<string, CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+		delete i->second;
 }
 
 unsigned int CBNET :: SetFD( void *fd, void *send_fd, int *nfds )
@@ -278,29 +283,28 @@ bool CBNET :: Update( void *fd, void *send_fd )
 	{
 		// attempt to connect to battle.net
 
-                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connecting to server [" + m_Server + "] on port 6112" );
+		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connecting to server [" + m_Server + "] on port 6112" );
 
-                if( m_ServerIP.empty( ) )
-                {
-                        m_Socket->Connect( string( ), m_Server, 6112 );
+		if( m_ServerIP.empty( ) )
+		{
+			m_Socket->Connect( string( ), m_Server, 6112 );
+			
+			if( !m_Socket->HasError( ) )
+			{
+				m_ServerIP = m_Socket->GetIPString( );
+				CONSOLE_Print( "[BNET: " + m_ServerAlias + "] resolved and cached server IP address " + m_ServerIP );
+			}
+        }
+		else
+        {
+			// use cached server IP address since resolving takes time and is blocking
 
-                        if( !m_Socket->HasError( ) )
-                        {
-                                m_ServerIP = m_Socket->GetIPString( );
-                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] resolved and cached server IP address " + m_ServerIP );
-                        }
-                }
-                else
-                {
-                        // use cached server IP address since resolving takes time and is blocking
+			CONSOLE_Print( "[BNET: " + m_Server + "] using cached server IP address " + m_ServerIP );
+			m_Socket->Connect( string( ), m_ServerIP, 6112 );
+        }
 
-                        CONSOLE_Print( "[BNET: " + m_Server + "] using cached server IP address " + m_ServerIP );
-                        m_Socket->Connect( string( ), m_ServerIP, 6112 );
-                }
-
-                m_WaitingToConnect = false;
-                return m_Exiting;
-
+		m_WaitingToConnect = false;
+		return m_Exiting;
 	}
 
 	return m_Exiting;
@@ -396,9 +400,7 @@ inline void CBNET :: ProcessPackets( )
 				delete ChatEvent;
 				ChatEvent = NULL;
 				break;
-			}
-			switch( Packet->GetID( ) )
-			{
+	
 			case CBNETProtocol :: SID_FLOODDETECTED:
 				if( m_Protocol->RECEIVE_SID_FLOODDETECTED( Packet->GetData( ) ) )
 				{
@@ -448,9 +450,7 @@ inline void CBNET :: ProcessPackets( )
 					}
 				}
 				break;
-			}
-			switch( Packet->GetID( ) )
-			{
+	
 			case CBNETProtocol :: SID_AUTH_CHECK:
 				if( m_Protocol->RECEIVE_SID_AUTH_CHECK( Packet->GetData( ) ) )
 				{
@@ -507,9 +507,7 @@ inline void CBNET :: ProcessPackets( )
 				}
 
 				break;
-			}
-			switch( Packet->GetID( ) )
-			{
+
 			case CBNETProtocol :: SID_AUTH_ACCOUNTLOGON:
 				if( m_Protocol->RECEIVE_SID_AUTH_ACCOUNTLOGON( Packet->GetData( ) ) )
 				{
@@ -580,9 +578,7 @@ inline void CBNET :: ProcessPackets( )
 						CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANINVITATION value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANINVITATION( Packet->GetData( ) ) ) + "]" );
 						break;
 				}				
-			}
-			switch( Packet->GetID( ) )
-			{
+
 			case CBNETProtocol :: SID_CLANINVITATIONRESPONSE:
 				if( m_Protocol->RECEIVE_SID_CLANINVITATIONRESPONSE( Packet->GetData( ) ) )
 				{
@@ -616,9 +612,7 @@ inline void CBNET :: ProcessPackets( )
 						QueueChatCommand( "Error setting user to Chieftain.", BNET );					
 				}
 				break;
-			}
-			switch( Packet->GetID( ) )
-			{
+
 			case CBNETProtocol :: SID_CLANREMOVEMEMBER:
 				switch( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( Packet->GetData( ) ) )
 				{
@@ -908,7 +902,7 @@ void CBNET :: SendGetClanList( )
 string CBNET :: GetUserFromNamePartial( string name )
 {
 	int Matches = 0;
-	string Partial = string( );
+	string User = string( );
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );	
 
 	// try to match each username with the passed string (e.g. "Varlock" would be matched with "lock")
@@ -918,15 +912,15 @@ string CBNET :: GetUserFromNamePartial( string name )
 		if( (*i).first.find( name ) != string :: npos )
 		{
 			++Matches;
-			Partial = (*i).first;
+			User = (*i).first;
 		
-			if( (*i).first == name )
-				return (*i).first;
+			if( User == name )
+				return User;
 		}
 	}
 
 	if( Matches == 1 )
-		return Partial;
+		return User;
 
 	return string( );
 }
@@ -943,7 +937,12 @@ inline bool CBNET :: Match( string string1, string string2 )
 // CUser
 //
 
-CUser :: CUser( string nUser, int nPing, uint32_t nUserflags ) : m_User ( nUser ), m_Ping( nPing ), m_UserFlags( nUserflags ), m_Clan( string( ) )
+CUser :: CUser( string nUser, int nPing, uint32_t nUserflags ) : m_User ( nUser ), m_Ping( nPing ), m_UserFlags( nUserflags )
+{
+
+}
+
+CUser :: ~CUser( )
 {
 
 }
@@ -952,7 +951,7 @@ CUser* CBNET :: GetUserByName( string name )
 {
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 
-	for( map<string,  CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+	for( map<string, CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 	{
 		if( name == (*i).first )
 			return i->second;

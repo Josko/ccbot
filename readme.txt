@@ -256,15 +256,23 @@ CHANGELOG
 =========
 
 
-Version 1.00 ( 21.08.2010. )
+Version 1.00 ( 22.08.2010. )
 
 - Fixed a bug with ping
 - Fixed a bug with swears.cfg not loading
 - Fixed a bug with swears.cfg not generating when not present
 - Couple of miscellanous fixes
 - Updated SQLite to version 3.7.0.1
+- Fixed a bug with clan members and CHAT clients (telnet/bots)
+- Cannot ban people with higher access and clan shamans & chieftains
+- Ban reduces the victims access to 0
+- People with access < 5 are affected by anti-spam (up from < 3)
+- !checkaccess writes your own access if you don't supply a user
+- Fixed the fix for rejoining the channel when you're banned
+- Fixed a major problem (100% CPU usage/crash)
+- Fixed a minor memory leak
 
-- First stable version - version changed to 1.00
+- First stable version, ready for general usage - version changed to 1.00
 
 Version 0.33 ( 15.08.2010. )
 

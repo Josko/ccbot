@@ -202,8 +202,7 @@ void CONSOLE_Draw( )
 		
 		for( map<string, CUser *> :: iterator i = gCCBot->m_BNETs[0]->m_Channel.begin( ); i != gCCBot->m_BNETs[0]->m_Channel.end( ); ++i )
 		{
-			mvwaddnstr( gChannelWindow, y, 0, (*i).second->GetUser( ).c_str( ), 16 );
-			++y;
+			mvwaddnstr( gChannelWindow, y++, 0, (*i).second->GetUser( ).c_str( ), 16 );
 
 			if( y >= LINES - 3 )
 				break;
