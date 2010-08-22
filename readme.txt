@@ -271,6 +271,7 @@ Version 1.00 ( 22.08.2010. )
 - Fixed the fix for rejoining the channel when you're banned
 - Fixed a major problem (100% CPU usage/crash)
 - Fixed a minor memory leak
+- Game announcer uses a "better" command (/whois intead of /whereis) and added a check for BNET pub response ("is using Warcraft III The Frozen Throne in game")
 
 - First stable version, ready for general usage - version changed to 1.00
 

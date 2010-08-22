@@ -219,11 +219,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					m_Announce = true;
 					m_AnnounceMsg = AnnounceMessage;
+					m_AnnounceInterval = UTIL_ToInt32( Interval );
 
-					if( UTIL_ToInt32( Interval ) < 3 )
+					if( m_AnnounceInterval < 3 )
 						m_AnnounceInterval = 4;
-					else
-						m_AnnounceInterval = UTIL_ToInt32( Interval );
 
 					QueueChatCommand( m_CCBot->m_Language->AnnounceEnabled( Interval ), User, Whisper, Output );				
 				}
@@ -266,7 +265,6 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					{
 						QueueChatCommand( m_CCBot->m_Language->UserAlreadyBanned( Victim, Ban->GetAdmin( ) ), User, Whisper, Output );
 						delete Ban;
-						Ban = NULL;
 					}
 					else
 					{
@@ -399,7 +397,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					Payload = User;
 
 				if( m_CCBot->m_DB->AccessCheck( m_Server, Payload ) != 11 )
-					QueueChatCommand( "User [" + Payload + "] has access of [" + UTIL_ToString( m_CCBot->m_DB->AccessCheck( m_Server, Payload ) ) + "],", User, Whisper, Output );
+					QueueChatCommand( "User [" + Payload + "] has access of [" + UTIL_ToString( m_CCBot->m_DB->AccessCheck( m_Server, Payload ) ) + "].", User, Whisper, Output );
 				else
 					QueueChatCommand( "User [" + Payload + "] has access of [0].", User, Whisper, Output );
 			}
@@ -828,10 +826,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				SS >> Victim;
 				bool Found = false;
 
-				if ( ( Victim = GetUserFromNamePartial( Victim ) ).size( ) )
-				{
+				if ( !( Victim = GetUserFromNamePartial( Victim ) ).empty( ) )
 					Found = true;
-				}
 
 				if( Found && !IsClanShaman( Victim ) && !IsClanChieftain( Victim ) && !m_CCBot->m_DB->SafelistCheck( m_Server, Victim )  )
 				{	
@@ -1358,7 +1354,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 		if( m_AnnounceGames && m_Channel.size( ) >= 2 )		
 		{
-			if( Message.find("private game") != string::npos || Message.find("in  game") != string::npos )
+			if( Message.find( "is using Warcraft III Frozen Throne and is currently in  game" ) != string :: npos || Message.find( "is using Warcraft III Frozen Throne and is currently in private game" ) != string :: npos || Message.find( "is using Warcraft III The Frozen Throne in game" ) != string :: npos)
 			{
 				string user = Message.substr( 0, Message.find_first_of(" ") );
 
@@ -1441,7 +1437,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	else if( Event == CBNETProtocol :: EID_LEAVE )
 	{
 		if ( m_AnnounceGames && !Match( m_HostbotName, User ) )
-			SendChatCommandHidden( "/whereis " + User, BNET );
+			SendChatCommandHidden( "/whois " + User, BNET );
 
 		for( map<string, CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 		{
