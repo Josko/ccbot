@@ -39,6 +39,8 @@ If you want to be able to connect to battle.net:
 -> "Storm.dll" in your bot_war3path
 -> "war3.exe" in your bot_war3path
 
+You also need Microsoft Visual C++ 2010 Redistributable Package (x86): http://www.microsoft.com/downloads/details.aspx?FamilyID=a7b7a05e-6de6-4d3a-a423-37bf0912db84&displaylang=en
+
 ===============
 Clan Moderation
 ===============
@@ -210,9 +212,9 @@ Parameters in angled brackets <like this> are required and parameters in square 
 Compiling CCBot on Windows
 ==========================
 
-1. Download Visual C++ 2008 Express Edition at http://www.microsoft.com/express/
-2. Open ghost.sln
-3. Choose a Release version
+1. Download Visual C++ 2010 Express Edition at http://www.microsoft.com/express/
+2. Open ccbot.sln
+3. Choose Release version
 4. Build
 
 Notes:
