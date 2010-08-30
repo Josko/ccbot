@@ -143,7 +143,7 @@ BYTEARRAY UTIL_ExtractCString( BYTEARRAY &b, unsigned int start )
 
 	if( start < b.size( ) )
 	{
-		for( unsigned int i = start; i < b.size( ); i++ )
+		for( unsigned int i = start; i < b.size( ); ++i )
 		{
 			if( b[i] == 0 )
 				return BYTEARRAY( b.begin( ) + start, b.begin( ) + i );
@@ -332,108 +332,12 @@ bool UTIL_FileExists( string file )
 	return false;
 }
 
-string UTIL_FileRead( string file, uint32_t start, uint32_t length )
-{
-	ifstream IS;
-	IS.open( file.c_str( ), ios :: binary );
-
-	if( IS.fail( ) )
-	{
-		CONSOLE_Print( "[UTIL] warning - unable to read file part [" + file + "]" );
-		return string( );
-	}
-
-	// get length of file
-
-	IS.seekg( 0, ios :: end );
-	uint32_t FileLength = IS.tellg( );
-
-	if( start > FileLength )
-	{
-		IS.close( );
-		return string( );
-	}
-
-	IS.seekg( start, ios :: beg );
-
-	// read data
-
-	char *Buffer = new char[length];
-	IS.read( Buffer, length );
-	string BufferString = string( Buffer, IS.gcount( ) );
-	IS.close( );
-	delete [] Buffer;
-	return BufferString;
-}
-
-string UTIL_FileRead( string file )
-{
-	ifstream IS;
-	IS.open( file.c_str( ), ios :: binary );
-
-	if( IS.fail( ) )
-	{
-		CONSOLE_Print( "[UTIL] warning - unable to read file [" + file + "]" );
-		return string( );
-	}
-
-	// get length of file
-
-	IS.seekg( 0, ios :: end );
-	uint32_t FileLength = IS.tellg( );
-	IS.seekg( 0, ios :: beg );
-
-	// read data
-
-	char *Buffer = new char[FileLength];
-	IS.read( Buffer, FileLength );
-	string BufferString = string( Buffer, IS.gcount( ) );
-	IS.close( );
-	delete [] Buffer;
-
-	if( BufferString.size( ) == FileLength )
-		return BufferString;
-	else
-		return string( );
-}
-
-bool UTIL_FileWrite( string file, unsigned char *data, uint32_t length )
-{
-	ofstream OS;
-	OS.open( file.c_str( ), ios :: binary );
-
-	if( OS.fail( ) )
-	{
-		CONSOLE_Print( "[UTIL] warning - unable to write file [" + file + "]" );
-		return false;
-	}
-
-	// write data
-
-	OS.write( (const char *)data, length );
-	OS.close( );
-	return true;
-}
-
-string UTIL_FileSafeName( string fileName )
-{
-	string :: size_type BadStart = fileName.find_first_of( "\\/:*?<>|" );
-
-	while( BadStart != string :: npos )
-	{
-		fileName.replace( BadStart, 1, 1, '_' );
-		BadStart = fileName.find_first_of( "\\/:*?<>|" );
-	}
-
-	return fileName;
-}
-
 vector<string> UTIL_Tokenize( string s, char delim )
 {
 	vector<string> Tokens;
 	string Token;
 
-	for( string :: iterator i = s.begin( ); i != s.end( ); i++ )
+	for( string :: iterator i = s.begin( ); i != s.end( ); ++i )
 	{
 		if( *i == delim )
 		{

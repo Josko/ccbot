@@ -37,7 +37,7 @@ public:
 
 	void Read( string file );
 	bool Exists( string key );
-	void CreateNewLanguage( );
+	void CreateLanguage( );
 	void CreateConfig( );
 	int GetInt( string key, int x );
 	string GetString( string key, string x );

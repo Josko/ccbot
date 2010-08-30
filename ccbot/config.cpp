@@ -21,6 +21,7 @@
 
 #include "ccbot.h"
 #include "config.h"
+#include "util.h"
 
 #include <stdlib.h>
 
@@ -46,41 +47,49 @@ void CConfig :: Read( string file )
 	{
 		CONSOLE_Print( "[CONFIG] warning - unable to read file [" + file + "]" );
 
-		if( file == CFGFile )
-			CreateConfig( );
-		else if( file == LanguageFile )
-			CreateNewLanguage( );		
-	}
-	else
-	{
-		CONSOLE_Print( "[CONFIG] loading file [" + file + "]" );
-		string Line;
-
-		while( !in.eof( ) )
+		if( !UTIL_FileExists( file ) )
 		{
-			getline( in, Line );
+			if( file == CFGFile  )
+				CreateConfig( );
+			else if( file == LanguageFile && !UTIL_FileExists( file ) )
+				CreateLanguage( );
 
-			// ignore blank lines, newlines, comments
+			in.open( file.c_str( ) );
 
-			if( Line.empty( ) || Line[0] == '#' || Line == "\n" )
-				continue;
-
-			string :: size_type Split = Line.find( "=" );
-
-			if( Split == string :: npos )
-				continue;
-
-			string :: size_type KeyStart = Line.find_first_not_of( " " );
-			string :: size_type KeyEnd = Line.find( " ", KeyStart );
-			string :: size_type ValueStart = Line.find_first_not_of( " ", Split + 1 );
-			string :: size_type ValueEnd = Line.size( );
-
-			if( ValueStart != string :: npos )
-				m_CFG[Line.substr( KeyStart, KeyEnd - KeyStart )] = Line.substr( ValueStart, ValueEnd - ValueStart );
+			if( in.fail( ) )
+				return;
 		}
-
-		in.close( );
+		else
+			return;
 	}
+	
+	CONSOLE_Print( "[CONFIG] loading file [" + file + "]" );
+	string Line;
+
+	while( !in.eof( ) )
+	{
+		getline( in, Line );
+
+		// ignore blank lines, newlines, comments
+
+		if( Line.empty( ) || Line[0] == '#' || Line == "\n" )
+			continue;
+
+		string :: size_type Split = Line.find( "=" );
+
+		if( Split == string :: npos )
+			continue;
+
+		string :: size_type KeyStart = Line.find_first_not_of( " " );
+		string :: size_type KeyEnd = Line.find( " ", KeyStart );
+		string :: size_type ValueStart = Line.find_first_not_of( " ", Split + 1 );
+		string :: size_type ValueEnd = Line.size( );
+
+		if( ValueStart != string :: npos )
+			m_CFG[Line.substr( KeyStart, KeyEnd - KeyStart )] = Line.substr( ValueStart, ValueEnd - ValueStart );
+	}
+
+	in.close( );
 }
 
 bool CConfig :: Exists( string key )
@@ -104,7 +113,7 @@ string CConfig :: GetString( string key, string x )
 		return m_CFG[key];
 }
 
-void CConfig :: CreateNewLanguage( )
+void CConfig :: CreateLanguage( )
 {
 	ofstream file( LanguageFile );
 
@@ -178,8 +187,7 @@ void CConfig :: CreateConfig( )
 		file << "# Starting here are the global variables which are valid for every bnet\n" << endl;
 		file << "bot_log = logs\\" << endl;
 		file << "bot_language = language.cfg" << endl;
-		file << "bot_war3path = C:\\Program Files\\Warcraft III\\" << endl;			
-		file << "tcp_nodelay = 0" << endl;
+		file << "bot_war3path = C:\\Program Files\\Warcraft III\\" << endl;
 		file << "db_type = sqlite3" << endl;
 		file << "db_sqlite3_file = ccbot.dbs\n" << endl;
 		file << "# These variables are needed\n" << endl;

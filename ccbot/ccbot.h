@@ -99,18 +99,18 @@ class CCCBot
 {
 public:
 
-	vector<CBNET *> m_BNETs;				// all our battle.net connections (there can be more than one)
+	vector<CBNET *> m_BNETs;			// all our battle.net connections (there can be more than one)
 	CCCBotDB *m_DB;						// database
-	CLanguage *m_Language;					// language
+	CLanguage *m_Language;				// language
 	bool m_Exiting;						// set to true to force ghost to shutdown next update (used by SignalCatcher)
 	bool m_Enabled;						// set to false to prevent new games from being created
 	string m_Version;					// CCBot version string
 	uint32_t m_Uptime;					// uptime value
-	map<string, uint32_t> m_Commands;			// map of every command keyword and default access value
-	string m_LanguageFile;					// config value: language file
-	string m_Warcraft3Path;					// config value: Warcraft 3 path
+	map<string, uint32_t> m_Commands;	// map of every command keyword and default access value
+	string m_LanguageFile;				// config value: language file
+	string m_Warcraft3Path;				// config value: Warcraft 3 path
 	string m_CFGPath;					// config value:path to txt files
-	vector<string> m_SwearList;				// vector of words for swear kicking
+	vector<string> m_SwearList;			// vector of words for swear kicking
 
 	CCCBot( CConfig *CFG );
 	~CCCBot( );
@@ -127,7 +127,6 @@ public:
 	void SetConfigs( CConfig *CFG );
 	void ReloadConfigs( );
 	void UpdateSwearList( );
-	// string GetServerFromNamePartial( string name );
 	vector<CBNET *> :: iterator GetServerFromNamePartial( string name );
 };
 

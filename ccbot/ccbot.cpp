@@ -650,53 +650,53 @@ void CCCBot :: UpdateCommandAccess( )
 	// load default access values and insert them into database if a access number hasn't already been set
 	// format: m_Commands["<command keyword>"] = <value> (must be higher or equal 0 and lower then 10)
 	
-	m_Commands[ "accept" ] = 9;
-	m_Commands[ "access" ] = 0;
-	m_Commands[ "addsafelist" ] = 6;
-	m_Commands[ "announce" ] = 6;
-	m_Commands[ "ban" ] = 7;
-	m_Commands[ "chanlist" ] = 3;
-	m_Commands[ "channel" ] = 5;
-	m_Commands[ "checkaccess" ] = 5;
-	m_Commands[ "checkban" ] = 3;
-	m_Commands[ "checksafelist" ] = 5;
-	m_Commands[ "chieftain" ] = 9;
-	m_Commands[ "clanlist" ] = 1;
-	m_Commands[ "clearqueue" ] = 3;
-	m_Commands[ "command" ] = 7;
-	m_Commands[ "countaccess" ] = 7;
-	m_Commands[ "countbans" ] = 5;
-	m_Commands[ "countsafelist" ] = 5;
-	m_Commands[ "delaccess" ] = 8;
-	m_Commands[ "delsafelist" ] = 6;
-	m_Commands[ "exit" ] = 9;
-	m_Commands[ "games" ] = 4;
-	m_Commands[ "getclan" ] = 2;
-	m_Commands[ "gn8" ] = 1;
-	m_Commands[ "greet" ] = 6;
-	m_Commands[ "grunt" ] = 7;
-	m_Commands[ "invite" ] = 2;
-	m_Commands[ "kick" ] = 5;
-	m_Commands[ "lockdown" ] = 8;
-	m_Commands[ "motd" ] = 5;
-	m_Commands[ "online" ] = 1;
-	m_Commands[ "peon" ] = 7;
-	m_Commands[ "ping" ] = 0;
-	m_Commands[ "rejoin" ] = 4;
-	m_Commands[ "restart" ] = 9;
-	m_Commands[ "remove" ] = 9;
-	m_Commands[ "reload" ] = 4;
-	m_Commands[ "say" ] = 6;
-	m_Commands[ "setaccess" ] = 8;
-	m_Commands[ "setcommand" ] = 9;
-	m_Commands[ "shaman" ] = 9;
-	m_Commands[ "slap" ] = 0;
-	m_Commands[ "spit" ] = 0;
-	m_Commands[ "status" ] = 2;
-	m_Commands[ "squelch" ] = 5;
-	m_Commands[ "topic" ] = 5;
-	m_Commands[ "unban" ] = 7;
-	m_Commands[ "uptime" ] = 1;	
+	m_Commands[ "accept"]			= 9;
+	m_Commands[ "access"]			= 0;
+	m_Commands[ "addsafelist" ]		= 6;
+	m_Commands[ "announce" ]		= 6;
+	m_Commands[ "ban" ]				= 7;
+	m_Commands[ "chanlist" ]		= 3;
+	m_Commands[ "channel" ]			= 5;
+	m_Commands[ "checkaccess" ]		= 5;
+	m_Commands[ "checkban" ]		= 3;
+	m_Commands[ "checksafelist" ]	= 5;
+	m_Commands[ "chieftain" ]		= 9;
+	m_Commands[ "clanlist" ]		= 1;
+	m_Commands[ "clearqueue" ]		= 3;
+	m_Commands[ "command" ]			= 7;
+	m_Commands[ "countaccess" ]		= 7;
+	m_Commands[ "countbans" ]		= 5;
+	m_Commands[ "countsafelist" ]	= 5;
+	m_Commands[ "delaccess" ]		= 8;
+	m_Commands[ "delsafelist" ]		= 6;
+	m_Commands[ "exit" ]			= 9;
+	m_Commands[ "games" ]			= 4;
+	m_Commands[ "getclan" ]			= 2;
+	m_Commands[ "gn8" ]				= 1;
+	m_Commands[ "greet" ]			= 6;
+	m_Commands[ "grunt" ]			= 7;
+	m_Commands[ "invite" ]			= 2;
+	m_Commands[ "kick" ]			= 5;
+	m_Commands[ "lockdown" ]		= 8;
+	m_Commands[ "motd" ]			= 5;
+	m_Commands[ "online" ]			= 1;
+	m_Commands[ "peon" ]			= 7;
+	m_Commands[ "ping" ]			= 0;
+	m_Commands[ "rejoin" ]			= 4;
+	m_Commands[ "restart" ]			= 9;
+	m_Commands[ "remove" ]			= 9;
+	m_Commands[ "reload" ]			= 4;
+	m_Commands[ "say" ]				= 6;
+	m_Commands[ "setaccess" ]		= 8;
+	m_Commands[ "setcommand" ]		= 9;
+	m_Commands[ "shaman" ]			= 9;
+	m_Commands[ "slap" ]			= 0;
+	m_Commands[ "spit" ]			= 0;
+	m_Commands[ "status" ]			= 2;
+	m_Commands[ "squelch" ]			= 5;
+	m_Commands[ "topic" ]			= 5;
+	m_Commands[ "unban" ]			= 7;
+	m_Commands[ "uptime" ]			= 1;	
 
 	for( map<string, uint32_t> :: iterator i = m_Commands.begin( ); i != m_Commands.end( ); ++i )
 	{
@@ -710,50 +710,53 @@ void CCCBot :: UpdateCommandAccess( )
 
 void CCCBot :: UpdateSwearList( )
 {
-	ifstream file;
-	file.open( SwearsFile, ios :: app );
-
-	if( !file.fail( ) )
+	if( !UTIL_FileExists( SwearsFile ) )
 	{
-		m_SwearList.clear( );
-		string line;
+		ifstream file;
+		file.open( SwearsFile, ios :: app );
 
-		while( !file.eof( ) )
+		if( !file.fail( ) )
 		{
-			getline( file, line );
+			m_SwearList.clear( );
+			string line;
 
-			if( !line.empty( ) )
+			while( !file.eof( ) )
 			{
-				if( find( m_SwearList.begin( ), m_SwearList.end( ), line ) == m_SwearList.end( ) && line.substr(0,1) != "#" ) 
+				getline( file, line );
+
+				if( !line.empty( ) )
 				{
-					transform( line.begin( ), line.end( ), line.begin( ), (int(*)(int))tolower );
-					m_SwearList.push_back( line );
-				}					
+					if( find( m_SwearList.begin( ), m_SwearList.end( ), line ) == m_SwearList.end( ) && line[0] != '#' ) 
+					{
+						transform( line.begin( ), line.end( ), line.begin( ), (int(*)(int))tolower );
+						m_SwearList.push_back( line );
+					}					
+				}
 			}
-		}
 
-		file.close( );
+			file.close( );
 
-		if( m_SwearList.size( ) )
-			CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
-		else
-		{
-			ofstream new_file;
-			new_file.open( SwearsFile );
-
-			if( !new_file.fail( ) )
+			if( m_SwearList.size( ) )
+				CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
+			else if( !UTIL_FileExists( SwearsFile ) )
 			{
-				CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
+				ofstream new_file;
+				new_file.open( SwearsFile );
 
-				new_file << "#########################################################" << endl;
-				new_file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! ####" << endl;
-				new_file << "#########################################################" << endl;
-				new_file << "# setting the # character on the first position will comment out your line" << endl;
+				if( !new_file.fail( ) )
+				{
+					CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
+
+					new_file << "#########################################################" << endl;
+					new_file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! ####" << endl;
+					new_file << "#########################################################" << endl;
+					new_file << "# setting the # character on the first position will comment out your line" << endl;
+				}
+
+				new_file.close( );
 			}
-
-			new_file.close( );
 		}
-	}	
+	}
 }
 
 vector<CBNET *> :: iterator CCCBot :: GetServerFromNamePartial( string name )
