@@ -40,8 +40,7 @@ CConfig :: ~CConfig( )
 
 void CConfig :: Read( string file )
 {
-	ifstream in;
-	in.open( file );
+	ifstream in( file.c_str( ) );
 
 	if( in.fail( ) )
 	{
@@ -49,8 +48,7 @@ void CConfig :: Read( string file )
 
 		if( file == CFGFile )
 			CreateConfig( );
-
-		if( file == LanguageFile )
+		else if( file == LanguageFile )
 			CreateNewLanguage( );		
 	}
 	else
@@ -108,7 +106,7 @@ string CConfig :: GetString( string key, string x )
 
 void CConfig :: CreateNewLanguage( )
 {
-	ofstream file( LanguageFile, ios :: app );
+	ofstream file( LanguageFile );
 
 	if( file.fail( ) )
 		CONSOLE_Print( "[CONFIG] error making a new language.cfg file" );

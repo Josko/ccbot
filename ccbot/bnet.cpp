@@ -55,8 +55,6 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 
 	if( m_ServerAlias == "server.eurobattle.net" )
 		m_ServerAlias = "eurobattle.net";
-	else if( m_ServerAlias == "playdota.eu" )
-		m_ServerAlias = "playdota";
 
 	m_CDKeyROC = nCDKeyROC;
 	m_CDKeyTFT = nCDKeyTFT;
@@ -925,13 +923,6 @@ string CBNET :: GetUserFromNamePartial( string name )
 	return string( );
 }
 
-inline bool CBNET :: Match( string string1, string string2 )
-{
-	transform( string1.begin( ), string1.end( ), string1.begin( ), (int(*)(int))tolower );
-	transform( string2.begin( ), string2.end( ), string2.begin( ), (int(*)(int))tolower );
-
-	return string1 == string2;
-}
 
 //
 // CUser

@@ -170,7 +170,13 @@ public:
 	string GetUserFromNamePartial( string name );
 	CUser *GetUserByName( string name );
 
-	inline bool Match( string string1, string string2 );	
+	bool Match( string string1, string string2 )
+	{
+		transform( string1.begin( ), string1.end( ), string1.begin( ), (int(*)(int))tolower );
+		transform( string2.begin( ), string2.end( ), string2.begin( ), (int(*)(int))tolower );
+
+		return string1 == string2;
+	};
 };
 
 //

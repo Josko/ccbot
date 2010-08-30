@@ -641,48 +641,56 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				}
 
 				if( ShowChief )
-				if( Chieftains.size( ) > 179 )
 				{
-					ClanList1 = Chieftains.substr( 0, 179 );
-					ClanList2 = Chieftains.substr( 179, 180 );
-					SendChatCommand( "/w " + User + " " + ClanList1, Output );
-					SendChatCommand( "/w " + User + " " + ClanList2, Output );				
+					if( Chieftains.size( ) > 179 )
+					{
+						ClanList1 = Chieftains.substr( 0, 179 );
+						ClanList2 = Chieftains.substr( 179, 180 );
+						SendChatCommand( "/w " + User + " " + ClanList1, Output );
+						SendChatCommand( "/w " + User + " " + ClanList2, Output );				
+					}
+					else
+						SendChatCommand( "/w " + User + " " + Chieftains.substr( 0, Chieftains.size( )-2 ), Output );
 				}
-				else
-					SendChatCommand( "/w " + User + " " + Chieftains.substr( 0, Chieftains.size( )-2 ), Output );
 
 				if( ShowShama )
-				if( Shamans.size( ) > 179 )
 				{
-					ClanList1 = Shamans.substr( 0, 179 );
-					ClanList2 = Shamans.substr( 179, 180 );
-					SendChatCommand( "/w " + User + " " + ClanList1, Output );
-					SendChatCommand( "/w " + User + " " + ClanList2, Output );				
+					if( Shamans.size( ) > 179 )
+					{
+						ClanList1 = Shamans.substr( 0, 179 );
+						ClanList2 = Shamans.substr( 179, 180 );
+						SendChatCommand( "/w " + User + " " + ClanList1, Output );
+						SendChatCommand( "/w " + User + " " + ClanList2, Output );				
+					}
+					else
+						SendChatCommand( "/w " + User + " " + Shamans.substr( 0, Shamans.size( )-2), Output );
 				}
-				else
-					SendChatCommand( "/w " + User + " " + Shamans.substr( 0, Shamans.size( )-2), Output );
 
 				if( ShowGrunt )
-				if( Grunts.size( ) > 179 )
 				{
-					ClanList1 = Grunts.substr( 0, 179 );
-					ClanList2 = Grunts.substr( 179, 180 );
-					SendChatCommand( "/w " + User + " " + ClanList1, Output );
-					SendChatCommand( "/w " + User + " " + ClanList2, Output );				
+					if( Grunts.size( ) > 179 )
+					{
+						ClanList1 = Grunts.substr( 0, 179 );
+						ClanList2 = Grunts.substr( 179, 180 );
+						SendChatCommand( "/w " + User + " " + ClanList1, Output );
+						SendChatCommand( "/w " + User + " " + ClanList2, Output );				
+					}
+					else
+						SendChatCommand( "/w " + User + " " + Grunts.substr( 0, Grunts.size( )-2), Output );
 				}
-				else
-					SendChatCommand( "/w " + User + " " + Grunts.substr( 0, Grunts.size( )-2), Output );
 
 				if( ShowPeon )
-				if( Peons.size( ) > 179 )
 				{
-					ClanList1 = Peons.substr( 0, 179 );
-					ClanList2 = Peons.substr( 179, 180 );
-					SendChatCommand( "/w " + User + " " + ClanList1, Output );
-					SendChatCommand( "/w " + User + " " + ClanList2, Output );
+					if( Peons.size( ) > 179 )
+					{
+						ClanList1 = Peons.substr( 0, 179 );
+						ClanList2 = Peons.substr( 179, 180 );
+						SendChatCommand( "/w " + User + " " + ClanList1, Output );
+						SendChatCommand( "/w " + User + " " + ClanList2, Output );
+					}
+					else
+						SendChatCommand( "/w " + User + " " + Peons.substr( 0, Peons.size( )-2), Output );
 				}
-				else
-					SendChatCommand( "/w " + User + " " + Peons.substr( 0, Peons.size( )-2), Output );
 			}
 
 			//
