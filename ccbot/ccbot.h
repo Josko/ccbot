@@ -47,8 +47,8 @@ typedef vector<unsigned char> BYTEARRAY;
 
 // time
 
-uint32_t GetTime( );		// seconds since January 1, 1970 usually
-uint32_t GetTicks( );		// milliseconds since computer startup usually, overflows after ~50 days
+uint64_t GetTime( );		// seconds since January 1, 1970 usually
+uint64_t GetTicks( );		// milliseconds since computer startup usually, overflows after ~50 days
 
 #ifdef WIN32
  #define MILLISLEEP( x ) Sleep( x )
@@ -71,7 +71,6 @@ uint32_t GetTicks( );		// milliseconds since computer startup usually, overflows
 
 #define BNET	0
 #define CONSOLE	1
-#define IRC		2
 
 void LOG_Print( string message );
 void CONSOLE_PrintNoCRLF( string message, bool log = true );
@@ -105,7 +104,7 @@ public:
 	bool m_Exiting;						// set to true to force ghost to shutdown next update (used by SignalCatcher)
 	bool m_Enabled;						// set to false to prevent new games from being created
 	string m_Version;					// CCBot version string
-	uint32_t m_Uptime;					// uptime value
+	uint64_t m_Uptime;					// uptime value
 	map<string, uint32_t> m_Commands;	// map of every command keyword and default access value
 	string m_LanguageFile;				// config value: language file
 	string m_Warcraft3Path;				// config value: Warcraft 3 path

@@ -61,13 +61,13 @@ bool gChannelWindowChanged = false;
 string gLogFile;
 CCCBot *gCCBot = NULL;
 
-uint32_t GetTime( )
+uint64_t GetTime( )
 {
-	// return (uint32_t)( (GetTicks( ) / 1000) - gStartTime );
+	// return (uint64_t)( (GetTicks( ) / 1000) - gStartTime );
 	return GetTicks( ) / 1000;
 }
 
-uint32_t GetTicks( )
+uint64_t GetTicks( )
 {
 #ifdef WIN32
 	return GetTickCount( );
@@ -122,11 +122,11 @@ void LOG_Print( string message )
 {
 	time_t Now;
 	time( &Now );
-    char datestr[100];
-    strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
-    char str[80];
+	char datestr[100];
+	strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
+	char str[80];
 	char timestr[100];
-    strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
+    	strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
 
     if( !gLogFile.empty( ) )
     {
@@ -145,7 +145,7 @@ void LOG_Print( string message )
         if( !Log.fail( ) )
         {
 			Log << "[" << timestr << "] " << message << endl;
-            Log.close( );
+            		Log.close( );
 		}
 	}
 }
@@ -472,7 +472,7 @@ int main( )
 // CCBot
 //
 
-CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.00" )
+CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.01" )
 {
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Exiting = false;
@@ -545,12 +545,13 @@ CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.00" )
 }
 
 CCCBot :: ~CCCBot( )
-{
-	delete m_DB;
+{	
 	delete m_Language;
 
 	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
         	delete *i;
+
+        delete m_DB;
 }
 
 bool CCCBot :: Update( long usecBlock )
@@ -654,25 +655,25 @@ void CCCBot :: UpdateCommandAccess( )
 	m_Commands[ "access"]			= 0;
 	m_Commands[ "addsafelist" ]		= 6;
 	m_Commands[ "announce" ]		= 6;
-	m_Commands[ "ban" ]				= 7;
+	m_Commands[ "ban" ]			= 7;
 	m_Commands[ "chanlist" ]		= 3;
 	m_Commands[ "channel" ]			= 5;
 	m_Commands[ "checkaccess" ]		= 5;
 	m_Commands[ "checkban" ]		= 3;
-	m_Commands[ "checksafelist" ]	= 5;
+	m_Commands[ "checksafelist" ]		= 5;
 	m_Commands[ "chieftain" ]		= 9;
 	m_Commands[ "clanlist" ]		= 1;
 	m_Commands[ "clearqueue" ]		= 3;
 	m_Commands[ "command" ]			= 7;
 	m_Commands[ "countaccess" ]		= 7;
 	m_Commands[ "countbans" ]		= 5;
-	m_Commands[ "countsafelist" ]	= 5;
+	m_Commands[ "countsafelist" ]		= 5;
 	m_Commands[ "delaccess" ]		= 8;
 	m_Commands[ "delsafelist" ]		= 6;
 	m_Commands[ "exit" ]			= 9;
 	m_Commands[ "games" ]			= 4;
 	m_Commands[ "getclan" ]			= 2;
-	m_Commands[ "gn8" ]				= 1;
+	m_Commands[ "gn8" ]			= 1;
 	m_Commands[ "greet" ]			= 6;
 	m_Commands[ "grunt" ]			= 7;
 	m_Commands[ "invite" ]			= 2;
@@ -686,7 +687,7 @@ void CCCBot :: UpdateCommandAccess( )
 	m_Commands[ "restart" ]			= 9;
 	m_Commands[ "remove" ]			= 9;
 	m_Commands[ "reload" ]			= 4;
-	m_Commands[ "say" ]				= 6;
+	m_Commands[ "say" ]			= 6;
 	m_Commands[ "setaccess" ]		= 8;
 	m_Commands[ "setcommand" ]		= 9;
 	m_Commands[ "shaman" ]			= 9;
@@ -710,7 +711,7 @@ void CCCBot :: UpdateCommandAccess( )
 
 void CCCBot :: UpdateSwearList( )
 {
-	if( !UTIL_FileExists( SwearsFile ) )
+	if( UTIL_FileExists( SwearsFile ) )
 	{
 		ifstream file;
 		file.open( SwearsFile, ios :: app );
@@ -733,29 +734,31 @@ void CCCBot :: UpdateSwearList( )
 					}					
 				}
 			}
-
-			file.close( );
-
+			
 			if( m_SwearList.size( ) )
 				CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
-			else if( !UTIL_FileExists( SwearsFile ) )
-			{
-				ofstream new_file;
-				new_file.open( SwearsFile );
 
-				if( !new_file.fail( ) )
-				{
-					CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
-
-					new_file << "#########################################################" << endl;
-					new_file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! ####" << endl;
-					new_file << "#########################################################" << endl;
-					new_file << "# setting the # character on the first position will comment out your line" << endl;
-				}
-
-				new_file.close( );
-			}
+			file.close( );			
 		}
+		
+		
+	}
+	else
+	{		
+		ofstream file;
+		file.open( SwearsFile );
+
+		if( !file.fail( ) )
+		{
+			CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
+
+			file << "#########################################################" << endl;
+			file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! ####" << endl;
+			file << "#########################################################" << endl;
+			file << "# setting the # character on the first position will comment out your line" << endl;
+		}
+
+		file.close( );
 	}
 }
 
@@ -768,14 +771,14 @@ vector<CBNET *> :: iterator CCCBot :: GetServerFromNamePartial( string name )
 
 	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
 	{
-			if( (*i)->GetServer( ).find( name ) != string :: npos )
-			{
-				++Matches;
-				it = i;
+		if( (*i)->GetServer( ).find( name ) != string :: npos )
+		{
+			++Matches;
+			it = i;
 
-				if( (*i)->GetServer( ) == name )
-					return i;
-			}		
+			if( (*i)->GetServer( ) == name )
+				return i;
+		}		
 	}
 
 	return it;

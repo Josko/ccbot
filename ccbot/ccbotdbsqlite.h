@@ -100,12 +100,6 @@ private:
 	string m_File;
 	CSQLITE3 *m_DB;
 
-	// we keep some prepared statements in memory rather than recreating them each function call
-	// this is an optimization because preparing statements takes time
-	// however it only pays off if you're going to be using the statement extremely often
-
-	void *FromAddStmt;
-
 public:
 	CCCBotDBSQLite( CConfig *CFG );
 	virtual ~CCCBotDBSQLite( );

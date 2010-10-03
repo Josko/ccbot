@@ -74,20 +74,20 @@ public:
 	BYTEARRAY m_EXEVersionHash;					// custom exe version hash for PvPGN users
 	string m_PasswordHashType;					// password hash type for PvPGN users
 	int m_AnnounceInterval;						// interval of two consecutive announce messages
-	uint32_t m_AccessRequired;					// access required to join the channel when lockdown is on
-	uint32_t m_Delay;							// delay of the next QueueChatCommand based on the length of the past one		
-	uint32_t m_ClanDefaultAccess;				// default access a clan members has
+	uint64_t m_AccessRequired;					// access required to join the channel when lockdown is on
+	uint64_t m_Delay;							// delay of the next QueueChatCommand based on the length of the past one		
+	uint64_t m_ClanDefaultAccess;				// default access a clan members has
 	uint32_t m_MaxMessageLength;				// maximum message length for PvPGN users
-	uint32_t m_NextConnectTime;					// GetTime when we should try connecting to battle.net next (after we get disconnected)
-	uint32_t m_LastNullTime;					// GetTime when the last null packet was sent for detecting disconnects
-	uint32_t m_LastGetClanTime;					// GetTime when the last SendGetClanList was send for updating the clan list
-	uint32_t m_LastAnnounceTime;				// GetTime when the last Announce message was sent
-	uint32_t m_LastRejoinTime;					// GetTime when the last /join was attempted
-	uint32_t m_RejoinInterval;					// interval between two consecutive rejoins
-	uint32_t m_LastInvitationTime;				// GetTime when the last SID_CLANINVITATION was recevied
-	uint32_t m_LastChatCommandTicks;			// GetTicks when the last chat command was sent for the m_ChatCommands queue
-	uint32_t m_LastOutPacketTicks;				// GetTicks when the last Packet was sent
-	uint32_t m_LastSpamCacheCleaning;			// GetTicks when the last m_SpamCache was last cleared
+	uint64_t m_NextConnectTime;					// GetTime when we should try connecting to battle.net next (after we get disconnected)
+	uint64_t m_LastNullTime;					// GetTime when the last null packet was sent for detecting disconnects
+	uint64_t m_LastGetClanTime;					// GetTime when the last SendGetClanList was send for updating the clan list
+	uint64_t m_LastAnnounceTime;				// GetTime when the last Announce message was sent
+	uint64_t m_LastRejoinTime;					// GetTime when the last /join was attempted
+	uint64_t m_RejoinInterval;					// interval between two consecutive rejoins
+	uint64_t m_LastInvitationTime;				// GetTime when the last SID_CLANINVITATION was recevied
+	uint64_t m_LastChatCommandTicks;			// GetTicks when the last chat command was sent for the m_ChatCommands queue
+	uint64_t m_LastOutPacketTicks;				// GetTicks when the last Packet was sent
+	uint64_t m_LastSpamCacheCleaning;			// GetTicks when the last m_SpamCache was last cleared
 	bool m_WaitingToConnect;					// if we're waiting to reconnect to battle.net after being disconnected
 	bool m_LoggedIn;							// if we've logged into battle.net or not
 	bool m_InChat;								// if we've entered chat or not (but we're not necessarily in a chat channel yet)

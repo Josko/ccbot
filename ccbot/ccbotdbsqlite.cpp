@@ -61,7 +61,7 @@ int CSQLITE3 :: Step( void *Statement )
 	{
 		m_Row.clear( );
 
-		for( int i = 0; i < sqlite3_column_count( (sqlite3_stmt *)Statement ); i++ )
+		for( int i = 0; i < sqlite3_column_count( (sqlite3_stmt *)Statement ); ++i )
 		{
 			char *ColumnText = (char *)sqlite3_column_text( (sqlite3_stmt *)Statement, i );
 
@@ -227,9 +227,6 @@ CCCBotDBSQLite :: CCCBotDBSQLite( CConfig *CFG ) : CCCBotDB( CFG )
 
 CCCBotDBSQLite :: ~CCCBotDBSQLite( )
 {
-	if( FromAddStmt )
-		m_DB->Finalize( FromAddStmt );
-
 	CONSOLE_Print( "[SQLITE3] closing database [" + m_File + "]" );
 	delete m_DB;
 }
@@ -342,7 +339,7 @@ uint32_t CCCBotDBSQLite :: SafelistCount( string server )
 bool CCCBotDBSQLite :: SafelistCheck( string server, string user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
-	bool IsSafelisted = false;
+	bool Safelisted = false;
 	sqlite3_stmt *Statement;
 	m_DB->Prepare( "SELECT * FROM safelist WHERE server=? AND name=?", (void **)&Statement );
 
@@ -355,7 +352,7 @@ bool CCCBotDBSQLite :: SafelistCheck( string server, string user )
 		// we're just checking to see if the query returned a row, we don't need to check the row data itself
 
 		if( RC == SQLITE_ROW )
-			IsSafelisted = true;
+			Safelisted = true;
 		else if( RC == SQLITE_ERROR )
 			CONSOLE_Print( "[SQLITE3] error checking safelist [" + server + " : " + user + "] - " + m_DB->GetError( ) );
 
@@ -364,7 +361,7 @@ bool CCCBotDBSQLite :: SafelistCheck( string server, string user )
 	else
 		CONSOLE_Print( "[SQLITE3] prepare error checking safelist [" + server + " : " + user + "] - " + m_DB->GetError( ) );
 
-	return IsSafelisted;
+	return Safelisted;
 }
 
 bool CCCBotDBSQLite :: SafelistAdd( string server, string user )
@@ -548,8 +545,9 @@ bool CCCBotDBSQLite :: AccessSet( string server, string user, uint32_t access )
 
 		if( RC == SQLITE_ROW )
 		{
-			sqlite3_stmt *Statement;
+			
 			m_DB->Prepare( "UPDATE access SET access =? WHERE name =? AND server =?", (void **)&Statement );
+			
 			if( Statement )
 			{
 				sqlite3_bind_int( Statement, 1, access );				
@@ -561,7 +559,7 @@ bool CCCBotDBSQLite :: AccessSet( string server, string user, uint32_t access )
 					Success = true;
 				else if( RC == SQLITE_ERROR )
 					CONSOLE_Print( "[SQLITE3] error updating record in access table [" + server + " : " + user + " update to " + UTIL_ToString( access ) + "] - " + m_DB->GetError( ) + "]" );
-			}			
+			}					
 		}
 		else if ( RC == SQLITE_DONE )
 		{
@@ -720,8 +718,9 @@ bool CCCBotDBSQLite :: CommandSetAccess( string command, uint32_t access )
 
 		if( RC == SQLITE_ROW )
 		{
-			sqlite3_stmt *Statement;
+			
 			m_DB->Prepare( "UPDATE commands SET access =? WHERE name =?", (void **)&Statement );
+			
 			if( Statement )
 			{
 				sqlite3_bind_int( Statement, 1, access );				
