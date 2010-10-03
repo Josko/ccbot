@@ -74,7 +74,7 @@ public:
 	BYTEARRAY m_EXEVersionHash;					// custom exe version hash for PvPGN users
 	string m_PasswordHashType;					// password hash type for PvPGN users
 	int m_AnnounceInterval;						// interval of two consecutive announce messages
-	uint64_t m_AccessRequired;					// access required to join the channel when lockdown is on
+	uint32_t m_AccessRequired;					// access required to join the channel when lockdown is on
 	uint64_t m_Delay;							// delay of the next QueueChatCommand based on the length of the past one		
 	uint64_t m_ClanDefaultAccess;				// default access a clan members has
 	uint32_t m_MaxMessageLength;				// maximum message length for PvPGN users

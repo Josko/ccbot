@@ -134,8 +134,8 @@ protected:
 private:
 	string m_RecvBuffer;
 	string m_SendBuffer;
-	uint32_t m_LastRecv;
-	uint32_t m_LastSend;
+	uint64_t m_LastRecv;
+	uint64_t m_LastSend;
 
 public:
 	CTCPSocket( );
@@ -148,8 +148,8 @@ public:
 	virtual string *GetBytes( )						{ return &m_RecvBuffer; }
 	virtual void PutBytes( string bytes );
 	virtual void PutBytes( BYTEARRAY bytes );
-	virtual uint32_t GetLastRecv( )						{ return m_LastRecv; }
-	virtual uint32_t GetLastSend( )						{ return m_LastSend; }
+	virtual uint64_t GetLastRecv( )						{ return m_LastRecv; }
+	virtual uint64_t GetLastSend( )						{ return m_LastSend; }
 	virtual void DoRecv( fd_set *fd );
 	virtual void DoSend( fd_set *fd );
 	virtual void Disconnect( );

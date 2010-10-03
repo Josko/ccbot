@@ -1056,7 +1056,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( Command == "uptime" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "uptime" ) )
 			{
 				string date;
-				uint32_t time = GetTime( ) - m_CCBot->m_Uptime;
+				uint64_t time = GetTime( ) - m_CCBot->m_Uptime;
 
 				if( time >= 86400 )
 				{
