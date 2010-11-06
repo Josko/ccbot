@@ -268,6 +268,7 @@ Version 1.02 ( 6.11.2010. )
 - Using init. lists in constructors for better startup/!restart performance
 - Removed some unecessary variables
 - Overall better performance
+- Fixed a bug found in the !ban command
 
 Version 1.01 ( 03.10.2010. )
 
@@ -286,10 +287,10 @@ Version 1.00 ( 22.08.2010. )
 - Updated SQLite to version 3.7.0.1
 - Fixed a bug with clan members and CHAT clients (telnet/bots)
 - Cannot ban people with higher access and clan shamans & chieftains
-- Ban reduces the victims access to 0
-- People with access < 5 are affected by anti-spam (up from < 3)
-- !checkaccess writes your own access if you don't supply a user
-- Fixed the fix for rejoining the channel when you're banned
+- Ban sets the victims access to 0
+- People with access < 5 are affected by anti-spam (up from 3)
+- !checkaccess returns your access if you don't supply a user
+- Fixed the "fix" for rejoining the channel when you're banned
 - Fixed a major problem (100% CPU usage/crash)
 - Fixed a minor memory leak
 - Game announcer uses a "better" command (/whois intead of /whereis) and added a check for BNET pub response ("is using Warcraft III The Frozen Throne in game")

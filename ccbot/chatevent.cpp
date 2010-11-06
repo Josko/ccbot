@@ -290,38 +290,38 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( Command == "check" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "checkban" ) )
 			{
 				CDBBan *Ban = m_CCBot->m_DB->BanCheck( m_Server, Payload );
-				int access = m_CCBot->m_DB->AccessCheck( m_Server, Payload );
+				unsigned char VictimAccess = m_CCBot->m_DB->AccessCheck( m_Server, Payload );
 
-				if( access == 255 )
-					access = 0;
+				if( VictimAccess == 255 )
+					VictimAccess = 0;
 
 				if( IsClanMember( Payload ) )
 				{
 					if( IsClanPeon( Payload ) )
 					{							
 						if( Ban )							
-							QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( access ) + "] access and banned from channel.", User, Whisper, Output );
+							QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( VictimAccess ) + "] access and banned from channel.", User, Whisper, Output );
 						else
-							QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( access ) + "] access.", User, Whisper, Output );
+							QueueChatCommand( Payload + " is in clan, rank Peon, with [" + UTIL_ToString( VictimAccess ) + "] access.", User, Whisper, Output );
 					}
 					else if( IsClanGrunt( Payload ) )
 					{
 						if( Ban )
-							QueueChatCommand( Payload + " is in clan, rank Grunt, with [" + UTIL_ToString( access ) + "] access and is banned from channel.", User, Whisper, Output );
+							QueueChatCommand( Payload + " is in clan, rank Grunt, with [" + UTIL_ToString( VictimAccess ) + "] access and is banned from channel.", User, Whisper, Output );
 						else
-							QueueChatCommand( Payload + " is in clan, rank Grunt with [" + UTIL_ToString( access ) + "] access.", User, Whisper, Output );
+							QueueChatCommand( Payload + " is in clan, rank Grunt with [" + UTIL_ToString( VictimAccess ) + "] access.", User, Whisper, Output );
 					}
 					else if( IsClanShaman( Payload ) )
-						QueueChatCommand( Payload + " is in clan, rank Shaman, with [" + UTIL_ToString( access ) + "] access.", User, Whisper, Output );
+						QueueChatCommand( Payload + " is in clan, rank Shaman, with [" + UTIL_ToString( VictimAccess ) + "] access.", User, Whisper, Output );
 					else if( IsClanChieftain( Payload ) )
-						QueueChatCommand( Payload + " is in clan, rank Chieftain, with [" + UTIL_ToString( access ) + "] access.", User, Whisper, Output );
+						QueueChatCommand( Payload + " is in clan, rank Chieftain, with [" + UTIL_ToString( VictimAccess ) + "] access.", User, Whisper, Output );
 				}
 				else
 				{
 					if( !Ban )
-						QueueChatCommand( Payload + " is not a clan member and has [" + UTIL_ToString( access ) + "] access.", User, Whisper, Output );
+						QueueChatCommand( Payload + " is not a clan member and has [" + UTIL_ToString( VictimAccess ) + "] access.", User, Whisper, Output );
 					else
-						QueueChatCommand( Payload + " is banned from the channel, not a clan member and has [" + UTIL_ToString( access ) + "] access.", User, Whisper, Output );
+						QueueChatCommand( Payload + " is banned from the channel, not a clan member and has [" + UTIL_ToString( VictimAccess ) + "] access.", User, Whisper, Output );
 				}
 			}
 		
@@ -360,9 +360,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( NewAccess > 10 )
 						NewAccess = 10;
 					if( OldAccess == 255 )
-						OldAccess = 0;
-						
-					CONSOLE_Print( "NewAcc: " + UTIL_ToString( NewAccess ) + ", OldAcc: " + UTIL_ToString( OldAccess ) + ", Acc: " + UTIL_ToString( Access ) );					
+						OldAccess = 0;			
 
 					if( Match( User, UserName ) && NewAccess > Access )
 					{
@@ -471,7 +469,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				bool Exists = false;
 
-				for( map<string, uint32_t> :: iterator i = m_CCBot->m_Commands.begin( ); i != m_CCBot->m_Commands.end( ); ++i )
+				for( map<string, unsigned char> :: iterator i = m_CCBot->m_Commands.begin( ); i != m_CCBot->m_Commands.end( ); ++i )
 				{
 					if( (*i).first == Payload )
 						Exists = true;						
@@ -512,7 +510,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( NewAccess > 10 )
 						NewAccess = 10;
 					
-					for( map<string, uint32_t> :: iterator i = m_CCBot->m_Commands.begin( ); i != m_CCBot->m_Commands.end( ); ++i )
+					for( map<string, unsigned char> :: iterator i = m_CCBot->m_Commands.begin( ); i != m_CCBot->m_Commands.end( ); ++i )
 						if( (*i).first == command )
 							Exists = true;
 										
@@ -1075,19 +1073,19 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( time >= 86400 )
 				{
 					uint32_t days = time / 86400;
-					time = time - ( days * 86400 );
+					time -= days * 86400;
 					date = UTIL_ToString( days ) + "d ";
 				}
 				if( time >= 3600 )
 				{
 					uint32_t hours = time / 3600;
-					time = time - ( hours * 3600 );
+					time -= hours * 3600;
 					date += UTIL_ToString( hours ) + "h ";
 				}
 				if( time >= 60 )
 				{
 					uint32_t minutes = time / 60;
-					time = time - ( minutes * 60 );
+					time -= minutes * 60;
 					date += UTIL_ToString( minutes ) + "m ";
 				}
 				

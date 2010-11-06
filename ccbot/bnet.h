@@ -40,7 +40,7 @@ class CBNET
 public:
 	CCCBot *m_CCBot;
 
-	private:
+private:
 	CTCPClient *m_Socket;						// the connection to battle.net
 	CBNETProtocol *m_Protocol;					// battle.net protocol
 	queue<CCommandPacket *> m_Packets;			// queue of incoming packets

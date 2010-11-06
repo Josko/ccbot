@@ -717,12 +717,12 @@ void CCCBot :: UpdateCommandAccess( )
 	m_Commands[ "unban" ]			= 7;
 	m_Commands[ "uptime" ]			= 1;	
 
-	for( map<string, uint32_t> :: iterator i = m_Commands.begin( ); i != m_Commands.end( ); ++i )
+	for( map<string, unsigned char> :: iterator i = m_Commands.begin( ); i != m_Commands.end( ); ++i )
 	{
-		if( m_DB->CommandAccess( (*i).first ) == 255 )
+		if( m_DB->CommandAccess( i->first ) == 255 )
 		{
-			m_DB->CommandSetAccess( (*i).first, (*i).second );
-			CONSOLE_Print( "[ACCESS] no value found for command [" + (*i).first + "] - setting default value of [" + UTIL_ToString( (*i).second ) + "]" );			
+			m_DB->CommandSetAccess( i->first, i->second );
+			CONSOLE_Print( "[ACCESS] no value found for command [" + i->first + "] - setting default value of [" + UTIL_ToString( i->second ) + "]" );			
 		}
 	}
 }

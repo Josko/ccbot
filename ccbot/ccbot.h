@@ -105,7 +105,7 @@ public:
 	bool m_Enabled;						// set to false to prevent new games from being created
 	string m_Version;					// CCBot version string
 	uint64_t m_Uptime;					// uptime value
-	map<string, uint32_t> m_Commands;	// map of every command keyword and default access value
+	map<string, unsigned char> m_Commands;	// map of every command keyword and default access value
 	string m_LanguageFile;				// config value: language file
 	string m_Warcraft3Path;				// config value: Warcraft 3 path
 	string m_CFGPath;					// config value:path to txt files
