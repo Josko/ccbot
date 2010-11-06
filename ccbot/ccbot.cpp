@@ -277,11 +277,6 @@ int main( )
 	CFG.Read( CFGFile );
 	gLog = CFG.GetInt( "bot_log", 1 ) == 0 ? false : true;
 	
-	if( gLog )
-		CONSOLE_Print( "YES" );
-	else
-		CONSOLE_Print( "EXCELLENT CHOICE" );
-
 	// catch SIGABRT and SIGINT
 
 	signal( SIGABRT, SignalCatcher );
