@@ -244,8 +244,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				stringstream SS;
 				SS << Payload;
 				SS >> Victim;
+				
+				unsigned char VictimAccess = m_CCBot->m_DB->AccessCheck( m_Server, Victim );
+				
+				if( VictimAccess == 255 )
+					VictimAccess = 0;
 					
-				if( Access >= m_CCBot->m_DB->AccessCheck( m_Server, Victim ) && !IsClanShaman( Victim ) && !IsClanChieftain( Victim ) )			
+				if( Access >= VictimAccess && !IsClanShaman( Victim ) && !IsClanChieftain( Victim ) )			
 				{
 					QueueChatCommand( "/ban " + Payload, BNET );
 					m_CCBot->m_DB->AccessSet( m_Server, Victim, 0 );
@@ -287,7 +292,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				CDBBan *Ban = m_CCBot->m_DB->BanCheck( m_Server, Payload );
 				int access = m_CCBot->m_DB->AccessCheck( m_Server, Payload );
 
-				if( access == 11 )
+				if( access == 255 )
 					access = 0;
 
 				if( IsClanMember( Payload ) )
@@ -331,11 +336,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				// extract the username and the access which we are setting
 				// ie. !setaccess 8 Panda -> username "Panda" , access "8" 
 
-				unsigned char NewAccess;
+				uint32_t Temp;
 				string UserName;
 				stringstream SS;
 				SS << Payload;
-				SS >> NewAccess;
+				SS >> Temp;
 
 				if( SS.fail( ) || SS.eof( ) )
 				{						
@@ -349,12 +354,15 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					if( Start != string :: npos )
 						UserName = UserName.substr( Start );
 
-					uint32_t OldAccess = m_CCBot->m_DB->AccessCheck( m_Server, UserName );
+					unsigned char OldAccess = m_CCBot->m_DB->AccessCheck( m_Server, UserName );
+					unsigned char NewAccess = Temp;
 
 					if( NewAccess > 10 )
 						NewAccess = 10;
-					if( OldAccess == 11 )
-						OldAccess = 0;							
+					if( OldAccess == 255 )
+						OldAccess = 0;
+						
+					CONSOLE_Print( "NewAcc: " + UTIL_ToString( NewAccess ) + ", OldAcc: " + UTIL_ToString( OldAccess ) + ", Acc: " + UTIL_ToString( Access ) );					
 
 					if( Match( User, UserName ) && NewAccess > Access )
 					{
@@ -396,7 +404,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				if( Payload.empty( ) )
 					Payload = User;
 
-				if( m_CCBot->m_DB->AccessCheck( m_Server, Payload ) != 11 )
+				if( m_CCBot->m_DB->AccessCheck( m_Server, Payload ) != 255 )
 					QueueChatCommand( "User [" + Payload + "] has access of [" + UTIL_ToString( m_CCBot->m_DB->AccessCheck( m_Server, Payload ) ) + "].", User, Whisper, Output );
 				else
 					QueueChatCommand( "User [" + Payload + "] has access of [0].", User, Whisper, Output );
@@ -1415,7 +1423,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 			m_Channel[lowerUser] = user;
 			
-			if ( m_CCBot->m_DB->AccessCheck( m_Server, User ) == 11 && IsClanMember( User ) && m_ClanDefaultAccess > 0 )
+			if ( m_CCBot->m_DB->AccessCheck( m_Server, User ) == 255 && IsClanMember( User ) && m_ClanDefaultAccess > 0 )
 			{					
 				m_CCBot->m_DB->AccessSet( m_Server, User, m_ClanDefaultAccess );
 				CONSOLE_Print( "[ACCESS: " + m_ServerAlias + "] Setting [" + User + "] access to clan default of " + UTIL_ToString( m_ClanDefaultAccess ) ); 

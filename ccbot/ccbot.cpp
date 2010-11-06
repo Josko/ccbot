@@ -122,9 +122,9 @@ void LOG_Print( string message )
 {
 	time_t Now;
 	time( &Now );
-	char datestr[100], timestr[100];
+	char datestr[100];
 	strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
-    	strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
+    	
     	                
 #ifdef WIN32
 	char str[80] = "log\\";
@@ -139,6 +139,9 @@ void LOG_Print( string message )
 
 	if( !Log.fail( ) )
 	{
+		char timestr[100];
+		strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
+		
 		Log << "[" << timestr << "] " << message << endl;
     		Log.close( );
 	}
