@@ -1013,11 +1013,11 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					string users;
 					
-					for( unsigned int i = 1; i <= m_Squelched.size( ); ++i )
+					for( unsigned int i = 0; i < m_Squelched.size( ); ++i )
 					{
 						if( m_Squelched[i].size( ) > 0 )
 						{
-							if( i != m_Squelched.size( ) )
+							if( (i+1) != m_Squelched.size( ) )
 								users = users + m_Squelched[i] + ", ";
 							else
 								users = users + m_Squelched[i];
@@ -1168,27 +1168,27 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				string Online;
 				uint32_t OnlineNumber = 0;				
 				
-				for( unsigned int i = 1; i <= m_Clans.size( ); ++i ) 
+				for( unsigned int i = 0; i < m_Clans.size( ); ++i ) 
 				{
 					if( m_Clans[i]->GetStatus( ) == "Online" && !Match( m_Clans[i]->GetName( ), m_UserName ) && !Match( m_Clans[i]->GetName( ), m_HostbotName ) )
 					{
-						if( i != m_Clans.size( ) )
+						if( (i+1) != m_Clans.size( ) )
 							Online = Online + m_Clans[i]->GetName( ) + ", ";
-						else
-							Online = Online + m_Clans[i]->GetName( );
 							
 						++OnlineNumber;
 					}
 				}
+				
+
 
 				if( OnlineNumber == 0 )
 					SendChatCommand( "/w " + User + " " + "There are no " + m_ClanTag + " members online.", Output );
 				else if( Online.size( ) < 156 ) 
-					SendChatCommand( "/w " + User + " " + m_ClanTag + " members online [" + UTIL_ToString(OnlineNumber) + "]: " + Online, Output );
+					SendChatCommand( "/w " + User + " " + m_ClanTag + " members online [" + UTIL_ToString(OnlineNumber) + "]: " + Online.substr( 0, Online.size( )-2) , Output );
 				else
 				{
 					SendChatCommand( "/w " + User + " " + m_ClanTag + " members online [" + UTIL_ToString(OnlineNumber) + "]: " + Online.substr( 0,155 ), Output );
-					SendChatCommand( "/w " + User + " " + Online.substr( 155, Online.size( )-155 ), Output );
+					SendChatCommand( "/w " + User + " " + Online.substr( 155, Online.size( )-157 ), Output );
 				}
 			}
  
