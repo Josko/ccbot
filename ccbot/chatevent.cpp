@@ -1082,8 +1082,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					time = time - ( minutes * 60 );
 					date += UTIL_ToString( minutes ) + "m ";
 				}
+				
 				date += UTIL_ToString( (uint32_t) time ) + "s";
-					QueueChatCommand( m_CCBot->m_Language->Uptime( m_UserName, date ), User, Whisper, Output );
+				QueueChatCommand( m_CCBot->m_Language->Uptime( m_UserName, date ), User, Whisper, Output );
 			}
 					
 			//
@@ -1172,14 +1173,10 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				{
 					if( m_Clans[i]->GetStatus( ) == "Online" && !Match( m_Clans[i]->GetName( ), m_UserName ) && !Match( m_Clans[i]->GetName( ), m_HostbotName ) )
 					{
-						if( (i+1) != m_Clans.size( ) )
-							Online = Online + m_Clans[i]->GetName( ) + ", ";
-							
+						Online = Online + m_Clans[i]->GetName( ) + ", ";							
 						++OnlineNumber;
 					}
 				}
-				
-
 
 				if( OnlineNumber == 0 )
 					SendChatCommand( "/w " + User + " " + "There are no " + m_ClanTag + " members online.", Output );
