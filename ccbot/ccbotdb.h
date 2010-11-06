@@ -56,15 +56,15 @@ public:
 	virtual bool BanRemove( string server, string user );
 
 	// access
-	virtual bool AccessSet( string server, string user, uint32_t access );
-	virtual uint32_t AccessCheck( string server, string user );
-	virtual uint32_t AccessCount( string server, uint32_t access );
+	virtual bool AccessSet( string server, string user, unsigned char access );
+	virtual unsigned char AccessCheck( string server, string user );
+	virtual uint32_t AccessCount( string server, unsigned char access );
 	virtual bool AccessRemove( string user );
 
 	// command
-	virtual uint32_t CommandAccess( string command );
-	virtual bool CommandSetAccess( string command, uint32_t access );
-	virtual vector<string> CommandList( uint32_t access );
+	virtual unsigned char CommandAccess( string command );
+	virtual bool CommandSetAccess( string command, unsigned char access );
+	virtual vector<string> CommandList( unsigned char access );
 	
 };
 //

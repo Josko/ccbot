@@ -45,7 +45,7 @@ public:
 	CBNETProtocol *m_Protocol;					// battle.net protocol
 	queue<CCommandPacket *> m_Packets;			// queue of incoming packets
 	queue<BYTEARRAY> m_OutPackets;				// queue of outgoing packets to be sent (to prevent getting kicked for flooding)
-	CBNCSUtilInterface *m_BNCSUtil;				// the interface to the bncsutil library (used for logging into battle.net)
+	CBNCSUtilInterface *m_BNCSUtil;					// the bncs utility (used for logging into battle.net)
 	queue<string> m_ChatCommands;				// queue of chat commands waiting to be sent (to prevent getting kicked for flooding)
 	vector<string> m_Admins;					// vector of cached admins
 	vector<string> m_Lockdown;					// vector of tempbanned users whom will be unbanned later
@@ -67,23 +67,22 @@ public:
 	string m_RootAdmin;							// the root admin
 	string m_HostbotName;						// hostbot's name if present
 	string m_AnnounceMsg;						// text printed on X interval by the announce command
-	char m_CommandTrigger;						// the character prefix to identify commands
-	string m_CommandTriggerStr;					// the character prefix to identify commands
+	string m_CommandTrigger;					// the character prefix to identify commands
 	unsigned char m_War3Version;				// custom warcraft 3 version for PvPGN users
 	BYTEARRAY m_EXEVersion;						// custom exe version for PvPGN users
 	BYTEARRAY m_EXEVersionHash;					// custom exe version hash for PvPGN users
 	string m_PasswordHashType;					// password hash type for PvPGN users
-	int m_AnnounceInterval;						// interval of two consecutive announce messages
-	uint32_t m_AccessRequired;					// access required to join the channel when lockdown is on
-	uint64_t m_Delay;							// delay of the next QueueChatCommand based on the length of the past one		
-	uint64_t m_ClanDefaultAccess;				// default access a clan members has
-	uint32_t m_MaxMessageLength;				// maximum message length for PvPGN users
+	int m_AnnounceInterval;						// interval of two consecutive announce messages	
+	uint64_t m_Delay;							// delay of the next QueueChatCommand based on the length of the past one
+	unsigned char m_AccessRequired;					// access required to join the channel when lockdown is on	
+	unsigned char m_ClanDefaultAccess;				// default access a clan members has
+	unsigned char m_MaxMessageLength;				// maximum message length for PvPGN users
 	uint64_t m_NextConnectTime;					// GetTime when we should try connecting to battle.net next (after we get disconnected)
 	uint64_t m_LastNullTime;					// GetTime when the last null packet was sent for detecting disconnects
-	uint64_t m_LastGetClanTime;					// GetTime when the last SendGetClanList was send for updating the clan list
-	uint64_t m_LastAnnounceTime;				// GetTime when the last Announce message was sent
+	uint64_t m_LastGetClanTime;					// GetTime when the last SendGetClanList was send for updating the clan list	
 	uint64_t m_LastRejoinTime;					// GetTime when the last /join was attempted
 	uint64_t m_RejoinInterval;					// interval between two consecutive rejoins
+	uint64_t m_LastAnnounceTime;				// GetTime when the last Announce message was sent
 	uint64_t m_LastInvitationTime;				// GetTime when the last SID_CLANINVITATION was recevied
 	uint64_t m_LastChatCommandTicks;			// GetTicks when the last chat command was sent for the m_ChatCommands queue
 	uint64_t m_LastOutPacketTicks;				// GetTicks when the last Packet was sent
@@ -109,27 +108,27 @@ public:
 	string m_ClanTag;							// clan tag	
 
 public:
-	CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotname, bool nAntiSPam );
+	CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, unsigned char nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, unsigned char nClanDefaultAccess, string nHostbotname, bool nAntiSPam );
 	~CBNET( );
 
-	vector<CIncomingClanList *> m_Clans;		// vector of clan members
+	vector<CIncomingClanList *> m_Clans;			// vector of clan members
 	map<string, CUser *> m_Channel;				// map of users in channel
 
 	bool GetExiting( )					{ return m_Exiting; }
 	string GetServer( )					{ return m_Server; }
-	string GetCDKeyROC( )				{ return m_CDKeyROC; }
-	string GetCDKeyTFT( )				{ return m_CDKeyTFT; }
-	string GetUserName( )				{ return m_UserName; }
-	string GetUserPassword( )			{ return m_UserPassword; }
-	string GetFirstChannel( )			{ return m_FirstChannel; }
-	string GetCurrentChannel( )			{ return m_CurrentChannel; }
-	string GetRootAdmin( )				{ return m_RootAdmin; }
-	string GetClanTag( )				{ return m_ClanTag; }
-	string GetHostBotName( )			{ return m_HostbotName; }
-	char GetCommandTrigger( )			{ return m_CommandTrigger; }
-	BYTEARRAY GetEXEVersion( )			{ return m_EXEVersion; }
-	BYTEARRAY GetEXEVersionHash( )		{ return m_EXEVersionHash; }
-	string GetPasswordHashType( )		{ return m_PasswordHashType; }
+	string GetCDKeyROC( )					{ return m_CDKeyROC; }
+	string GetCDKeyTFT( )					{ return m_CDKeyTFT; }
+	string GetUserName( )					{ return m_UserName; }
+	string GetUserPassword( )				{ return m_UserPassword; }
+	string GetFirstChannel( )				{ return m_FirstChannel; }
+	string GetCurrentChannel( )				{ return m_CurrentChannel; }
+	string GetRootAdmin( )					{ return m_RootAdmin; }
+	string GetClanTag( )					{ return m_ClanTag; }
+	string GetHostBotName( )				{ return m_HostbotName; }
+	char GetCommandTrigger( )				{ return m_CommandTrigger[0]; }
+	BYTEARRAY GetEXEVersion( )				{ return m_EXEVersion; }
+	BYTEARRAY GetEXEVersionHash( )				{ return m_EXEVersionHash; }
+	string GetPasswordHashType( )				{ return m_PasswordHashType; }
 	bool GetLoggedIn( )					{ return m_LoggedIn; }
 	bool GetInChat( )					{ return m_InChat; }
 
@@ -146,18 +145,18 @@ public:
 
 	// functions to send packets to battle.net
 
-	void SendChatCommand( string chatCommand, int destination );
-	void SendChatCommandHidden( string chatCommand, int destination );
+	void SendChatCommand( string chatCommand, unsigned char destination );
+	void SendChatCommandHidden( string chatCommand, unsigned char destination );
 	void SendGetClanList( );
 	void SendClanChangeRank( string accountName, CBNETProtocol::RankCode rank );
 	
 	// other functions
 
-	void QueueChatCommand( string chatCommand, int destination );
-	void QueueChatCommand( string chatCommand, string user, bool whisper, int destination );
-	void QueueWhisperCommand( string chatCommand, string user, int destination );
-	void ImmediateChatCommand( string chatCommand, int destination );
-	void ImmediateChatCommand( string chatCommand, string user, bool whisper, int destination );
+	void QueueChatCommand( string chatCommand, unsigned char destination );
+	void QueueChatCommand( string chatCommand, string user, bool whisper, unsigned char destination );
+	void QueueWhisperCommand( string chatCommand, string user, unsigned char destination );
+	void ImmediateChatCommand( string chatCommand, unsigned char destination );
+	void ImmediateChatCommand( string chatCommand, string user, bool whisper, unsigned char destination );
 
 	bool IsRootAdmin( string name );	
 	bool IsInChannel( string name );
@@ -196,12 +195,12 @@ public:
 
 	string GetUser( )							{ return m_User; }
 	int GetPing( )								{ return m_Ping; }
-	uint32_t GetUserFlags( )					{ return m_UserFlags; }
+	uint32_t GetUserFlags( )						{ return m_UserFlags; }
 	string GetClan( )							{ return m_Clan; }
 	
-	void SetPing( int nPing )					{ m_Ping = nPing; }
-	void SetUserFlags( uint32_t nUserFlags )	{ m_UserFlags = nUserFlags; }
-	void SetClan( string nClan )				{ m_Clan = nClan; }
+	void SetPing( int nPing )						{ m_Ping = nPing; }
+	void SetUserFlags( uint32_t nUserFlags )				{ m_UserFlags = nUserFlags; }
+	void SetClan( string nClan )						{ m_Clan = nClan; }
 };
 
 #endif

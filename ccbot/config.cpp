@@ -185,7 +185,7 @@ void CConfig :: CreateConfig( )
 
 		file << "# This file is used to configure CCBot options\n" << endl;
 		file << "# Starting here are the global variables which are valid for every bnet\n" << endl;
-		file << "bot_log = logs\\" << endl;
+		file << "bot_log = 1" << endl;
 		file << "bot_language = language.cfg" << endl;
 		file << "bot_war3path = C:\\Program Files\\Warcraft III\\" << endl;
 		file << "db_type = sqlite3" << endl;

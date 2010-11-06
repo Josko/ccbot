@@ -40,24 +40,19 @@
 // CBNET
 //
 
-CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, uint32_t nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, uint32_t nClanDefaultAccess, string nHostbotName, bool nAntiSpam )
+CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, unsigned char nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, unsigned char nClanDefaultAccess, string nHostbotName, bool nAntiSpam ) 
+
+: m_CCBot( nCCBot ), m_Exiting( false ), m_Server( nServer ), m_ServerAlias( m_Server ), m_CDKeyROC( nCDKeyROC ), m_CDKeyTFT( nCDKeyTFT ), m_CountryAbbrev( nCountryAbbrev ), m_Country( nCountry ), m_UserName( nUserName ), m_UserPassword( nUserPassword ), m_FirstChannel( nFirstChannel ), m_CurrentChannel( nFirstChannel ), m_RootAdmin( nRootAdmin ), m_HostbotName( nHostbotName ), m_War3Version( nWar3Version ), m_EXEVersion( nEXEVersion ), m_EXEVersionHash( nEXEVersionHash ), m_PasswordHashType( nPasswordHashType ), m_Delay( 3001 ),  m_ClanDefaultAccess( nClanDefaultAccess ), m_MaxMessageLength( nMaxMessageLength ), m_NextConnectTime( GetTime( ) ), m_LastNullTime( GetTime( ) ), m_LastGetClanTime( 0 ), m_LastRejoinTime( 0 ), m_RejoinInterval( 15 ), m_LastAnnounceTime( 0 ), m_LastInvitationTime( 0 ), m_LastChatCommandTicks( 0 ), m_LastOutPacketTicks( 0 ), m_LastSpamCacheCleaning( 0 ), m_WaitingToConnect( true ), m_LoggedIn( false ), m_InChat( false ), m_AntiSpam( nAntiSpam ), m_Announce( false ), m_IsLockdown( false ), m_ActiveInvitation( false ), m_ActiveCreation( false ), m_AnnounceGames( nAnnounceGames ), m_BanChat( nBanChat ), m_SwearingKick( nSwearingKick ), m_SelfJoin( nSelfJoin ), m_GreetUsers( nGreetUsers ), m_ClanTag( "Clan " + nClanTag )
 {
 	// todotodo: append path seperator to Warcraft3Path if needed
 
-	m_CCBot = nCCBot;
 	m_Socket = new CTCPClient( );
 	m_Protocol = new CBNETProtocol( );
-	m_BNCSUtil = new CBNCSUtilInterface( nUserName, nUserPassword );
-	m_Exiting = false;
-	m_Server = nServer;
-	m_ServerAlias = m_Server;
+	m_BNCSUtil = new CBNCSUtilInterface( nUserName, nUserPassword );	
  	transform( m_ServerAlias.begin( ), m_ServerAlias.end( ), m_ServerAlias.begin( ), (int(*)(int))tolower );
 
 	if( m_ServerAlias == "server.eurobattle.net" )
 		m_ServerAlias = "eurobattle.net";
-
-	m_CDKeyROC = nCDKeyROC;
-	m_CDKeyTFT = nCDKeyTFT;
 
 	// needed only on BNET
 
@@ -69,49 +64,10 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 
 	transform( m_CDKeyROC.begin( ), m_CDKeyROC.end( ), m_CDKeyROC.begin( ), (int(*)(int))toupper );
 	transform( m_CDKeyTFT.begin( ), m_CDKeyTFT.end( ), m_CDKeyTFT.begin( ), (int(*)(int))toupper );
-	m_CountryAbbrev = nCountryAbbrev;
-	m_Country = nCountry;
-	m_UserName = nUserName;
-	m_UserPassword = nUserPassword;
-	m_FirstChannel = nFirstChannel;
-	m_CurrentChannel = nFirstChannel;
-	m_RootAdmin = nRootAdmin;
 	transform( m_RootAdmin.begin( ), m_RootAdmin.end( ), m_RootAdmin.begin( ), (int(*)(int))tolower );
 	m_CCBot->m_DB->AccessSet( m_Server, m_RootAdmin, 10 );
+	
 	m_CommandTrigger = nCommandTrigger;
-	m_CommandTriggerStr = nCommandTrigger;
-	m_War3Version = nWar3Version;
-	m_EXEVersion = nEXEVersion;
-	m_EXEVersionHash = nEXEVersionHash;
-	m_PasswordHashType = nPasswordHashType;
-	m_MaxMessageLength = nMaxMessageLength;
-	m_NextConnectTime = GetTime( );
-	m_LastNullTime = 0;
-	m_LastChatCommandTicks = 0;
-	m_LastOutPacketTicks = 0;
-	m_LastRejoinTime = 0;
-	m_RejoinInterval = 15;
-	m_LastGetClanTime = 0;
-	m_LastAnnounceTime = 0;
-	m_LastInvitationTime = 0;
-	m_LastSpamCacheCleaning = 0;
-	m_Delay = 3001;
-	m_WaitingToConnect = true;
-	m_ActiveInvitation = false;
-	m_ActiveCreation = false;
-	m_LoggedIn = false;
-	m_InChat = false;
-	m_IsLockdown = false;
-	m_Announce = false;	
-	m_ClanTag = "Clan " + nClanTag;
-	m_GreetUsers = nGreetUsers;
-	m_HostbotName = nHostbotName;
-	m_AnnounceGames = nAnnounceGames;
-	m_BanChat = nBanChat;
-	m_SwearingKick = nSwearingKick;
-	m_SelfJoin = nSelfJoin;
-	m_ClanDefaultAccess = nClanDefaultAccess;
-	m_AntiSpam = nAntiSpam;	
 }
 
 CBNET :: ~CBNET( )
@@ -581,7 +537,7 @@ inline void CBNET :: ProcessPackets( )
 				if( m_Protocol->RECEIVE_SID_CLANINVITATIONRESPONSE( Packet->GetData( ) ) )
 				{
 					QueueChatCommand( "Clan invitation received for [" + m_Protocol->GetClanName( ) + "] from [" + m_Protocol->GetInviterStr( ) + "].", BNET );
-					QueueChatCommand( "Type " + m_CommandTriggerStr + "accept to accept the clan invitation.", BNET );
+					QueueChatCommand( "Type " + m_CommandTrigger + "accept to accept the clan invitation.", BNET );
 
 					m_ActiveInvitation = true;
 					m_LastInvitationTime = GetTime( );										
@@ -662,7 +618,7 @@ inline void CBNET :: ProcessPackets( )
 	}
 }
 
-void CBNET :: SendChatCommand( string chatCommand, int destination )
+void CBNET :: SendChatCommand( string chatCommand, unsigned char destination )
 {
 	// don't call this function directly, use QueueChatCommand instead to prevent getting kicked for flooding
 	if( m_LoggedIn )
@@ -705,7 +661,7 @@ void CBNET :: SendChatCommand( string chatCommand, int destination )
 
 }
 
-void CBNET :: SendChatCommandHidden( string chatCommand, int destination )
+void CBNET :: SendChatCommandHidden( string chatCommand, unsigned char destination )
 {
 	// don't call this function directly, use QueueChatCommand instead to prevent getting kicked for flooding
 	if( m_LoggedIn )
@@ -728,7 +684,7 @@ void CBNET :: SendChatCommandHidden( string chatCommand, int destination )
 	}
 }
 
-void CBNET :: QueueChatCommand( string chatCommand, int destination )
+void CBNET :: QueueChatCommand( string chatCommand, unsigned char destination )
 {
 	if( chatCommand.empty( ) )
 		return;
@@ -737,7 +693,7 @@ void CBNET :: QueueChatCommand( string chatCommand, int destination )
 		m_ChatCommands.push( chatCommand );
 }
 
-void CBNET :: QueueChatCommand( string chatCommand, string user, bool whisper, int destination )
+void CBNET :: QueueChatCommand( string chatCommand, string user, bool whisper, unsigned char destination )
 {
 	if( chatCommand.empty( ) )
 		return;
@@ -757,9 +713,8 @@ void CBNET :: QueueChatCommand( string chatCommand, string user, bool whisper, i
 		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 }
 
-void CBNET :: QueueWhisperCommand( string chatCommand, string user, int destination )
+void CBNET :: QueueWhisperCommand( string chatCommand, string user, unsigned char destination )
 {
-
 	if( chatCommand.empty( ) )
 		return;
 
@@ -772,19 +727,19 @@ void CBNET :: QueueWhisperCommand( string chatCommand, string user, int destinat
 	}
 }
 
-void CBNET :: ImmediateChatCommand( string chatCommand, int destination )
+void CBNET :: ImmediateChatCommand( string chatCommand, unsigned char destination )
 {
 	if( chatCommand.empty( ) )
 		return;
 
-	if( GetTicks( ) >= m_LastChatCommandTicks + 950 )
+	if( GetTicks( ) >= m_LastChatCommandTicks + 1000 )
 	{
 		SendChatCommand( chatCommand, destination );
 		m_LastChatCommandTicks = GetTicks( );
 	}	
 }
 
-void CBNET :: ImmediateChatCommand( string chatCommand, string user, bool whisper, int destination )
+void CBNET :: ImmediateChatCommand( string chatCommand, string user, bool whisper, unsigned char destination )
 {
 	if( chatCommand.empty( ) )
 		return;
@@ -900,7 +855,7 @@ void CBNET :: SendGetClanList( )
 string CBNET :: GetUserFromNamePartial( string name )
 {
 	int Matches = 0;
-	string User = string( );
+	string User;
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );	
 
 	// try to match each username with the passed string (e.g. "Varlock" would be matched with "lock")

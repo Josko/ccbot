@@ -31,8 +31,8 @@
 
 #include <time.h>
 #include <signal.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef WIN32
  #include <process.h>
@@ -58,7 +58,7 @@ bool gMainWindowChanged = false;
 bool gInputWindowChanged = false;
 bool gChannelWindowChanged = false;
 
-string gLogFile;
+bool gLog = false;
 CCCBot *gCCBot = NULL;
 
 uint64_t GetTime( )
@@ -122,31 +122,25 @@ void LOG_Print( string message )
 {
 	time_t Now;
 	time( &Now );
-	char datestr[100];
+	char datestr[100], timestr[100];
 	strftime( datestr , 100, "%m%d%y", localtime( &Now ) );
-	char str[80];
-	char timestr[100];
     	strftime( timestr , 100, "%H:%M:%S", localtime( &Now ) );
-
-    if( !gLogFile.empty( ) )
-    {
-		ofstream Log;
-                
+    	                
 #ifdef WIN32
-        strcpy(str, "logs\\");
+	char str[80] = "log\\";
 #else
-        strcpy(str, "logs/");
+	char str[80] = "log/";
 #endif
+	strcat(str, datestr);
+	strcat(str, ".log");
+	
+	ofstream Log;
+	Log.open(str, ios :: app );
 
-        strcat(str, datestr);
-        strcat(str, ".log");
-        Log.open(str, ios :: app );
-
-        if( !Log.fail( ) )
-        {
-			Log << "[" << timestr << "] " << message << endl;
-            		Log.close( );
-		}
+	if( !Log.fail( ) )
+	{
+		Log << "[" << timestr << "] " << message << endl;
+    		Log.close( );
 	}
 }
 
@@ -223,7 +217,7 @@ void CONSOLE_PrintNoCRLF( string message, bool log )
 	gMainWindowChanged = true;
 	CONSOLE_Draw( );
 
-	if( log )
+	if( log && gLog )
 		LOG_Print( message );
 
 	if( !gCurses )
@@ -281,7 +275,12 @@ int main( )
 
 	CConfig CFG;
 	CFG.Read( CFGFile );
-	gLogFile = CFG.GetString( "bot_log", string( ) );	
+	gLog = CFG.GetInt( "bot_log", 1 ) == 0 ? false : true;
+	
+	if( gLog )
+		CONSOLE_Print( "YES" );
+	else
+		CONSOLE_Print( "EXCELLENT CHOICE" );
 
 	// catch SIGABRT and SIGINT
 
@@ -317,8 +316,30 @@ int main( )
 	keypad( gInputWindow, TRUE );
 	scrollok( gInputWindow, TRUE );
 	CONSOLE_Draw( );
-	nodelay( gInputWindow, TRUE );
-
+	nodelay( gInputWindow, TRUE );	
+	
+	// check if the log folder exists
+	
+	if( !UTIL_FileExists( "log" ) )
+	{
+#ifdef WIN32
+		CreateDirectoryA( "log", NULL );
+#else
+		mkdir( "log", 0777 );
+#endif
+	}
+	
+	// check if the cfg folder exists
+	
+	if( !UTIL_FileExists( "cfg" ) )
+	{
+#ifdef WIN32
+		CreateDirectoryA( "cfg", NULL );
+#else
+		mkdir( "cfg", 0777 );
+#endif
+	}
+	
 	// print something for logging purposes
 
 	CONSOLE_Print( "[CCBOT] starting up" );
@@ -472,7 +493,7 @@ int main( )
 // CCBot
 //
 
-CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.01" )
+CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.02" )
 {
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Exiting = false;
@@ -511,7 +532,7 @@ CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.01" )
 		bool AnnounceGames = CFG->GetInt( Prefix + "announcegames", 0 ) == 0 ? false : true;
 		bool SelfJoin = CFG->GetInt( Prefix + "selfjoin", 0 ) == 0 ? false : true;
 		bool BanChat = CFG->GetInt( Prefix + "banchat", 0 ) == 0 ? false : true;		
-		unsigned int ClanDefaultAccess = CFG->GetInt( Prefix + "clanmembersdefaultaccess", 4 );
+		unsigned char ClanDefaultAccess = CFG->GetInt( Prefix + "clanmembersdefaultaccess", 4 );
 
 		if( ClanDefaultAccess > 9 )
 			ClanDefaultAccess = 9;
@@ -520,14 +541,13 @@ CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.01" )
 		BYTEARRAY EXEVersion = UTIL_ExtractNumbers( CFG->GetString( Prefix + "custom_exeversion", string( ) ), 4 );
 		BYTEARRAY EXEVersionHash = UTIL_ExtractNumbers( CFG->GetString( Prefix + "custom_exeversionhash", string( ) ), 4 );
 		string PasswordHashType = CFG->GetString( Prefix + "custom_passwordhashtype", string( ) );
-		uint32_t MaxMessageLength = CFG->GetInt( Prefix + "custom_maxmessagelength", 200 );
+		unsigned char MaxMessageLength = CFG->GetInt( Prefix + "custom_maxmessagelength", 200 );
 
 		if( Server.empty( ) )
 			break;
 
 		CONSOLE_Print( "[CCBOT] found battle.net connection #" + UTIL_ToString( i ) + " for server [" + Server + "]" );
 		m_BNETs.push_back( new CBNET( this, Server, CDKeyROC, CDKeyTFT, CountryAbbrev, Country, UserName, UserPassword, FirstChannel, RootAdmin, BNETCommandTrigger[0], War3Version, EXEVersion, EXEVersionHash, PasswordHashType, MaxMessageLength, ClanTag, GreetUsers, SwearingKick, AnnounceGames, SelfJoin, BanChat, ClanDefaultAccess, HostbotName, AntiSpam ) );
-
 	}
 
 	if( m_BNETs.empty( ) )
@@ -701,7 +721,7 @@ void CCCBot :: UpdateCommandAccess( )
 
 	for( map<string, uint32_t> :: iterator i = m_Commands.begin( ); i != m_Commands.end( ); ++i )
 	{
-		if( m_DB->CommandAccess( (*i).first ) == 11 )
+		if( m_DB->CommandAccess( (*i).first ) == 255 )
 		{
 			m_DB->CommandSetAccess( (*i).first, (*i).second );
 			CONSOLE_Print( "[ACCESS] no value found for command [" + (*i).first + "] - setting default value of [" + UTIL_ToString( (*i).second ) + "]" );			
@@ -739,9 +759,7 @@ void CCCBot :: UpdateSwearList( )
 				CONSOLE_Print( "[CONFIG] updated swear list file (" + UTIL_ToString( m_SwearList.size( ) ) + ")" );
 
 			file.close( );			
-		}
-		
-		
+		}	
 	}
 	else
 	{		

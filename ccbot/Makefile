@@ -2,7 +2,7 @@ SHELL = /bin/sh
 SYSTEM = $(shell uname)
 C++ = g++
 CC = gcc
-DFLAGS =
+DFLAGS = -DSQLITE_THREADSAFE=0
 OFLAGS = -O3
 LFLAGS = -L. -L../bncsutil/src/bncsutil/ -lbncsutil -lpthread -ldl -lrt -lnsl -lcurses
 CFLAGS += -Wall -Wno-write-strings

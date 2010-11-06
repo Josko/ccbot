@@ -230,6 +230,15 @@ string UTIL_ToString( unsigned int i )
 	return result;
 }
 
+string UTIL_ToString( unsigned char i )
+{
+	string result;
+	stringstream SS;
+	SS << (unsigned short) i;
+	SS >> result;
+	return result;
+}
+
 string UTIL_ToString( long i )
 {
 	string result;

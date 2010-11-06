@@ -528,7 +528,7 @@ bool CCCBotDBSQLite :: BanRemove( string server, string user )
 	return Success;
 }
 
-bool CCCBotDBSQLite :: AccessSet( string server, string user, uint32_t access )
+bool CCCBotDBSQLite :: AccessSet( string server, string user, unsigned char access )
 {	
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	bool Success = false;
@@ -592,10 +592,10 @@ bool CCCBotDBSQLite :: AccessSet( string server, string user, uint32_t access )
 	return Success;
 }
 
-uint32_t CCCBotDBSQLite :: AccessCheck( string server, string user )
+unsigned char CCCBotDBSQLite :: AccessCheck( string server, string user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
-	uint32_t Access = 11;
+	unsigned char Access = 255;
 	sqlite3_stmt *Statement;
 	m_DB->Prepare( "SELECT access FROM access WHERE server=? AND name=?", (void **)&Statement );
 
@@ -620,10 +620,11 @@ uint32_t CCCBotDBSQLite :: AccessCheck( string server, string user )
 	return Access;
 }
 
-uint32_t CCCBotDBSQLite :: AccessCount( string server, uint32_t access )
+uint32_t CCCBotDBSQLite :: AccessCount( string server, unsigned char access )
 {
 	uint32_t Count = 0;
 	sqlite3_stmt *Statement;
+	
 	if( access != 0 )
 		m_DB->Prepare( "SELECT COUNT(*) FROM access WHERE server=? AND access=?", (void **)&Statement );
 	else
@@ -676,10 +677,10 @@ bool CCCBotDBSQLite :: AccessRemove( string user )
 	return Success;
 }
 
-uint32_t CCCBotDBSQLite :: CommandAccess( string command )
+unsigned char CCCBotDBSQLite :: CommandAccess( string command )
 {
 	transform( command.begin( ), command.end( ), command.begin( ), (int(*)(int))tolower );
-	uint32_t Access = 11;
+	unsigned char Access = 255;
 	sqlite3_stmt *Statement;
 	m_DB->Prepare( "SELECT access FROM commands WHERE name=?", (void **)&Statement );
 
@@ -702,7 +703,7 @@ uint32_t CCCBotDBSQLite :: CommandAccess( string command )
 	return Access;
 }
 
-bool CCCBotDBSQLite :: CommandSetAccess( string command, uint32_t access )
+bool CCCBotDBSQLite :: CommandSetAccess( string command, unsigned char access )
 {	
 	transform( command.begin( ), command.end( ), command.begin( ), (int(*)(int))tolower );
 	bool Success = false;
@@ -763,7 +764,7 @@ bool CCCBotDBSQLite :: CommandSetAccess( string command, uint32_t access )
 	return Success;
 }
 
-vector<string> CCCBotDBSQLite :: CommandList( uint32_t access )
+vector<string> CCCBotDBSQLite :: CommandList( unsigned char access )
 {
 	vector<string> CommandList;
 	sqlite3_stmt *Statement;	

@@ -46,6 +46,7 @@ BYTEARRAY UTIL_ExtractNumbers( string s, unsigned int count );
 string UTIL_ToString( unsigned long i );
 string UTIL_ToString( unsigned short i );
 string UTIL_ToString( unsigned int i );
+string UTIL_ToString( unsigned char i );
 string UTIL_ToString( long i );
 string UTIL_ToString( short i );
 string UTIL_ToString( int i );

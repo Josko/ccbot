@@ -86,17 +86,17 @@ bool CCCBotDB :: BanRemove( string server, string user )
 	return false;
 }
 
-bool CCCBotDB :: AccessSet( string server, string user, uint32_t access )
+bool CCCBotDB :: AccessSet( string server, string user, unsigned char access )
 {
 	return false;
 }
 
-uint32_t CCCBotDB :: AccessCheck( string server, string user )
+unsigned char CCCBotDB :: AccessCheck( string server, string user )
 {
-	return 11;
+	return 255;
 }
 
-uint32_t CCCBotDB :: AccessCount( string server, uint32_t access )
+uint32_t CCCBotDB :: AccessCount( string server, unsigned char access )
 {
 	return 0;
 }
@@ -106,17 +106,17 @@ bool CCCBotDB :: AccessRemove( string user )
 	return false;
 }
 
-uint32_t CCCBotDB :: CommandAccess( string command )
+unsigned char CCCBotDB :: CommandAccess( string command )
 {
-	return 11;
+	return 255;
 }
 
-bool CCCBotDB :: CommandSetAccess( string command, uint32_t access )
+bool CCCBotDB :: CommandSetAccess( string command, unsigned char access )
 {
 	return false;
 }
 
-vector<string> CCCBotDB :: CommandList( uint32_t access )
+vector<string> CCCBotDB :: CommandList( unsigned char access )
 {
 	return vector<string>( );
 }
