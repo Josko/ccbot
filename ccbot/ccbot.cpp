@@ -63,7 +63,6 @@ CCCBot *gCCBot = NULL;
 
 uint64_t GetTime( )
 {
-	// return (uint64_t)( (GetTicks( ) / 1000) - gStartTime );
 	return GetTicks( ) / 1000;
 }
 
@@ -118,7 +117,7 @@ void CONSOLE_MainWindowChanged( )
 	gMainWindowChanged = true;
 }
 
-void LOG_Print( string message )
+void LOG_Print( const string &message )
 {
 	time_t Now;
 	time( &Now );
@@ -210,7 +209,7 @@ void CONSOLE_Draw( )
 	}
 }
 
-void CONSOLE_PrintNoCRLF( string message, bool log )
+void CONSOLE_PrintNoCRLF( const string &message, bool log )
 {
 	gMainBuffer.push_back( message );
 
@@ -227,7 +226,7 @@ void CONSOLE_PrintNoCRLF( string message, bool log )
 		cout << message;
 }
 
-void CONSOLE_Print( string message )
+void CONSOLE_Print( const string &message )
 {
 	CONSOLE_PrintNoCRLF( message );
 
@@ -235,7 +234,7 @@ void CONSOLE_Print( string message )
 		cout << endl;
 }
 
-void DEBUG_Print( string message )
+void DEBUG_Print( const string &message )
 {
 	CONSOLE_PrintNoCRLF( message, false );
 

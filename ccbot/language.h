@@ -31,70 +31,67 @@ private:
 	CConfig *m_CFG;
 
 public:
-	CLanguage( string nCFGFile );
+	CLanguage( const string &nCFGFile );
 	~CLanguage( );
 
-	void Replace( string &Text, string Key, string Value );
+	void Replace( string &Text, const string &Key, const string &Value );
 
 	string MessageQueueCleared(  );
 	string YouDontHaveAccessToThatCommand( );
-	string CommandTrigger( string trigger );
-	string Ping( string user, string ping, string server );
+	string CommandTrigger( const string &trigger );
+	string Ping( const string &user, const string &ping, const string &server );
 	string CannotAccessPing(  );
 	string CommandDisabled(  );
 	string InvitationAccepted(  );
-	string HasFollowingAccess( string access );
-	string Version( string version );
-	string ConnectingToBNET( string server );
-	string ConnectedToBNET( string server );
-	string DisconnectedFromBNET( string server );
-	string LoggedInToBNET( string server );
-	string ConnectingToBNETTimedOut( string server );
-	string WelcomeMessageLine1( string channel, string user );
-	string WelcomeMessageLine2( string channel, string user );
-	string AnnounceGame( string user, string gamename );
-	string SwearKick( string user, string swear );
-	string UserAlreadySafelisted( string user );
-	string UserSafelisted( string user );
-	string ErrorSafelisting( string user );
-	string AnnounceEnabled( string interval );
+	string HasFollowingAccess( const string &access );
+	string Version( const string &version );
+	string ConnectingToBNET( const string &server );
+	string ConnectedToBNET( const string &server );
+	string DisconnectedFromBNET( const string &server );
+	string LoggedInToBNET( const string &server );
+	string ConnectingToBNETTimedOut( const string &server );
+	string WelcomeMessageLine1( const string &channel, const string &user );
+	string WelcomeMessageLine2( const string &channel, const string &user );
+	string AnnounceGame( const string &user, const string &gamename );
+	string SwearKick( const string &user, const string &swear );
+	string UserAlreadySafelisted( const string &user );
+	string UserSafelisted( const string &user );
+	string ErrorSafelisting( const string &user );
+	string AnnounceEnabled( const string &interval );
 	string AnnounceDisabled( );
-	string UserAlreadyBanned( string victim, string admin );
-	string SuccesfullyBanned( string victim, string admin );
-	string ErrorBanningUser( string victim );
-	string UnbannedUser( string victim );
-	string ErrorUnbanningUser( string victim );
+	string UserAlreadyBanned( const string &victim, const string &admin );
+	string SuccesfullyBanned( const string &victim, const string &admin );
+	string ErrorBanningUser( const string &victim );
+	string UnbannedUser( const string &victim );
+	string ErrorUnbanningUser( const string &victim );
 	string GameAnnouncerEnabled(  );
 	string GameAnnouncerDisabled( );
 	string UpdatedClanList( );
-	string ReceivedClanMembers( string count );
-	string MustBeAClanMember( string user );
+	string ReceivedClanMembers( const string &count );
+	string MustBeAClanMember( const string &user );
 	string GreetingEnabled( );
 	string GreetingDisabled( );
 	string CFGReloaded( );
 	string NotAllowedUsingSay( );
 	string UnableToPartiallyMatchServer( );
-	string Uptime( string user, string time );
-	string GN8( string user );
-	string UserIsSafelisted( string user );
-	string UserNotSafelisted( string user );
-	string ChangedRank( string user, string rank );
-	string LockdownEnabled( string access );
+	string Uptime( const string &user, const string &time );
+	string GN8( const string &user );
+	string UserIsSafelisted( const string &user );
+	string UserNotSafelisted( const string &user );
+	string ChangedRank( const string &user, const string &rank );
+	string LockdownEnabled( const string &access );
 	string LockdownDisabled( );
-	string SetMOTD( string message );
-	string SetTopic( string message );
+	string SetMOTD( const string &message );
+	string SetTopic( const string &message );
 	
-	string ErrorAddingUser( string user, string server );	
-	string UserHasAccess( string user, string access );
-	string ThereAreNoUsers( string access );
-	string ThereIsOneUser( string access );
-	string ThereAreUsers( string number, string access );
-	string UserHasNoAccessSet( string user );
-	string DeletedUsersAccess( string access );
-	string ErrorDeletingAccess( string access );
-	
-	
-
+	string ErrorAddingUser( const string &user, const string &server );	
+	string UserHasAccess( const string &user, const string &access );
+	string ThereAreNoUsers( const string &access );
+	string ThereIsOneUser( const string &access );
+	string ThereAreUsers( const string &number, const string &access );
+	string UserHasNoAccessSet( const string &user );
+	string DeletedUsersAccess( const string &access );
+	string ErrorDeletingAccess( const string &access );
 };
 
 #endif

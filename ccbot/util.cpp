@@ -341,12 +341,12 @@ bool UTIL_FileExists( string file )
 	return false;
 }
 
-vector<string> UTIL_Tokenize( string s, char delim )
+vector<string> UTIL_Tokenize( const string &s, char delim )
 {
 	vector<string> Tokens;
 	string Token;
 
-	for( string :: iterator i = s.begin( ); i != s.end( ); ++i )
+	for( string :: const_iterator i = s.begin( ); i != s.end( ); ++i )
 	{
 		if( *i == delim )
 		{

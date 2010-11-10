@@ -618,7 +618,7 @@ inline void CBNET :: ProcessPackets( )
 	}
 }
 
-void CBNET :: SendChatCommand( string chatCommand, unsigned char destination )
+void CBNET :: SendChatCommand( const string &chatCommand, unsigned char destination )
 {
 	// don't call this function directly, use QueueChatCommand instead to prevent getting kicked for flooding
 	if( m_LoggedIn )
@@ -626,18 +626,10 @@ void CBNET :: SendChatCommand( string chatCommand, unsigned char destination )
 
 		if( destination == BNET )
 		{
-			if( m_PasswordHashType != "pvpgn" )
-			{
-				if( chatCommand.size( ) > 200 )
-					chatCommand = chatCommand.substr( 0, 200 );
-			}
+			if( chatCommand.size( ) > 200 )					
+				m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand.substr( 0, 200 ) ) );
 			else
-			{
-				if( chatCommand.size( ) > 199 )
-					chatCommand = chatCommand.substr( 0, 199 );
-			}
-
-			m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
+				m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
 
 			if( chatCommand.substr( 0, 3 ) == "/w " )
 				{
@@ -661,30 +653,22 @@ void CBNET :: SendChatCommand( string chatCommand, unsigned char destination )
 
 }
 
-void CBNET :: SendChatCommandHidden( string chatCommand, unsigned char destination )
+void CBNET :: SendChatCommandHidden( const string &chatCommand, unsigned char destination )
 {
 	// don't call this function directly, use QueueChatCommand instead to prevent getting kicked for flooding
 	if( m_LoggedIn )
 	{
 		if( destination == BNET )
 		{
-			if( m_PasswordHashType != "pvpgn" )
-			{
-				if( chatCommand.size( ) > 200 )
-					chatCommand = chatCommand.substr( 0, 200 );
-			}
-			else
-			{
-				if( chatCommand.size( ) > 199 )
-					chatCommand = chatCommand.substr( 0, 199 );
-			}
-
-			m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
+			if( chatCommand.size( ) > 200 )
+				m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand.substr( 0, 200 ) ) );
+			else				
+				m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
 		}
 	}
 }
 
-void CBNET :: QueueChatCommand( string chatCommand, unsigned char destination )
+void CBNET :: QueueChatCommand( const string &chatCommand, unsigned char destination )
 {
 	if( chatCommand.empty( ) )
 		return;
@@ -693,7 +677,7 @@ void CBNET :: QueueChatCommand( string chatCommand, unsigned char destination )
 		m_ChatCommands.push( chatCommand );
 }
 
-void CBNET :: QueueChatCommand( string chatCommand, string user, bool whisper, unsigned char destination )
+void CBNET :: QueueChatCommand( const string &chatCommand, string user, bool whisper, unsigned char destination )
 {
 	if( chatCommand.empty( ) )
 		return;
@@ -713,7 +697,7 @@ void CBNET :: QueueChatCommand( string chatCommand, string user, bool whisper, u
 		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 }
 
-void CBNET :: QueueWhisperCommand( string chatCommand, string user, unsigned char destination )
+void CBNET :: QueueWhisperCommand( const string &chatCommand, string user, unsigned char destination )
 {
 	if( chatCommand.empty( ) )
 		return;
@@ -727,7 +711,7 @@ void CBNET :: QueueWhisperCommand( string chatCommand, string user, unsigned cha
 	}
 }
 
-void CBNET :: ImmediateChatCommand( string chatCommand, unsigned char destination )
+void CBNET :: ImmediateChatCommand( const string &chatCommand, unsigned char destination )
 {
 	if( chatCommand.empty( ) )
 		return;
@@ -739,7 +723,7 @@ void CBNET :: ImmediateChatCommand( string chatCommand, unsigned char destinatio
 	}	
 }
 
-void CBNET :: ImmediateChatCommand( string chatCommand, string user, bool whisper, unsigned char destination )
+void CBNET :: ImmediateChatCommand( const string &chatCommand, string user, bool whisper, unsigned char destination )
 {
 	if( chatCommand.empty( ) )
 		return;

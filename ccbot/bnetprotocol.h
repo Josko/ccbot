@@ -231,7 +231,7 @@ private:
 	string m_Message;
 
 public:
-	CIncomingChatEvent( CBNETProtocol :: IncomingChatEvent nChatEvent, uint32_t nUserFlags, int nPing, string nUser, string nMessage );
+	CIncomingChatEvent( CBNETProtocol :: IncomingChatEvent nChatEvent, uint32_t nUserFlags, int nPing, const string &nUser, const string &nMessage );
 	~CIncomingChatEvent( );
 
 	CBNETProtocol :: IncomingChatEvent GetChatEvent( )	{ return m_ChatEvent; }
@@ -254,7 +254,7 @@ private:
 	unsigned char m_Status;
 
 public:
-	CIncomingClanList( string nName, unsigned char nRank, unsigned char nStatus );
+	CIncomingClanList( const string &nName, unsigned char nRank, unsigned char nStatus );
 	~CIncomingClanList( );
 
 	string GetName( )					{ return m_Name; }

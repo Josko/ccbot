@@ -47,71 +47,71 @@ bool CCCBotDB :: Commit( )
 	return false;
 }
 
-uint32_t CCCBotDB :: SafelistCount( string server )
+uint32_t CCCBotDB :: SafelistCount( const string &server )
 {
 	return 0;
 }
 
-bool CCCBotDB :: SafelistCheck( string server, string user )
+bool CCCBotDB :: SafelistCheck( const string &server, string &user )
 {
 	return false;
 }
 
-bool CCCBotDB :: SafelistAdd( string server, string user )
+bool CCCBotDB :: SafelistAdd( const string &server, string &user )
 {
 	return false;
 }
 
-bool CCCBotDB :: SafelistRemove( string server, string user )
+bool CCCBotDB :: SafelistRemove( const string &server, string &user )
 {
 	return false;
 }
-uint32_t CCCBotDB :: BanCount( string server )
+uint32_t CCCBotDB :: BanCount( const string &server )
 {
 	return 0;
 }
 
-CDBBan *CCCBotDB :: BanCheck( string server, string user )
+CDBBan *CCCBotDB :: BanCheck( const string &server, string &user )
 {
 	return NULL;
 }
 
-bool CCCBotDB :: BanAdd( string server, string user, string admin, string reason )
+bool CCCBotDB :: BanAdd( const string &server, string &user, const string &admin, const string &reason )
 {
 	return false;
 }
 
-bool CCCBotDB :: BanRemove( string server, string user )
+bool CCCBotDB :: BanRemove( const string &server, string &user )
 {
 	return false;
 }
 
-bool CCCBotDB :: AccessSet( string server, string user, unsigned char access )
+bool CCCBotDB :: AccessSet( const string &server, string &user, unsigned char access )
 {
 	return false;
 }
 
-unsigned char CCCBotDB :: AccessCheck( string server, string user )
+unsigned char CCCBotDB :: AccessCheck( const string &server, string &user )
 {
 	return 255;
 }
 
-uint32_t CCCBotDB :: AccessCount( string server, unsigned char access )
+uint32_t CCCBotDB :: AccessCount( const string &server, unsigned char access )
 {
 	return 0;
 }
 
-bool CCCBotDB :: AccessRemove( string user )
+bool CCCBotDB :: AccessRemove( string &user )
 {
 	return false;
 }
 
-unsigned char CCCBotDB :: CommandAccess( string command )
+unsigned char CCCBotDB :: CommandAccess( const string &command )
 {
 	return 255;
 }
 
-bool CCCBotDB :: CommandSetAccess( string command, unsigned char access )
+bool CCCBotDB :: CommandSetAccess( const string &command, unsigned char access )
 {
 	return false;
 }
@@ -125,7 +125,7 @@ vector<string> CCCBotDB :: CommandList( unsigned char access )
 // CDBBan
 //
 
-CDBBan :: CDBBan( string nServer, string nName, string nDate, string nAdmin, string nReason ) : m_Server( nServer ), m_Name( nName ), m_Date( nDate ), m_Admin( nAdmin ), m_Reason( nReason )
+CDBBan :: CDBBan( const string &nServer, const string &nName, const string &nDate, const string &nAdmin, const string &nReason ) : m_Server( nServer ), m_Name( nName ), m_Date( nDate ), m_Admin( nAdmin ), m_Reason( nReason )
 {
 
 }

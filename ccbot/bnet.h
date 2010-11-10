@@ -145,18 +145,18 @@ public:
 
 	// functions to send packets to battle.net
 
-	void SendChatCommand( string chatCommand, unsigned char destination );
-	void SendChatCommandHidden( string chatCommand, unsigned char destination );
+	void SendChatCommand( const string &chatCommand, unsigned char destination );
+	void SendChatCommandHidden( const string &chatCommand, unsigned char destination );
 	void SendGetClanList( );
 	void SendClanChangeRank( string accountName, CBNETProtocol::RankCode rank );
 	
 	// other functions
 
-	void QueueChatCommand( string chatCommand, unsigned char destination );
-	void QueueChatCommand( string chatCommand, string user, bool whisper, unsigned char destination );
-	void QueueWhisperCommand( string chatCommand, string user, unsigned char destination );
-	void ImmediateChatCommand( string chatCommand, unsigned char destination );
-	void ImmediateChatCommand( string chatCommand, string user, bool whisper, unsigned char destination );
+	void QueueChatCommand( const string &chatCommand, unsigned char destination );
+	void QueueChatCommand( const string &chatCommand, string user, bool whisper, unsigned char destination );
+	void QueueWhisperCommand( const string &chatCommand, string user, unsigned char destination );
+	void ImmediateChatCommand( const string &chatCommand, unsigned char destination );
+	void ImmediateChatCommand( const string &chatCommand, string user, bool whisper, unsigned char destination );
 
 	bool IsRootAdmin( string name );	
 	bool IsInChannel( string name );

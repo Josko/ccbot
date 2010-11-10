@@ -246,12 +246,12 @@ void CTCPSocket :: Reset( )
 	setsockopt( m_Socket, IPPROTO_TCP, TCP_NODELAY, (const char *)&OptVal, sizeof( int ) );
 }
 
-void CTCPSocket :: PutBytes( string bytes )
+void CTCPSocket :: PutBytes( const string &bytes )
 {
 	m_SendBuffer += bytes;
 }
 
-void CTCPSocket :: PutBytes( BYTEARRAY bytes )
+void CTCPSocket :: PutBytes( const BYTEARRAY &bytes )
 {
 	m_SendBuffer += string( bytes.begin( ), bytes.end( ) );
 }

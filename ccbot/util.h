@@ -65,6 +65,6 @@ bool UTIL_FileExists( string file );
 
 // other
 
-vector<string> UTIL_Tokenize( string s, char delim );
+vector<string> UTIL_Tokenize( const string &s, char delim );
 
 #endif

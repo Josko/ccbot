@@ -30,7 +30,7 @@
 // CQSLITE3 (wrapper class)
 //
 
-CSQLITE3 :: CSQLITE3( string filename )
+CSQLITE3 :: CSQLITE3( const string &filename )
 {
 	m_Ready = true;
 
@@ -48,7 +48,7 @@ string CSQLITE3 :: GetError( )
 	return sqlite3_errmsg( (sqlite3 *)m_DB );
 }
 
-int CSQLITE3 :: Prepare( string query, void **Statement )
+int CSQLITE3 :: Prepare( const string &query, void **Statement )
 {
 	return sqlite3_prepare_v2( (sqlite3 *)m_DB, query.c_str( ), -1, (sqlite3_stmt **)Statement, NULL );
 }
@@ -85,7 +85,7 @@ int CSQLITE3 :: Reset( void *Statement )
 	return sqlite3_reset( (sqlite3_stmt *)Statement );
 }
 
-int CSQLITE3 :: Exec( string query )
+int CSQLITE3 :: Exec( const string &query )
 {
 	return sqlite3_exec( (sqlite3 *)m_DB, query.c_str( ), NULL, NULL, NULL );
 }
@@ -312,7 +312,7 @@ bool CCCBotDBSQLite :: Commit( )
 	return m_DB->Exec( "COMMIT TRANSACTION" ) == SQLITE_OK;
 }
 
-uint32_t CCCBotDBSQLite :: SafelistCount( string server )
+uint32_t CCCBotDBSQLite :: SafelistCount( const string &server )
 {
 	uint32_t Count = 0;
 	sqlite3_stmt *Statement;
@@ -336,7 +336,7 @@ uint32_t CCCBotDBSQLite :: SafelistCount( string server )
 	return Count;
 }
 
-bool CCCBotDBSQLite :: SafelistCheck( string server, string user )
+bool CCCBotDBSQLite :: SafelistCheck( const string &server, string &user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	bool Safelisted = false;
@@ -364,7 +364,7 @@ bool CCCBotDBSQLite :: SafelistCheck( string server, string user )
 	return Safelisted;
 }
 
-bool CCCBotDBSQLite :: SafelistAdd( string server, string user )
+bool CCCBotDBSQLite :: SafelistAdd( const string &server, string &user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	bool Success = false;
@@ -390,7 +390,7 @@ bool CCCBotDBSQLite :: SafelistAdd( string server, string user )
 	return Success;
 }
 
-bool CCCBotDBSQLite :: SafelistRemove( string server, string user )
+bool CCCBotDBSQLite :: SafelistRemove( const string &server, string &user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	bool Success = false;
@@ -416,7 +416,7 @@ bool CCCBotDBSQLite :: SafelistRemove( string server, string user )
 	return Success;
 }
 
-uint32_t CCCBotDBSQLite :: BanCount( string server )
+uint32_t CCCBotDBSQLite :: BanCount( const string &server )
 {
 	uint32_t Count = 0;
 	sqlite3_stmt *Statement;
@@ -440,7 +440,7 @@ uint32_t CCCBotDBSQLite :: BanCount( string server )
 	return Count;
 }
 
-CDBBan *CCCBotDBSQLite :: BanCheck( string server, string user )
+CDBBan *CCCBotDBSQLite :: BanCheck( const string &server, string &user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	CDBBan *Ban = NULL;
@@ -473,7 +473,7 @@ CDBBan *CCCBotDBSQLite :: BanCheck( string server, string user )
 	return Ban;
 }
 
-bool CCCBotDBSQLite :: BanAdd( string server, string user, string admin, string reason )
+bool CCCBotDBSQLite :: BanAdd( const string &server, string &user, const string &admin, const string &reason )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	bool Success = false;
@@ -502,7 +502,7 @@ bool CCCBotDBSQLite :: BanAdd( string server, string user, string admin, string 
 	return Success;
 }
 
-bool CCCBotDBSQLite :: BanRemove( string server, string user )
+bool CCCBotDBSQLite :: BanRemove( const string &server, string &user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	bool Success = false;
@@ -528,7 +528,7 @@ bool CCCBotDBSQLite :: BanRemove( string server, string user )
 	return Success;
 }
 
-bool CCCBotDBSQLite :: AccessSet( string server, string user, unsigned char access )
+bool CCCBotDBSQLite :: AccessSet( const string &server, string &user, unsigned char access )
 {	
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	bool Success = false;
@@ -592,7 +592,7 @@ bool CCCBotDBSQLite :: AccessSet( string server, string user, unsigned char acce
 	return Success;
 }
 
-unsigned char CCCBotDBSQLite :: AccessCheck( string server, string user )
+unsigned char CCCBotDBSQLite :: AccessCheck( const string &server, string &user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	unsigned char Access = 255;
@@ -620,7 +620,7 @@ unsigned char CCCBotDBSQLite :: AccessCheck( string server, string user )
 	return Access;
 }
 
-uint32_t CCCBotDBSQLite :: AccessCount( string server, unsigned char access )
+uint32_t CCCBotDBSQLite :: AccessCount( const string &server, unsigned char access )
 {
 	uint32_t Count = 0;
 	sqlite3_stmt *Statement;
@@ -652,7 +652,7 @@ uint32_t CCCBotDBSQLite :: AccessCount( string server, unsigned char access )
 	return Count;
 }
 
-bool CCCBotDBSQLite :: AccessRemove( string user )
+bool CCCBotDBSQLite :: AccessRemove( string &user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	bool Success = false;
@@ -677,9 +677,8 @@ bool CCCBotDBSQLite :: AccessRemove( string user )
 	return Success;
 }
 
-unsigned char CCCBotDBSQLite :: CommandAccess( string command )
+unsigned char CCCBotDBSQLite :: CommandAccess( const string &command )
 {
-	transform( command.begin( ), command.end( ), command.begin( ), (int(*)(int))tolower );
 	unsigned char Access = 255;
 	sqlite3_stmt *Statement;
 	m_DB->Prepare( "SELECT access FROM commands WHERE name=?", (void **)&Statement );
@@ -703,9 +702,8 @@ unsigned char CCCBotDBSQLite :: CommandAccess( string command )
 	return Access;
 }
 
-bool CCCBotDBSQLite :: CommandSetAccess( string command, unsigned char access )
-{	
-	transform( command.begin( ), command.end( ), command.begin( ), (int(*)(int))tolower );
+bool CCCBotDBSQLite :: CommandSetAccess( const string &command, unsigned char access )
+{
 	bool Success = false;
 	sqlite3_stmt *Statement;
 	m_DB->Prepare( "SELECT access FROM commands WHERE name=?", (void **)&Statement );

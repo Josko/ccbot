@@ -76,18 +76,18 @@ private:
 	vector<string> m_Row;
 
 public:
-	CSQLITE3( string filename );
+	CSQLITE3( const string &filename );
 	~CSQLITE3( );
 
 	bool GetReady( )					{ return m_Ready; }
 	vector<string> *GetRow( )				{ return &m_Row; }
 	string GetError( );
 
-	int Prepare( string query, void **Statement );
+	int Prepare( const string &query, void **Statement );
 	int Step( void *Statement );
 	int Finalize( void *Statement );
 	int Reset( void *Statement );
-	int Exec( string query );
+	int Exec( const string &query );
 };
 
 //
@@ -112,26 +112,26 @@ public:
 	virtual bool Commit( );
 
 	// safelist
-	virtual uint32_t SafelistCount( string server );
-	virtual bool SafelistCheck( string server, string user );
-	virtual bool SafelistAdd( string server, string user );
-	virtual bool SafelistRemove( string server, string user );
+	virtual uint32_t SafelistCount( const string &server );
+	virtual bool SafelistCheck( const string &server, string &user );
+	virtual bool SafelistAdd( const string &server, string &user );
+	virtual bool SafelistRemove( const string &server, string &user );
 
 	// bans
-	virtual uint32_t BanCount( string server );
-	virtual CDBBan *BanCheck( string server, string user );
-	virtual bool BanAdd( string server, string user, string admin, string reason );
-	virtual bool BanRemove( string server, string user );
+	virtual uint32_t BanCount( const string &server );
+	virtual CDBBan *BanCheck( const string &server, string &user );
+	virtual bool BanAdd( const string &server, string &user, const string &admin, const string &reason );
+	virtual bool BanRemove( const string &server, string &user );
 
 	// access
-	virtual bool AccessSet( string server, string user, unsigned char access );
-	virtual unsigned char AccessCheck( string server, string user );
-	virtual uint32_t AccessCount( string server, unsigned char access );
-	virtual bool AccessRemove( string user );
+	virtual bool AccessSet( const string &server, string &user, unsigned char access );
+	virtual unsigned char AccessCheck( const string &server, string &user );
+	virtual uint32_t AccessCount( const string &server, unsigned char access );
+	virtual bool AccessRemove( string &user );
 
 	// commands
-	virtual unsigned char CommandAccess( string command );
-	virtual bool CommandSetAccess( string command, unsigned char access );
+	virtual unsigned char CommandAccess( const string &command );
+	virtual bool CommandSetAccess( const string &command, unsigned char access );
 	virtual vector<string> CommandList( unsigned char access );
 
 };

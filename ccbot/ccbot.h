@@ -72,13 +72,13 @@ uint64_t GetTicks( );		// milliseconds since computer startup usually, overflows
 #define BNET	0
 #define CONSOLE	1
 
-void LOG_Print( string message );
-void CONSOLE_PrintNoCRLF( string message, bool log = true );
-void CONSOLE_Print( string message );
-void DEBUG_Print( string message );
-void CONSOLE_ChangeChannel( string channel );
-void CONSOLE_AddChannelUser( string name );
-void CONSOLE_RemoveChannelUser( string name );
+void LOG_Print( const string &message );
+void CONSOLE_PrintNoCRLF( const string &message, bool log = true );
+void CONSOLE_Print( const string &message );
+void DEBUG_Print( const string &message );
+void CONSOLE_ChangeChannel( const string &channel );
+void CONSOLE_AddChannelUser( const string &name );
+void CONSOLE_RemoveChannelUser( const string &name );
 void CONSOLE_RemoveChannelUsers( );
 void CONSOLE_Draw( );
 void CONSOLE_Resize( );

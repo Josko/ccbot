@@ -146,8 +146,8 @@ public:
 	virtual void SetFD( fd_set *fd, fd_set *send_fd, int *nfds );
 	virtual bool GetConnected( )						{ return m_Connected; }
 	virtual string *GetBytes( )						{ return &m_RecvBuffer; }
-	virtual void PutBytes( string bytes );
-	virtual void PutBytes( BYTEARRAY bytes );
+	virtual void PutBytes( const string &bytes );
+	virtual void PutBytes( const BYTEARRAY &bytes );
 	virtual uint64_t GetLastRecv( )						{ return m_LastRecv; }
 	virtual uint64_t GetLastSend( )						{ return m_LastSend; }
 	virtual void DoRecv( fd_set *fd );

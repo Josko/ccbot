@@ -936,7 +936,7 @@ inline bool CBNETProtocol :: ValidateLength( BYTEARRAY &content )
 // CIncomingChatEvent
 //
 
-CIncomingChatEvent :: CIncomingChatEvent( CBNETProtocol :: IncomingChatEvent nChatEvent, uint32_t nUserFlags, int nPing, string nUser, string nMessage ) : m_ChatEvent( nChatEvent ), m_UserFlags( nUserFlags ), m_Ping( nPing ), m_User( nUser ), m_Message( nMessage )
+CIncomingChatEvent :: CIncomingChatEvent( CBNETProtocol :: IncomingChatEvent nChatEvent, uint32_t nUserFlags, int nPing, const string &nUser, const string &nMessage ) : m_ChatEvent( nChatEvent ), m_UserFlags( nUserFlags ), m_Ping( nPing ), m_User( nUser ), m_Message( nMessage )
 {
 
 }
@@ -951,7 +951,7 @@ CIncomingChatEvent :: ~CIncomingChatEvent( )
 // CIncomingClanList
 //
 
-CIncomingClanList :: CIncomingClanList( string nName, unsigned char nRank, unsigned char nStatus ) : m_Name( nName ), m_Rank( nRank ), m_Status( nStatus )
+CIncomingClanList :: CIncomingClanList( const string &nName, unsigned char nRank, unsigned char nStatus ) : m_Name( nName ), m_Rank( nRank ), m_Status( nStatus )
 {
 
 }

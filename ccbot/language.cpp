@@ -27,7 +27,7 @@
 // CLanguage
 //
 
-CLanguage :: CLanguage( string nCFGFile )
+CLanguage :: CLanguage( const string &nCFGFile )
 {
 	m_CFG = new CConfig( );
 	m_CFG->Read( nCFGFile );
@@ -38,7 +38,7 @@ CLanguage :: ~CLanguage( )
 	delete m_CFG;
 }
 
-void CLanguage :: Replace( string &Text, string Key, string Value )
+void CLanguage :: Replace( string &Text, const string &Key, const string &Value )
 {
 	// don't allow any infinite loops
 
@@ -79,14 +79,14 @@ string CLanguage :: UpdatedClanList( )
 	return m_CFG->GetString( "lang_0005", "lang_0005" );
 }
 
-string CLanguage :: ReceivedClanMembers( string count )
+string CLanguage :: ReceivedClanMembers( const string &count )
 {
 	string Out = m_CFG->GetString( "lang_0006", "lang_0006" );
 	Replace( Out, "$TOTAL$", count );
 	return Out;
 }
 
-string CLanguage :: MustBeAClanMember( string user )
+string CLanguage :: MustBeAClanMember( const string &user )
 {
 	string Out = m_CFG->GetString( "lang_0007", "lang_0007" );
 	Replace( Out, "$USER$", user );
@@ -118,49 +118,49 @@ string CLanguage :: UnableToPartiallyMatchServer( )
 	return m_CFG->GetString( "lang_0012", "lang_0012" );
 }
 
-string CLanguage :: Version( string version )
+string CLanguage :: Version( const string &version )
 {
 	string Out = m_CFG->GetString( "lang_0013", "lang_0013" );
 	Replace( Out, "$VERSION$", version );
 	return Out;
 }
 
-string CLanguage :: ConnectingToBNET( string server )
+string CLanguage :: ConnectingToBNET( const string &server )
 {
 	string Out = m_CFG->GetString( "lang_0014", "lang_0014" );
 	Replace( Out, "$SERVER$", server );
 	return Out;
 }
 
-string CLanguage :: ConnectedToBNET( string server )
+string CLanguage :: ConnectedToBNET( const string &server )
 {
 	string Out = m_CFG->GetString( "lang_0015", "lang_0015" );
 	Replace( Out, "$SERVER$", server );
 	return Out;
 }
 
-string CLanguage :: DisconnectedFromBNET( string server )
+string CLanguage :: DisconnectedFromBNET( const string &server )
 {
 	string Out = m_CFG->GetString( "lang_0016", "lang_0016" );
 	Replace( Out, "$SERVER$", server );
 	return Out;
 }
 
-string CLanguage :: LoggedInToBNET( string server )
+string CLanguage :: LoggedInToBNET( const string &server )
 {
 	string Out = m_CFG->GetString( "lang_0017", "lang_0017" );
 	Replace( Out, "$SERVER$", server );
 	return Out;
 }
 
-string CLanguage :: ConnectingToBNETTimedOut( string server )
+string CLanguage :: ConnectingToBNETTimedOut( const string &server )
 {
 	string Out = m_CFG->GetString( "lang_0018", "lang_0018" );
 	Replace( Out, "$SERVER$", server );
 	return Out;
 }
 
-string CLanguage :: WelcomeMessageLine1( string channel, string user )
+string CLanguage :: WelcomeMessageLine1( const string &channel, const string &user )
 {
 	string Out = m_CFG->GetString( "lang_0019", string( ) );
 	Replace( Out, "$CHANNEL$", channel );
@@ -168,7 +168,7 @@ string CLanguage :: WelcomeMessageLine1( string channel, string user )
 	return Out;
 }
 
-string CLanguage :: WelcomeMessageLine2( string channel, string user )
+string CLanguage :: WelcomeMessageLine2( const string &channel, const string &user )
 {
 	string Out = m_CFG->GetString( "lang_0020", string( ) );
 	Replace( Out, "$CHANNEL$", channel );
@@ -176,7 +176,7 @@ string CLanguage :: WelcomeMessageLine2( string channel, string user )
 	return Out;
 }
 
-string CLanguage :: SwearKick( string user, string swear )
+string CLanguage :: SwearKick( const string &user, const string &swear )
 {
 	string Out = m_CFG->GetString( "lang_0021", "lang_0021" );
 	Replace( Out, "$USER$", user );
@@ -184,7 +184,7 @@ string CLanguage :: SwearKick( string user, string swear )
 	return Out;
 }
 
-string CLanguage :: AnnounceGame( string user, string gamename )
+string CLanguage :: AnnounceGame( const string &user, const string &gamename )
 {
 	string Out = m_CFG->GetString( "lang_0022", "lang_0022" );
 	Replace(Out, "$USER$", user );
@@ -192,14 +192,14 @@ string CLanguage :: AnnounceGame( string user, string gamename )
 	return Out;
 }
 
-string CLanguage :: CommandTrigger( string trigger )
+string CLanguage :: CommandTrigger( const string &trigger )
 {
 	string Out = m_CFG->GetString( "lang_0023", "lang_0023" );
 	Replace(Out, "$TRIGGER$", trigger );
 	return Out;
 }
 
-string CLanguage :: Ping( string user, string ping, string server )
+string CLanguage :: Ping( const string &user, const string &ping, const string &server )
 {
 	string Out = m_CFG->GetString( "lang_0024", "lang_0024" );
 	Replace(Out, "$USER$", user );
@@ -223,28 +223,28 @@ string CLanguage :: InvitationAccepted(  )
 	return m_CFG->GetString( "lang_0027", "lang_0027" );
 }
 
-string CLanguage :: HasFollowingAccess( string access )
+string CLanguage :: HasFollowingAccess( const string &access )
 {
 	string Out = m_CFG->GetString( "lang_0028", "lang_0028" );
 	Replace(Out, "$ACCESS$", access );
 	return Out;
 }
 
-string CLanguage :: UserAlreadySafelisted( string user )
+string CLanguage :: UserAlreadySafelisted( const string &user )
 {
 	string Out = m_CFG->GetString( "lang_0029", "lang_0029" );
 	Replace(Out, "$USER$", user );
 	return Out;
 }
 
-string CLanguage :: UserSafelisted( string user )
+string CLanguage :: UserSafelisted( const string &user )
 {
 	string Out = m_CFG->GetString( "lang_0030", "lang_0030" );
 	Replace(Out, "$USER$", user );
 	return Out;
 }
 
-string CLanguage :: ErrorSafelisting( string user )
+string CLanguage :: ErrorSafelisting( const string &user )
 {
 	string Out = m_CFG->GetString( "lang_0031", "lang_0031" );
 	Replace(Out, "$USER$", user );
@@ -256,14 +256,14 @@ string CLanguage :: AnnounceDisabled( )
 	return m_CFG->GetString( "lang_0032", "lang_0032" );
 }
 
-string CLanguage :: AnnounceEnabled( string interval )
+string CLanguage :: AnnounceEnabled( const string &interval )
 {
 	string Out = m_CFG->GetString( "lang_0033", "lang_0033" );
 	Replace(Out, "$INTERVAL$", interval );
 	return Out;
 }
 
-string CLanguage :: UserAlreadyBanned( string victim, string admin )
+string CLanguage :: UserAlreadyBanned( const string &victim, const string &admin )
 {
 	string Out = m_CFG->GetString( "lang_0034", "lang_0034" );
 	Replace(Out, "$USER$", victim );
@@ -271,7 +271,7 @@ string CLanguage :: UserAlreadyBanned( string victim, string admin )
 	return Out;
 }
 
-string CLanguage :: SuccesfullyBanned( string victim, string admin )
+string CLanguage :: SuccesfullyBanned( const string &victim, const string &admin )
 {
 	string Out = m_CFG->GetString( "lang_0035", "lang_0035" );
 	Replace(Out, "$USER$", victim );
@@ -279,14 +279,14 @@ string CLanguage :: SuccesfullyBanned( string victim, string admin )
 	return Out;
 }
 
-string CLanguage :: ErrorBanningUser( string victim )
+string CLanguage :: ErrorBanningUser( const string &victim )
 {
 	string Out = m_CFG->GetString( "lang_0036", "lang_0036" );
 	Replace(Out, "$USER$", victim );
 	return Out;
 }
 
-string CLanguage :: Uptime( string user, string time )
+string CLanguage :: Uptime( const string &user, const string &time )
 {
 	string Out = m_CFG->GetString( "lang_0037", "lang_0037" );
 	Replace(Out, "$USER$", user );
@@ -294,28 +294,28 @@ string CLanguage :: Uptime( string user, string time )
 	return Out;
 }
 
-string CLanguage :: GN8( string user )
+string CLanguage :: GN8( const string &user )
 {
 	string Out = m_CFG->GetString( "lang_0038", "lang_0038" );
 	Replace(Out, "$USER$", user );
 	return Out;
 }
 
-string CLanguage :: UserIsSafelisted( string user )
+string CLanguage :: UserIsSafelisted( const string &user )
 {
 	string Out = m_CFG->GetString( "lang_0039", "lang_0039" );
 	Replace(Out, "$USER$", user );
 	return Out;
 }
 
-string CLanguage :: UserNotSafelisted( string user )
+string CLanguage :: UserNotSafelisted( const string &user )
 {
 	string Out = m_CFG->GetString( "lang_0040", "lang_0040" );
 	Replace(Out, "$USER$", user );
 	return Out;
 }
 
-string CLanguage :: ChangedRank( string user, string rank )
+string CLanguage :: ChangedRank( const string &user, const string &rank )
 {
 	string Out = m_CFG->GetString( "lang_0041", "lang_0041" );
 	Replace(Out, "$USER$", user );
@@ -323,7 +323,7 @@ string CLanguage :: ChangedRank( string user, string rank )
 	return Out;
 }
 
-string CLanguage :: LockdownEnabled( string access )
+string CLanguage :: LockdownEnabled( const string &access )
 {
 	string Out = m_CFG->GetString( "lang_0042", "lang_0042" );
 	Replace(Out, "$ACCESS$", access );
@@ -335,14 +335,14 @@ string CLanguage :: LockdownDisabled( )
 	return m_CFG->GetString( "lang_0043", "lang_0043" );
 }
 
-string CLanguage :: SetMOTD( string message )
+string CLanguage :: SetMOTD( const string &message )
 {
 	string Out = m_CFG->GetString( "lang_0044", "lang_0044" );
 	Replace(Out, "$MOTD$", message );
 	return Out;
 }
 
-string CLanguage :: SetTopic( string message )
+string CLanguage :: SetTopic( const string &message )
 {
 	string Out = m_CFG->GetString( "lang_0045", "lang_0045" );
 	Replace(Out, "$TOPIC$", message );

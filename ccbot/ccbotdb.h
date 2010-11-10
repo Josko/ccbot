@@ -44,26 +44,26 @@ public:
 	virtual bool Commit( );
 
 	// safelist
-	virtual uint32_t SafelistCount( string server );
-	virtual bool SafelistCheck( string server, string user );
-	virtual bool SafelistAdd( string server, string user );
-	virtual bool SafelistRemove( string server, string user );
+	virtual uint32_t SafelistCount( const string &server );
+	virtual bool SafelistCheck( const string &server, string &user );
+	virtual bool SafelistAdd( const string &server, string &user );
+	virtual bool SafelistRemove( const string &server, string &user );
 
 	// bans
-	virtual uint32_t BanCount( string server );
-	virtual CDBBan *BanCheck( string server, string user );
-	virtual bool BanAdd( string server, string user, string admin, string reason );
-	virtual bool BanRemove( string server, string user );
+	virtual uint32_t BanCount( const string &server );
+	virtual CDBBan *BanCheck( const string &server, string &user );
+	virtual bool BanAdd( const string &server, string &user, const string &admin, const string &reason );
+	virtual bool BanRemove( const string &server, string &user );
 
 	// access
-	virtual bool AccessSet( string server, string user, unsigned char access );
-	virtual unsigned char AccessCheck( string server, string user );
-	virtual uint32_t AccessCount( string server, unsigned char access );
-	virtual bool AccessRemove( string user );
+	virtual bool AccessSet( const string &server, string &user, unsigned char access );
+	virtual unsigned char AccessCheck( const string &server, string &user );
+	virtual uint32_t AccessCount( const string &server, unsigned char access );
+	virtual bool AccessRemove( string &user );
 
 	// command
-	virtual unsigned char CommandAccess( string command );
-	virtual bool CommandSetAccess( string command, unsigned char access );
+	virtual unsigned char CommandAccess( const string &command );
+	virtual bool CommandSetAccess( const string &command, unsigned char access );
 	virtual vector<string> CommandList( unsigned char access );
 	
 };
@@ -81,7 +81,7 @@ private:
 	string m_Reason;
 
 public:
-	CDBBan( string nServer, string nName, string nDate, string nAdmin, string nReason );
+	CDBBan( const string &nServer, const string &nName, const string &nDate, const string &nAdmin, const string &nReason );
 	~CDBBan( );
 
 	string GetServer( )		{ return m_Server; }
