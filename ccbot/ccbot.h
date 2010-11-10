@@ -76,10 +76,6 @@ void LOG_Print( const string &message );
 void CONSOLE_PrintNoCRLF( const string &message, bool log = true );
 void CONSOLE_Print( const string &message );
 void DEBUG_Print( const string &message );
-void CONSOLE_ChangeChannel( const string &channel );
-void CONSOLE_AddChannelUser( const string &name );
-void CONSOLE_RemoveChannelUser( const string &name );
-void CONSOLE_RemoveChannelUsers( );
 void CONSOLE_Draw( );
 void CONSOLE_Resize( );
 void CONSOLE_ChannelWindowChanged( );
@@ -105,7 +101,7 @@ public:
 	bool m_Enabled;						// set to false to prevent new games from being created
 	string m_Version;					// CCBot version string
 	uint64_t m_Uptime;					// uptime value
-	map<string, unsigned char> m_Commands;	// map of every command keyword and default access value
+	map<string, unsigned char> m_Commands;		// map of every command keyword and default access value
 	string m_LanguageFile;				// config value: language file
 	string m_Warcraft3Path;				// config value: Warcraft 3 path
 	string m_CFGPath;					// config value:path to txt files

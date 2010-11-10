@@ -269,6 +269,7 @@ Version 1.02 ( 6.11.2010. )
 - Removed some unecessary variables
 - Overall better performance
 - Fixed a bug found in the !ban command
+- Updated SQLite3 to 3.7.3 (from 3.7.0.1)
 
 Version 1.01 ( 03.10.2010. )
 
