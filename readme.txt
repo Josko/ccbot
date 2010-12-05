@@ -2,7 +2,7 @@
 CCBot - Clan & Channel Bot - Version 1.02
 =========================================
 
-CCBot is a modified GHost++ bot (made by Varlock) to moderate both the channel and the clan it's located in. It's written in C++ with the SQLite files in C and because of this it's multi-platform and works on Windows and Linux (and OS X with probable minor changes to source). It's meant to be small and powerful with almost no dependecies and to work on PvPGNs and B.NET. 
+CCBot is a modified GHost++ bot (made by Varlock) to moderate both the channel and the clan it's located in. It's written in C++ and works on Windows and Linux (and possibly OS X with minor changes). It's meant to be small and powerful with almost no dependecies. Works on PvPGNs and B.NET. Use at your own risk.
 
 Its source is freely available on http://code.google.com/p/ccbot while the GHost++ source is available at http://code.google.com/p/ghostplusplus
 
