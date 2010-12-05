@@ -1016,23 +1016,18 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			else if( ( Command == "squelchlist" || Command == "sl" ) && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "squelch" ) )
 			{
 				if ( m_Squelched.size( ) )
-				{
-					string users;
-					
-					for( unsigned int i = 0; i < m_Squelched.size( ); ++i )
-					{
-						if( m_Squelched[i].size( ) > 0 )
-						{
-							if( (i+1) != m_Squelched.size( ) )
-								users = users + m_Squelched[i] + ", ";
-							else
-								users = users + m_Squelched[i];
-						}
-					}
-					QueueChatCommand( "Squelched users: " + users + ".", User, Whisper, Output );
-				}
-				else
-					QueueChatCommand( "There are no squelched users." , User, Whisper, Output );					
+                                {
+                                        string tempText;
+                                        
+                                        for( vector<string> :: iterator i = m_Squelched.begin( ); i != m_Squelched.end( ); ++i )
+                                        {
+                                                if( (*i).size( ) > 0 )
+                                                        tempText = tempText + (*i) + ", ";
+                                        }
+                                        QueueChatCommand( "Squelched users: " + tempText.substr( 0, tempText.size( )- 2 ) + ".", User, Whisper, Output );
+                                }
+                                else
+                                        QueueChatCommand( "There are no squelched users." , User, Whisper, Output );				
 			}
 
 			//
