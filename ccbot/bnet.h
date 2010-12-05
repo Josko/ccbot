@@ -190,7 +190,7 @@ private:
 	uint32_t m_UserFlags;
 	string m_Clan;
 public:
-	CUser( string nUser, int nPing, uint32_t nUserFlags );
+	CUser( const string &nUser, int nPing, uint32_t nUserFlags );
 	~CUser( );
 
 	string GetUser( )							{ return m_User; }

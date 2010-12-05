@@ -40,9 +40,7 @@
 // CBNET
 //
 
-CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, unsigned char nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, unsigned char nClanDefaultAccess, string nHostbotName, bool nAntiSpam ) 
-
-: m_CCBot( nCCBot ), m_Exiting( false ), m_Server( nServer ), m_ServerAlias( m_Server ), m_CDKeyROC( nCDKeyROC ), m_CDKeyTFT( nCDKeyTFT ), m_CountryAbbrev( nCountryAbbrev ), m_Country( nCountry ), m_UserName( nUserName ), m_UserPassword( nUserPassword ), m_FirstChannel( nFirstChannel ), m_CurrentChannel( nFirstChannel ), m_RootAdmin( nRootAdmin ), m_HostbotName( nHostbotName ), m_War3Version( nWar3Version ), m_EXEVersion( nEXEVersion ), m_EXEVersionHash( nEXEVersionHash ), m_PasswordHashType( nPasswordHashType ), m_Delay( 3001 ),  m_ClanDefaultAccess( nClanDefaultAccess ), m_MaxMessageLength( nMaxMessageLength ), m_NextConnectTime( GetTime( ) ), m_LastNullTime( GetTime( ) ), m_LastGetClanTime( 0 ), m_LastRejoinTime( 0 ), m_RejoinInterval( 15 ), m_LastAnnounceTime( 0 ), m_LastInvitationTime( 0 ), m_LastChatCommandTicks( 0 ), m_LastOutPacketTicks( 0 ), m_LastSpamCacheCleaning( 0 ), m_WaitingToConnect( true ), m_LoggedIn( false ), m_InChat( false ), m_AntiSpam( nAntiSpam ), m_Announce( false ), m_IsLockdown( false ), m_ActiveInvitation( false ), m_ActiveCreation( false ), m_AnnounceGames( nAnnounceGames ), m_BanChat( nBanChat ), m_SwearingKick( nSwearingKick ), m_SelfJoin( nSelfJoin ), m_GreetUsers( nGreetUsers ), m_ClanTag( "Clan " + nClanTag )
+CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyTFT, string nCountryAbbrev, string nCountry, string nUserName, string nUserPassword, string nFirstChannel, string nRootAdmin, char nCommandTrigger, unsigned char nWar3Version, BYTEARRAY nEXEVersion, BYTEARRAY nEXEVersionHash, string nPasswordHashType, unsigned char nMaxMessageLength, string nClanTag, bool nGreetUsers, bool nSwearingKick, bool nAnnounceGames, bool nSelfJoin, bool nBanChat, unsigned char nClanDefaultAccess, string nHostbotName, bool nAntiSpam ): m_CCBot( nCCBot ), m_Exiting( false ), m_Server( nServer ), m_ServerAlias( m_Server ), m_CDKeyROC( nCDKeyROC ), m_CDKeyTFT( nCDKeyTFT ), m_CountryAbbrev( nCountryAbbrev ), m_Country( nCountry ), m_UserName( nUserName ), m_UserPassword( nUserPassword ), m_FirstChannel( nFirstChannel ), m_CurrentChannel( nFirstChannel ), m_RootAdmin( nRootAdmin ), m_HostbotName( nHostbotName ), m_War3Version( nWar3Version ), m_EXEVersion( nEXEVersion ), m_EXEVersionHash( nEXEVersionHash ), m_PasswordHashType( nPasswordHashType ), m_Delay( 3001 ),  m_ClanDefaultAccess( nClanDefaultAccess ), m_MaxMessageLength( nMaxMessageLength ), m_NextConnectTime( GetTime( ) ), m_LastNullTime( GetTime( ) ), m_LastGetClanTime( 0 ), m_LastRejoinTime( 0 ), m_RejoinInterval( 15 ), m_LastAnnounceTime( 0 ), m_LastInvitationTime( 0 ), m_LastChatCommandTicks( 0 ), m_LastOutPacketTicks( 0 ), m_LastSpamCacheCleaning( 0 ), m_WaitingToConnect( true ), m_LoggedIn( false ), m_InChat( false ), m_AntiSpam( nAntiSpam ), m_Announce( false ), m_IsLockdown( false ), m_ActiveInvitation( false ), m_ActiveCreation( false ), m_AnnounceGames( nAnnounceGames ), m_BanChat( nBanChat ), m_SwearingKick( nSwearingKick ), m_SelfJoin( nSelfJoin ), m_GreetUsers( nGreetUsers ), m_ClanTag( "Clan " + nClanTag )
 {
 	// todotodo: append path seperator to Warcraft3Path if needed
 
@@ -506,7 +504,6 @@ inline void CBNET :: ProcessPackets( )
 			case CBNETProtocol :: SID_CLANINVITATION:
 				switch( m_Protocol->RECEIVE_SID_CLANINVITATION( Packet->GetData( ) ) )
 				{
-
 					case 9:
 						QueueChatCommand( m_ClanTag + " is currently full, please contact a shaman/chieftain.", BNET );
 						break;
@@ -867,7 +864,7 @@ string CBNET :: GetUserFromNamePartial( string name )
 // CUser
 //
 
-CUser :: CUser( string nUser, int nPing, uint32_t nUserflags ) : m_User ( nUser ), m_Ping( nPing ), m_UserFlags( nUserflags )
+CUser :: CUser( const string &nUser, int nPing, uint32_t nUserflags ) : m_User ( nUser ), m_Ping( nPing ), m_UserFlags( nUserflags )
 {
 
 }
