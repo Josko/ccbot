@@ -1,5 +1,5 @@
 ﻿=========================================
-CCBot - Clan & Channel Bot - Version 1.02
+CCBot - Clan & Channel Bot - Version 1.03
 =========================================
 
 CCBot is a modified GHost++ bot (made by Varlock) to moderate both the channel and the clan it's located in. It's written in C++ and works on Windows and Linux (and possibly OS X with minor changes). It's meant to be small and powerful with almost no dependecies. Works on PvPGNs and B.NET. Use at your own risk.
@@ -255,6 +255,15 @@ Then when in the CCBot binary directory just type in terminal "./ccbot++" withou
 
 =========
 CHANGELOG
+
+Version 1.03 ( 6.12.2010. )
+
+- Fixed a small gramatical error in a response
+- Changed order of if-else statements in DoSend( ) and DoRecv( )
+- Using init. lists in socket constructors
+- Less calls to GetTime( ) and GetTicks( )
+- Small changes to GetTime( ) for a bit better performance and using 64-bit words on *nix
+- Fixed a few warnings when compiling with VS2010
 
 Version 1.02 ( 6.11.2010. )
 

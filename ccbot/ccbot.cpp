@@ -62,8 +62,26 @@ bool gLog = false;
 CCCBot *gCCBot = NULL;
 
 uint64_t GetTime( )
-{
-	return GetTicks( ) / 1000;
+{	
+#ifdef WIN32
+	return GetTickCount( ) / 1000;
+#elif __APPLE__
+	uint64_t current = mach_absolute_time( );
+	static mach_timebase_info_data_t info = { 0, 0 };
+	// get timebase info
+	if( info.denom == 0 )
+		mach_timebase_info( &info );
+	uint64_t elapsednano = current * ( info.numer / info.denom );
+	// convert ns to s
+	return elapsednano / 1e9;
+#else
+	uint64_t ticks;
+	struct timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	ticks = t.tv_sec;
+	ticks += t.tv_nsec / 1e9;
+	return ticks;
+#endif
 }
 
 uint64_t GetTicks( )
@@ -80,7 +98,7 @@ uint64_t GetTicks( )
 	// convert ns to ms
 	return elapsednano / 1e6;
 #else
-	uint32_t ticks;
+	uint64_t ticks;
 	struct timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);
 	ticks = t.tv_sec * 1000;
@@ -490,17 +508,16 @@ int main( )
 // CCBot
 //
 
-CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.02" )
+CCCBot :: CCCBot( CConfig *CFG ) : m_Exiting( false ), m_Version( "1.03" )
 {
 	m_DB = new CCCBotDBSQLite( CFG );
-	m_Exiting = false;
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
 
 	// load the battle.net connections
 	// we're just loading the config data and creating the CBNET classes here, the connections are established later (in the Update function)
 
-	for( uint32_t i = 1; i < 10; ++i )
+	for( unsigned int i = 1; i < 10; ++i )
 	{
 		string Prefix;
 
@@ -609,9 +626,9 @@ bool CCCBot :: Update( long usecBlock )
 	if( NumFDs == 0 )
 	{
 		// we don't have any sockets (i.e. we aren't connected to battle.net maybe due to a lost connection)
-		// select will return immediately and we'll chew up the CPU if we let it loop so just sleep for 50ms to kill some time
+		// select will return immediately and we'll chew up the CPU if we let it loop so just sleep for 200ms to kill some time
 
-		MILLISLEEP( 100 );
+		MILLISLEEP( 200 );
 	}
 
 	bool BNETExit = false;
@@ -721,7 +738,7 @@ void CCCBot :: UpdateCommandAccess( )
 		if( m_DB->CommandAccess( i->first ) == 255 )
 		{
 			m_DB->CommandSetAccess( i->first, i->second );
-			CONSOLE_Print( "[ACCESS] no value found for command [" + i->first + "] - setting default value of [" + UTIL_ToString( i->second ) + "]" );			
+			CONSOLE_Print( "[ACCESS] no value found for command [" + i->first + "] - setting default value of [" + UTIL_ToString( i->second ) + "]" );
 		}
 	}
 }

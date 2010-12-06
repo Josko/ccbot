@@ -97,6 +97,9 @@ unsigned int CBNET :: SetFD( void *fd, void *send_fd, int *nfds )
 }
 bool CBNET :: Update( void *fd, void *send_fd )
 {
+
+	uint64_t Time = GetTime( );
+	
 	// we return at the end of each if statement so we don't have to deal with errors related to the order of the if statements
 	// that means it might take a few ms longer to complete a task involving multiple steps (in this case, reconnecting) due to blocking or sleeping
 	// but it's not a big deal at all, maybe 100ms in the worst possible case (based on a 50ms blocking time)
@@ -108,7 +111,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket error" );
 		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
 		m_Socket->Reset( );
-		m_NextConnectTime = GetTime( ) + 11;
+		m_NextConnectTime = Time + 11;
 		m_LoggedIn = false;
 		m_InChat = false;
 		m_WaitingToConnect = true;
@@ -122,12 +125,14 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket not connected" );
 		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
 		m_Socket->Reset( );
-		m_NextConnectTime = GetTime( ) + 11;
+		m_NextConnectTime = Time + 11;
 		m_LoggedIn = false;
 		m_InChat = false;
 		m_WaitingToConnect = true;
 		return m_Exiting;
 	}
+	
+	uint64_t Ticks = GetTicks( );
 
 	if( m_Socket->GetConnected( ) )
 	{
@@ -137,59 +142,65 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		ExtractPackets( );
 		ProcessPackets( );	
 		
-		if( !m_ChatCommands.empty( ) && GetTicks( ) >= m_LastChatCommandTicks + m_Delay )
+		if( !m_ChatCommands.empty( ) && Ticks >= m_LastChatCommandTicks + m_Delay )
 		{			
 			string ChatCommand = m_ChatCommands.front( );
 			m_ChatCommands.pop( );
 			m_Delay = 1100 + ChatCommand.length( ) * 40;
 			SendChatCommand( ChatCommand, BNET );
-			m_LastChatCommandTicks = GetTicks( );
-			m_LastOutPacketTicks = GetTicks( );
+			m_LastChatCommandTicks = Ticks;
+			m_LastOutPacketTicks = Ticks;
 		}
 	
 		// send a null packet to detect disconnects
-		if( GetTime( ) >= m_LastNullTime + 60 )
+		
+		if( Time >= m_LastNullTime + 60 )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_NULL( ) );
-			m_LastNullTime = GetTime( );
+			m_LastNullTime = Time;
 		}
 		
-		if( GetTime( ) >= m_LastSpamCacheCleaning + 5 && m_AntiSpam )
+		if( Time >= m_LastSpamCacheCleaning + 5 && m_AntiSpam )
 		{
 			m_SpamCache.clear( );
-			m_LastSpamCacheCleaning = GetTime( );
+			m_LastSpamCacheCleaning = Time;
 		}
 
 		// refresh the clan vector so it gets updated every 70 seconds
-		if( GetTime( ) >= m_LastGetClanTime + 70 && m_LoggedIn )
+		
+		if( Time >= m_LastGetClanTime + 70 && m_LoggedIn )
 		{
 			SendGetClanList( );
-			m_LastGetClanTime = GetTime( );
+			m_LastGetClanTime = Time;
 		}
 
 		// part of !Announce
-		if( ( GetTime( ) >= m_LastAnnounceTime + m_AnnounceInterval ) && m_Announce  )
+		
+		if( ( Time >= m_LastAnnounceTime + m_AnnounceInterval ) && m_Announce  )
 		{
 			QueueChatCommand( m_AnnounceMsg, BNET );
-			m_LastAnnounceTime = GetTime( );
+			m_LastAnnounceTime = Time;
 		}
 
 		// rejoining the channel when not in the set channel
-		if( GetTime( ) >= m_LastRejoinTime + m_RejoinInterval && m_LoggedIn && m_Rejoin )
+		
+		if( Time >= m_LastRejoinTime + m_RejoinInterval && m_LoggedIn && m_Rejoin )
 		{
 			SendChatCommandHidden( "/join " + m_CurrentChannel, BNET );
-			m_LastRejoinTime = GetTime( );
+			m_LastRejoinTime = Time;
 		}
 
 		// if we didn't accept a clan invitation send a decline after 29 seconds (to be on the safe side it doesn't cross over 30 seconds )
-		if( GetTime( ) >= ( m_LastInvitationTime + 29 ) && m_ActiveInvitation && m_LoggedIn )
+		
+		if( Time >= ( m_LastInvitationTime + 29 ) && m_ActiveInvitation && m_LoggedIn )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_Protocol->GetClanTag( ), m_Protocol->GetInviter( ), false ) );
 			m_ActiveInvitation = false;
 		}
 
 		// wait 5 seconds before accepting the invitation otherwise the clan can get created but you would get an false error
-		if( GetTime( ) >= ( m_LastInvitationTime + 5 ) && m_ActiveCreation && m_LoggedIn )
+		
+		if( Time >= ( m_LastInvitationTime + 5 ) && m_ActiveCreation && m_LoggedIn )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANCREATIONINVITATION( m_Protocol->GetClanCreationTag( ), m_Protocol->GetClanCreator( ) ) );
 			m_ActiveCreation = false;
@@ -211,27 +222,27 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			m_Socket->PutBytes( m_Protocol->SEND_PROTOCOL_INITIALIZE_SELECTOR( ) );
 			m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_INFO( m_War3Version, !m_CDKeyTFT.empty( ), m_CountryAbbrev, m_Country ) );
 			m_Socket->DoSend( (fd_set*)send_fd );
-			m_LastNullTime = GetTime( );
-			m_LastChatCommandTicks = GetTicks( );
+			m_LastNullTime = Time;
+			m_LastChatCommandTicks = Ticks;
 
 			while( !m_OutPackets.empty( ) )
 			m_OutPackets.pop( );
 
 			return m_Exiting;
 		}
-		else if( GetTime( ) >= m_NextConnectTime + 15 )
+		else if( Time >= m_NextConnectTime + 15 )
 		{
 			// the connection attempt timed out (11 seconds)
 
 			CONSOLE_Print( "[BNET: " + m_ServerAlias + "] connect timed out" );
 			m_Socket->Reset( );
-			m_NextConnectTime = GetTime( ) + 11;
+			m_NextConnectTime = Time + 11;
 			m_WaitingToConnect = true;
 			return m_Exiting;
 		}
 	}
 
-	if( !m_Socket->GetConnecting( ) && !m_Socket->GetConnected( ) && GetTime( ) >= m_NextConnectTime )
+	if( !m_Socket->GetConnecting( ) && !m_Socket->GetConnected( ) && Time >= m_NextConnectTime )
 	{
 		// attempt to connect to battle.net
 

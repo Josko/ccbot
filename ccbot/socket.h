@@ -171,7 +171,7 @@ public:
 	virtual void Reset( );
 	virtual void Disconnect( );
 	virtual bool GetConnecting( )						{ return m_Connecting; }
-	virtual void Connect( string localaddress, string address, uint16_t port );
+	virtual void Connect( const string &localaddress, const string &address, uint16_t port );
 	virtual bool CheckConnect( );
 };
 

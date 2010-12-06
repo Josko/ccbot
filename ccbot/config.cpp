@@ -159,7 +159,7 @@ void CConfig :: CreateLanguage( )
 		file << "lang_0034 = [$USER$] was already banned from the channel by $ADMIN$.\n";
 		file << "lang_0035 = [$USER$] successfully banned from the channel by $ADMIN$.\n";
 		file << "lang_0036 = Error banning [$USER$] from the channel.\n";
-		file << "lang_0037 = [$USER$] has a uptime of : $TIME$\n";
+		file << "lang_0037 = [$USER$] has an uptime of : $TIME$\n";
 		file << "lang_0038 = /me - $USER$ is going to bed and wishes everyone a good night!\n";
 		file << "lang_0039 = User [$USER$] is safelisted.\n";
 		file << "lang_0040 = User [$USER$] is not safelisted.\n";
