@@ -99,7 +99,6 @@ private:
 	bool m_ActiveInvitation;					// bool true if we got an SID_CLANINVITATION in the last 29 seconds
 	bool m_ActiveCreation;						// bool true if we got an clan creation invitaiton in the last 29 seconds
 	bool m_Rejoin;								// indicates that the bot is in the "wrong" channel
-	bool m_ClanCommandsEnabled;					// bool true if bot is in a clan and the users can use clan commands
 	bool m_AnnounceGames;						// set to true and every game joined by users from channel will be announced in channel
 	bool m_BanChat;								// set to true and CHAT clients get kicked from channel
 	bool m_SwearingKick;						// set to true and every message containing swears (contained in swears.cfg) will get the user kicked

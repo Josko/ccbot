@@ -51,7 +51,7 @@
     <ClCompile Include="util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-	<ClCompile Include="chatevent.cpp">
+    <ClCompile Include="chatevent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,13 +71,7 @@
     <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="crc32.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ccbot.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ghostdb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ccbotdbsqlite.h">
@@ -99,6 +93,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ccbotdb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

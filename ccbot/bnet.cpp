@@ -32,9 +32,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
 #ifdef WIN32
 	#include <time.h>
 #endif
+*/
 
 //
 // CBNET

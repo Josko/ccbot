@@ -31,9 +31,11 @@
 #include <cstdio>
 #include <cstdlib>
 
+/*
 #ifdef WIN32
 	#include <time.h>
 #endif
+*/
 
 void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 {
@@ -51,12 +53,12 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 	if( Access == 255 )
 		Access = 0;
 
-	m_ClanCommandsEnabled = IsClanMember( m_UserName );	
+	bool ClanMember = IsClanMember( m_UserName );	
 
-	if( Event == CBNETProtocol :: EID_WHISPER )
-			CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "][" + User + "] " + Message );
-	else if( Event == CBNETProtocol :: EID_TALK )
+	if( Event == CBNETProtocol :: EID_TALK )
 			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + ":" + m_CurrentChannel + "][" + User + "] " + Message );
+	else if( Event == CBNETProtocol :: EID_WHISPER )
+			CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "][" + User + "] " + Message );
 	else if( Event == CBNETProtocol :: EID_EMOTE )
 			CONSOLE_Print( "[EMOTE: " + m_ServerAlias + ":" + m_CurrentChannel + "][" + User + "] " + Message );
 
@@ -612,7 +614,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !CLANLIST
 			//
 
-			else if( Command == "clanlist" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "clanlist" ) && m_ClanCommandsEnabled )
+			else if( Command == "clanlist" && Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "clanlist" ) && ClanMember )
 			{
 				string Chieftains = "Chieftains: ", Shamans = "Shamans: ", Grunts = "Grunts: ", Peons = "Peons: ";
 
@@ -747,7 +749,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !GETCLAN
 			//
 
-			else if( Command == "getclan" && Access >= m_CCBot->m_DB->CommandAccess( "getclan" ) && m_ClanCommandsEnabled )
+			else if( Command == "getclan" && Access >= m_CCBot->m_DB->CommandAccess( "getclan" ) && ClanMember )
 			{
 				SendGetClanList( );
 				QueueChatCommand( m_CCBot->m_Language->UpdatedClanList( ), User, Whisper, Output );
@@ -758,7 +760,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !CHIEFTAIN
 			//
 
-			else if( Command == "chieftain" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "chieftain" ) && IsClanChieftain( m_UserName ) && m_ClanCommandsEnabled )
+			else if( Command == "chieftain" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "chieftain" ) && IsClanChieftain( m_UserName ) && ClanMember )
 			{
 				if( IsClanMember( Payload ) )
 				{
@@ -791,7 +793,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !GRUNT
 			//
 
-			else if( Command == "grunt"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "grunt" ) && m_ClanCommandsEnabled )
+			else if( Command == "grunt"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "grunt" ) && ClanMember )
 			{
 				if(  IsClanShaman( m_UserName ) || IsClanChieftain( m_UserName ) )
 				{
@@ -876,7 +878,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !MOTD (clan message of the day)
 			//
 
-			else if( Command == "motd" && Access >= m_CCBot->m_DB->CommandAccess( "motd" ) && m_ClanCommandsEnabled )
+			else if( Command == "motd" && Access >= m_CCBot->m_DB->CommandAccess( "motd" ) && ClanMember )
 			{					
 				m_Socket->PutBytes( m_Protocol->SEND_SID_CLANSETMOTD( Payload ) );
 				QueueChatCommand( m_CCBot->m_Language->SetMOTD( Payload ), User, Whisper, Output );
@@ -886,7 +888,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !PEON
 			//
 
-			else if( Command == "peon"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "peon" ) && m_ClanCommandsEnabled )
+			else if( Command == "peon"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "peon" ) && ClanMember )
 			{
 				if( IsClanShaman( m_UserName ) || IsClanChieftain( m_UserName ) )
 				{
@@ -901,7 +903,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !REMOVE (from clan)
 			//
 
-			else if( Command == "remove"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "remove" ) && m_ClanCommandsEnabled )
+			else if( Command == "remove"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "remove" ) && ClanMember )
 			{
 				if( !IsClanChieftain( Payload ) && !IsClanShaman( Payload ) )
 				{
@@ -979,7 +981,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !SHAMAN
 			//
 
-			else if( Command == "shaman"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "shaman" ) && m_ClanCommandsEnabled )
+			else if( Command == "shaman"  && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "shaman" ) && ClanMember )
 			{
 				if( IsClanChieftain( m_UserName ) )
 				{
@@ -1123,7 +1125,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !INVITE
 			//
 
-			else if( Command == "invite" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "invite" )  && m_ClanCommandsEnabled && IsInChannel( Payload ) )
+			else if( Command == "invite" && !Payload.empty( ) && Access >= m_CCBot->m_DB->CommandAccess( "invite" )  && ClanMember && IsInChannel( Payload ) )
 			{
 				if( !IsClanMember( Payload ) )
 				{
@@ -1145,7 +1147,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !JOIN
 			//
 				
-			else if( ( Command == "joinclan" || Command == "join" ) && Payload.empty( ) && !IsClanMember( User ) && IsInChannel( User ) && m_ClanCommandsEnabled )
+			else if( ( Command == "joinclan" || Command == "join" ) && Payload.empty( ) && !IsClanMember( User ) && IsInChannel( User ) && ClanMember )
 			{
 				if( m_SelfJoin )
 				{
@@ -1165,7 +1167,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			// !O
 			//
 				
-			else if( ( Command == "online" || Command == "o" ) && Access >= m_CCBot->m_DB->CommandAccess( "online" ) && m_ClanCommandsEnabled )
+			else if( ( Command == "online" || Command == "o" ) && Access >= m_CCBot->m_DB->CommandAccess( "online" ) && ClanMember )
 			{
 				string Online;
 				uint32_t OnlineNumber = 0;				

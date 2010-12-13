@@ -264,6 +264,9 @@ Version 1.03 ( 6.12.2010. )
 - Less calls to GetTime( ) and GetTicks( )
 - Small changes to GetTime( ) for a bit better performance and using 64-bit words on *nix
 - Fixed a few warnings when compiling with VS2010
+- Updated SQLite3 to 3.7.4 (from 3.7.3)
+- Moved the srand( ) calls to main( ) rather then using srand( ) in !slap and !spit
+- Removed an obsolete flag in the Makefile
 
 Version 1.02 ( 6.11.2010. )
 
