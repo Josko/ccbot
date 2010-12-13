@@ -5,7 +5,7 @@ CC = gcc
 DFLAGS = -DSQLITE_THREADSAFE=0
 OFLAGS = -O3
 LFLAGS = -L. -L../bncsutil/src/bncsutil/ -lbncsutil -lpthread -ldl -lrt -lnsl -lcurses
-CFLAGS += -Wall -Wno-write-strings
+CFLAGS += -Wall
 
 ifeq ($(SYSTEM),Darwin)
 DFLAGS += -D__APPLE__

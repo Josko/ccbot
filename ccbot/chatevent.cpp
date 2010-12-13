@@ -1201,8 +1201,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 				if( Payload == User )					
 					Payload = "himself";
-
-				srand( (unsigned int) time( NULL ) );					
+								
 				int Random = ( rand( ) % 6 );					
 
 				switch( Random )
@@ -1235,8 +1234,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			{
 				if ( GetUserFromNamePartial( Payload ).size( ) )
 					Payload = GetUserFromNamePartial( Payload );
-
-				srand( (unsigned int) time( NULL ) );
+					
 				int Random = ( rand( ) % 6 );
 
 				switch( Random )

@@ -291,6 +291,10 @@ void CONSOLE_Resize( )
 
 int main( )
 {
+	// seed the RNG
+	
+	srand( (unsigned int) time( NULL ) );	
+	
 	// read config file
 
 	CConfig CFG;
@@ -683,7 +687,7 @@ void CCCBot :: SetConfigs( CConfig *CFG )
 void CCCBot :: UpdateCommandAccess( )
 {
 	// load default access values and insert them into database if a access number hasn't already been set
-	// format: m_Commands["<command keyword>"] = <value> (must be higher or equal 0 and lower then 10)
+	// format: m_Commands["<command keyword>"] = <value> (must be equal or higher than 0 and lower than 10)
 	
 	m_Commands[ "accept"]			= 9;
 	m_Commands[ "access"]			= 0;

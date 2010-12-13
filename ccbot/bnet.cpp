@@ -97,42 +97,11 @@ unsigned int CBNET :: SetFD( void *fd, void *send_fd, int *nfds )
 }
 bool CBNET :: Update( void *fd, void *send_fd )
 {
-
-	uint64_t Time = GetTime( );
-	
 	// we return at the end of each if statement so we don't have to deal with errors related to the order of the if statements
 	// that means it might take a few ms longer to complete a task involving multiple steps (in this case, reconnecting) due to blocking or sleeping
 	// but it's not a big deal at all, maybe 100ms in the worst possible case (based on a 50ms blocking time)
-
-	if( m_Socket->HasError( ) )
-	{
-		// the socket has an error
-
-		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket error" );
-		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
-		m_Socket->Reset( );
-		m_NextConnectTime = Time + 11;
-		m_LoggedIn = false;
-		m_InChat = false;
-		m_WaitingToConnect = true;
-		return m_Exiting;
-	}
-
-	if( !m_Socket->GetConnecting( ) && !m_Socket->GetConnected( ) && !m_WaitingToConnect )
-	{
-		// the socket was disconnected
-
-		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket not connected" );
-		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
-		m_Socket->Reset( );
-		m_NextConnectTime = Time + 11;
-		m_LoggedIn = false;
-		m_InChat = false;
-		m_WaitingToConnect = true;
-		return m_Exiting;
-	}
 	
-	uint64_t Ticks = GetTicks( );
+	uint64_t Time = GetTime( ), Ticks = GetTicks( );
 
 	if( m_Socket->GetConnected( ) )
 	{
@@ -209,6 +178,34 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		m_Socket->DoSend( (fd_set*)send_fd );
 		return m_Exiting;
 	}
+
+	if( m_Socket->HasError( ) )
+	{
+		// the socket has an error
+
+		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket error" );
+		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
+		m_Socket->Reset( );
+		m_NextConnectTime = Time + 11;
+		m_LoggedIn = false;
+		m_InChat = false;
+		m_WaitingToConnect = true;
+		return m_Exiting;
+	}
+
+	if( !m_Socket->GetConnecting( ) && !m_Socket->GetConnected( ) && !m_WaitingToConnect )
+	{
+		// the socket was disconnected
+
+		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket not connected" );
+		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
+		m_Socket->Reset( );
+		m_NextConnectTime = Time + 11;
+		m_LoggedIn = false;
+		m_InChat = false;
+		m_WaitingToConnect = true;
+		return m_Exiting;
+	}	
 
 	if( m_Socket->GetConnecting( ) )
 	{
