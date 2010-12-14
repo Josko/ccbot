@@ -64,7 +64,7 @@ CCCBot *gCCBot = NULL;
 uint64_t GetTime( )
 {	
 #ifdef WIN32
-	return GetTickCount( ) / 1000;
+	return GetTickCount( ) / 1e3;
 #elif __APPLE__
 	uint64_t current = mach_absolute_time( );
 	static mach_timebase_info_data_t info = { 0, 0 };
@@ -514,11 +514,10 @@ int main( )
 // CCBot
 //
 
-CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.03" )
+CCCBot :: CCCBot( CConfig *CFG ) : m_Exiting( false), m_Version( "1.03" )
 {
 	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++" );
-	
-	m_Exiting = false;		
+			
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );

@@ -39,7 +39,7 @@ CConfig :: ~CConfig( )
 
 }
 
-void CConfig :: Read( string file )
+void CConfig :: Read( const string &file )
 {
 	ifstream in( file.c_str( ) );
 
@@ -93,12 +93,12 @@ void CConfig :: Read( string file )
 	in.close( );
 }
 
-bool CConfig :: Exists( string key )
+bool CConfig :: Exists( const string &key )
 {
 	return m_CFG.find( key ) != m_CFG.end( );
 }
 
-int CConfig :: GetInt( string key, int x )
+int CConfig :: GetInt( const string &key, int x )
 {
 	if( m_CFG.find( key ) == m_CFG.end( ) )
 		return x;
@@ -106,7 +106,7 @@ int CConfig :: GetInt( string key, int x )
 		return atoi( m_CFG[key].c_str( ) );
 }
 
-string CConfig :: GetString( string key, string x )
+string CConfig :: GetString( const string &key, const string &x )
 {
 	if( m_CFG.find( key ) == m_CFG.end( ) )
 		return x;
@@ -190,7 +190,7 @@ void CConfig :: CreateConfig( )
 		file << "bot_war3path = C:\\Program Files\\Warcraft III\\" << endl;
 		file << "db_type = sqlite3" << endl;
 		file << "db_sqlite3_file = ccbot.dbs\n" << endl;
-		file << "# These variables are needed\n" << endl;
+		file << "# These variables are required\n" << endl;
 		file << "bnet_server = server.eurobattle.net" << endl;
 		file << "bnet_cdkeyroc = FFFFFFFFFFFFFFFFFFFFFFFFFF" << endl;
 		file << "bnet_cdkeytft = FFFFFFFFFFFFFFFFFFFFFFFFFF" << endl;
@@ -211,7 +211,7 @@ void CConfig :: CreateConfig( )
 		file << "bnet_selfjoin = 0" << endl;
 		file << "bnet_announcegames = 0" << endl;
 		file << "bnet_banchat = 0\n" << endl;
-		file << "# These variables are used when connecting to a PvPGN - how to fill them can be found on forum.codelain.com and eurobattle.net\n" << endl;	
+		file << "# These variables are used when connecting to a PvPGN - how to fill them can be found on http://www.codelain.com/forum and http://eurobattle.net\n" << endl;
 		file << "bnet_custom_war3version = 24" << endl;
 		file << "bnet_custom_exeversion = " << endl;
 		file << "bnet_custom_exeversionhash = " << endl;

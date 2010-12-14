@@ -114,7 +114,6 @@ public:
 
 	bool Update( long usecBlock );	
 	void UpdateCommandAccess( );
-	void readStdInMessages( );
 
 	// other functions
 

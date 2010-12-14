@@ -267,6 +267,8 @@ Version 1.03 ( 6.12.2010. )
 - Updated SQLite3 to 3.7.4 (from 3.7.3)
 - Moved the srand( ) calls to main( ) rather then using srand( ) in !slap and !spit
 - Removed an obsolete flag in the Makefile
+- Fixed several important bugs with creating “log” & “cfg” folders and .cfg file generation
+- Minor performance improvements
 
 Version 1.02 ( 6.11.2010. )
 
@@ -286,7 +288,7 @@ Version 1.02 ( 6.11.2010. )
 Version 1.01 ( 03.10.2010. )
 
 - Final fix to the swears.cfg
-- Time is now a 64-bit unsigned int (no more overflow after 30+ days)
+- Time is now a 64-bit unsigned int (no more overflow after 48+ days)
 - Fixed an segmentation fault on exit
 - Fixed Linux compatibility
 - Other misc. fixes
