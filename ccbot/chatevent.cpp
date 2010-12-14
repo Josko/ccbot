@@ -31,12 +31,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-/*
-#ifdef WIN32
-	#include <time.h>
-#endif
-*/
-
 void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 {
 	unsigned char Output = BNET;

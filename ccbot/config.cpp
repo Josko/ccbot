@@ -29,7 +29,7 @@
 // CConfig
 //
 
-CConfig :: CConfig( )
+CConfig :: CConfig( ) : m_Generated( false )
 {
 
 }
@@ -51,7 +51,8 @@ void CConfig :: Read( string file )
 		{
 			if( file == CFGFile  )
 				CreateConfig( );
-			else if( file == LanguageFile && !UTIL_FileExists( file ) )
+				
+			if( file == LanguageFile )
 				CreateLanguage( );
 
 			in.open( file.c_str( ) );
@@ -72,7 +73,7 @@ void CConfig :: Read( string file )
 
 		// ignore blank lines, newlines, comments
 
-		if( Line.empty( ) || Line[0] == '#' || Line == "\n" )
+		if( Line.empty( ) || Line[0] == '#' || Line[0] == '\n' )
 			continue;
 
 		string :: size_type Split = Line.find( "=" );
@@ -168,9 +169,9 @@ void CConfig :: CreateLanguage( )
 		file << "lang_0043 = Lockdown mode is deactivated! Anyone can join the channel now.\n";
 		file << "lang_0044 = Clan MOTD set to [$MOTD$].\n";
 		file << "lang_0045 = Channel topic set to [$TOPIC$].\n";
-	}
-
-	file.close( );
+		
+		file.close( );
+	}	
 }
 
 void CConfig :: CreateConfig( )
@@ -215,13 +216,10 @@ void CConfig :: CreateConfig( )
 		file << "bnet_custom_exeversion = " << endl;
 		file << "bnet_custom_exeversionhash = " << endl;
 		file << "bnet_custom_passwordhashtype = pvpgn\n" << endl;
-		file << "# You can add more servers (upto 9) by using \"bnet2_\" prefix instead of \"bnet_\" and so on\n" << endl;
-
-		CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
-		CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
-		CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
-		CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
+		file << "# You can add more servers (upto 9) by using \"bnet2_\" prefix instead of \"bnet_\" and so on\n" << endl;		
+		
+		file.close( );
 	}
-
-	file.close( );
+	
+	m_Generated = true;	
 }

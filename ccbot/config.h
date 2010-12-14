@@ -30,6 +30,7 @@ class CConfig
 {
 private:
 	map<string, string> m_CFG;
+	bool m_Generated;				// true if ccbot.cfg is newly made so we can exit
 
 public:
 	CConfig( );
@@ -41,6 +42,7 @@ public:
 	void CreateConfig( );
 	int GetInt( string key, int x );
 	string GetString( string key, string x );
+	bool GetGenerated( )				{ return m_Generated; }
 };
 
 #endif

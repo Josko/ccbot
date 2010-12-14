@@ -101,8 +101,8 @@ uint64_t GetTicks( )
 	uint64_t ticks;
 	struct timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);
-	ticks = t.tv_sec * 1000;
-	ticks += t.tv_nsec / 1000000;
+	ticks = t.tv_sec * 1e3;
+	ticks += t.tv_nsec / 1e6;
 	return ticks;
 #endif
 }
@@ -293,7 +293,31 @@ int main( )
 {
 	// seed the RNG
 	
-	srand( (unsigned int) time( NULL ) );	
+	srand( (unsigned int) time( NULL ) );
+	
+	// check if the log folder exists
+	
+	if( !UTIL_FileExists( "log" ) )
+	{
+#ifdef WIN32
+		CreateDirectoryA( "log", NULL );
+#else
+		system( "mkdir log" );
+		system( "chmod 777 log" );
+#endif
+	}
+	
+	// check if the cfg folder exists
+	
+	if( !UTIL_FileExists( "cfg" ) )
+	{
+#ifdef WIN32
+		CreateDirectoryA( "cfg", NULL );
+#else
+		system( "mkdir cfg" );
+		system( "chmod 777 cfg" );
+#endif
+	}
 	
 	// read config file
 
@@ -336,28 +360,6 @@ int main( )
 	scrollok( gInputWindow, TRUE );
 	CONSOLE_Draw( );
 	nodelay( gInputWindow, TRUE );	
-	
-	// check if the log folder exists
-	
-	if( !UTIL_FileExists( "log" ) )
-	{
-#ifdef WIN32
-		CreateDirectoryA( "log", NULL );
-#else
-		mkdir( "log", 0777 );
-#endif
-	}
-	
-	// check if the cfg folder exists
-	
-	if( !UTIL_FileExists( "cfg" ) )
-	{
-#ifdef WIN32
-		CreateDirectoryA( "cfg", NULL );
-#else
-		mkdir( "cfg", 0777 );
-#endif
-	}
 	
 	// print something for logging purposes
 
@@ -512,8 +514,11 @@ int main( )
 // CCBot
 //
 
-CCCBot :: CCCBot( CConfig *CFG ) : m_Exiting( false ), m_Version( "1.03" )
+CCCBot :: CCCBot( CConfig *CFG ) : m_Version( "1.03" )
 {
+	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++" );
+	
+	m_Exiting = false;		
 	m_DB = new CCCBotDBSQLite( CFG );
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
@@ -521,6 +526,16 @@ CCCBot :: CCCBot( CConfig *CFG ) : m_Exiting( false ), m_Version( "1.03" )
 	// load the battle.net connections
 	// we're just loading the config data and creating the CBNET classes here, the connections are established later (in the Update function)
 
+	if( CFG->GetGenerated( ) )
+	{
+		CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
+		CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
+		CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
+		CONSOLE_Print( "[CONFIG] EDIT ccbot.cfg IN THE cfg FOLDER AND RESTART CCBOT!" );
+		
+		return;
+	}
+		
 	for( unsigned int i = 1; i < 10; ++i )
 	{
 		string Prefix;
@@ -569,9 +584,7 @@ CCCBot :: CCCBot( CConfig *CFG ) : m_Exiting( false ), m_Version( "1.03" )
 	}
 
 	if( m_BNETs.empty( ) )
-		CONSOLE_Print( "[CCBOT] warning - no battle.net connections found in config file" );
-
-	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++" );
+		CONSOLE_Print( "[CCBOT] warning - no battle.net connections found in config file" );	
 
 	// Update the swears.cfg file
 	UpdateSwearList( );
@@ -594,14 +607,6 @@ CCCBot :: ~CCCBot( )
 
 bool CCCBot :: Update( long usecBlock )
 {
-	// todotodo: do we really want to shutdown if there's a database error? is there any way to recover from this?
-
-	if( m_DB->HasError( ) )
-	{
-		CONSOLE_Print( "[CCBOT] database error - " + m_DB->GetError( ) );
-		return true;
-	}
-
 	unsigned int NumFDs = 0;
 
 	// take every socket we own and throw it in one giant select statement so we can block on all sockets
@@ -786,15 +791,15 @@ void CCCBot :: UpdateSwearList( )
 
 		if( !file.fail( ) )
 		{
-			CONSOLE_Print( "[CONFIG] creating a new, blank swears.txt file" );
+			CONSOLE_Print( "[CONFIG] creating a new, blank swears.cfg file" );
 
 			file << "#########################################################" << endl;
 			file << "### THIS FILE CONTAINS ALL BANNED PHRASES AND WORDS! ####" << endl;
 			file << "#########################################################" << endl;
 			file << "# setting the # character on the first position will comment out your line" << endl;
-		}
-
-		file.close( );
+			
+			file.close( );
+		}		
 	}
 }
 
