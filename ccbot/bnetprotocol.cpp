@@ -78,8 +78,8 @@ CIncomingChatEvent *CBNETProtocol :: RECEIVE_SID_CHATEVENT( BYTEARRAY data )
 	// 4 bytes					-> User Flags
 	// 4 bytes					-> Ping
 	// 12 bytes					-> ???
-	// null terminated string	-> User
-	// null terminated string	-> Message
+	// null terminated string			-> User
+	// null terminated string			-> Message
 
 	if( ValidateLength( data ) && data.size( ) >= 29 )
 	{
@@ -106,11 +106,13 @@ CIncomingChatEvent *CBNETProtocol :: RECEIVE_SID_CHATEVENT( BYTEARRAY data )
 			case CBNETProtocol :: EID_INFO:
 			case CBNETProtocol :: EID_ERROR:
 			case CBNETProtocol :: EID_EMOTE:
+			
 				return new CIncomingChatEvent(	(CBNETProtocol :: IncomingChatEvent)UTIL_ByteArrayToUInt32( EventID, false ),
-													UTIL_ByteArrayToUInt32( UserFlags, false ),
+											    		UTIL_ByteArrayToUInt32( UserFlags, false ),
 													UTIL_ByteArrayToUInt32( Ping, false ),
 													string( User.begin( ), User.end( ) ),
-													string( Message.begin( ), Message.end( ) ) );
+													string( Message.begin( ), Message.end( ) )
+								);
 		}
 
 	}
@@ -336,7 +338,7 @@ vector<CIncomingClanList *> CBNETProtocol :: RECEIVE_SID_CLANMEMBERLIST( BYTEARR
 		
 		while( Total > 0 )
 		{
-			Total--;
+			--Total;
 
 			if( data.size( ) < i + 1 )
 				break;
@@ -356,8 +358,8 @@ vector<CIncomingClanList *> CBNETProtocol :: RECEIVE_SID_CLANMEMBERLIST( BYTEARR
 			BYTEARRAY Location = UTIL_ExtractCString( data, i );
 			i += Location.size( ) + 1;
 			ClanList.push_back( new CIncomingClanList(	string( Name.begin( ), Name.end( ) ),
-														Rank,
-														Status ) );
+									Rank,
+									Status ) );
 		}
 	}
 
@@ -389,8 +391,8 @@ CIncomingClanList *CBNETProtocol :: RECEIVE_SID_CLANMEMBERSTATUSCHANGE( BYTEARRA
 
 			BYTEARRAY Location = UTIL_ExtractCString( data, Name.size( ) + 7 );
 			return new CIncomingClanList(	string( Name.begin( ), Name.end( ) ),
-											Rank,
-											Status );
+							Rank,
+							Status );
 		}
 	}
 
@@ -513,7 +515,7 @@ BYTEARRAY CBNETProtocol :: SEND_SID_ENTERCHAT( )
 BYTEARRAY CBNETProtocol :: SEND_SID_JOINCHANNEL( string channel )
 {
 	unsigned char NoCreateJoin[]	= { 2, 0, 0, 0 };
-	unsigned char FirstJoin[]		= { 1, 0, 0, 0 };
+	unsigned char FirstJoin[]	= { 1, 0, 0, 0 };
 
 	BYTEARRAY packet;
 	packet.push_back( BNET_HEADER_CONSTANT );				// BNET header constant
@@ -968,9 +970,6 @@ string CIncomingClanList :: GetRank( )
 		case 0: return "Recruit";
 		case 1: return "Peon";
 		case 2: return "Grunt";
-	}
-	switch( m_Rank )
-	{
 		case 3: return "Shaman";
 		case 4: return "Chieftain";
 	}

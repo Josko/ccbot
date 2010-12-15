@@ -440,7 +440,7 @@ uint32_t CCCBotDBSQLite :: BanCount( const string &server )
 	return Count;
 }
 
-CDBBan *CCCBotDBSQLite :: BanCheck( const string &server, string &user )
+CDBBan *CCCBotDBSQLite :: BanCheck( const string &server, string user )
 {
 	transform( user.begin( ), user.end( ), user.begin( ), (int(*)(int))tolower );
 	CDBBan *Ban = NULL;

@@ -256,6 +256,17 @@ Then when in the CCBot binary directory just type in terminal "./ccbot++" withou
 =========
 CHANGELOG
 
+Version 1.04 ( 15.12.2010. )
+
+- Improved the BNET and CONSOLE output systems
+- Optimized the CBNET::Update a bit
+- Removed disabling Nagle's algorithm
+- Improved code reability and quality in several places
+- Fixed a bug when kicking a player on channel join
+- Fixed channel list having users in lowercase
+- Fixed !ping returning users in lowercase
+- Removed unnecessary checks on channel join
+
 Version 1.03 ( 6.12.2010. )
 
 - Fixed a small gramatical error in a response

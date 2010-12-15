@@ -119,7 +119,7 @@ public:
 
 	// bans
 	virtual uint32_t BanCount( const string &server );
-	virtual CDBBan *BanCheck( const string &server, string &user );
+	virtual CDBBan *BanCheck( const string &server, string user );
 	virtual bool BanAdd( const string &server, string &user, const string &admin, const string &reason );
 	virtual bool BanRemove( const string &server, string &user );
 

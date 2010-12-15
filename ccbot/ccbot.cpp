@@ -214,9 +214,9 @@ void CONSOLE_Draw( )
 
 		// for( vector<string> :: iterator i = gChannelUsers.begin( ); i != gChannelUsers.end( ); ++i )
 		
-		for( map<string, CUser *> :: iterator i = gCCBot->m_BNETs[0]->m_Channel.begin( ); i != gCCBot->m_BNETs[0]->m_Channel.end( ); ++i )
+		for( vector<CUser *> :: iterator i = gCCBot->m_BNETs[0]->m_Channel.begin( ); i != gCCBot->m_BNETs[0]->m_Channel.end( ); ++i )
 		{
-			mvwaddnstr( gChannelWindow, y++, 0, (*i).second->GetUser( ).c_str( ), 16 );
+			mvwaddnstr( gChannelWindow, y++, 0, (*i)->GetUser( ).c_str( ), 16 );
 
 			if( y >= LINES - 3 )
 				break;
@@ -431,7 +431,7 @@ int main( )
 					gCCBot->m_BNETs[0]->ProcessChatEvent( &event );
 				}
 				else
-					gCCBot->m_BNETs[0]->QueueChatCommand( Command, BNET );				
+					gCCBot->m_BNETs[0]->QueueChatCommand( Command, false );				
 
 				gInputBuffer.clear( );
 			}
@@ -514,7 +514,7 @@ int main( )
 // CCBot
 //
 
-CCCBot :: CCCBot( CConfig *CFG ) : m_Exiting( false), m_Version( "1.03" )
+CCCBot :: CCCBot( CConfig *CFG ) : m_Exiting( false), m_Version( "1.04" )
 {
 	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++" );
 			

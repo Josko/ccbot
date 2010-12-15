@@ -67,11 +67,6 @@ uint64_t GetTicks( );		// milliseconds since computer startup usually, overflows
 #undef FD_SETSIZE
 #define FD_SETSIZE 512
 
-// output
-
-#define BNET	0
-#define CONSOLE	1
-
 void LOG_Print( const string &message );
 void CONSOLE_PrintNoCRLF( const string &message, bool log = true );
 void CONSOLE_Print( const string &message );

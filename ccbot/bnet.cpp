@@ -29,14 +29,9 @@
 #include "bncsutilinterface.h"
 #include "bnetprotocol.h"
 #include "bnet.h"
-#include <stdio.h>
-#include <stdlib.h>
 
-/*
-#ifdef WIN32
-	#include <time.h>
-#endif
-*/
+#include <cstdio>
+#include <cstdlib>
 
 //
 // CBNET
@@ -65,8 +60,8 @@ CBNET :: CBNET( CCCBot *nCCBot, string nServer, string nCDKeyROC, string nCDKeyT
 	transform( m_CDKeyROC.begin( ), m_CDKeyROC.end( ), m_CDKeyROC.begin( ), (int(*)(int))toupper );
 	transform( m_CDKeyTFT.begin( ), m_CDKeyTFT.end( ), m_CDKeyTFT.begin( ), (int(*)(int))toupper );
 	transform( m_RootAdmin.begin( ), m_RootAdmin.end( ), m_RootAdmin.begin( ), (int(*)(int))tolower );
-	m_CCBot->m_DB->AccessSet( m_Server, m_RootAdmin, 10 );
 	
+	m_CCBot->m_DB->AccessSet( m_Server, m_RootAdmin, 10 );	
 	m_CommandTrigger = nCommandTrigger;
 }
 
@@ -83,8 +78,8 @@ CBNET :: ~CBNET( )
 
 	delete m_BNCSUtil;
 
-	for( map<string, CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
-		delete i->second;
+	for( vector<CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+		delete *i;
 }
 
 unsigned int CBNET :: SetFD( void *fd, void *send_fd, int *nfds )
@@ -118,7 +113,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			string ChatCommand = m_ChatCommands.front( );
 			m_ChatCommands.pop( );
 			m_Delay = 1100 + ChatCommand.length( ) * 40;
-			SendChatCommand( ChatCommand, BNET );
+			SendChatCommand( ChatCommand, false );
 			m_LastChatCommandTicks = Ticks;
 			m_LastOutPacketTicks = Ticks;
 		}
@@ -131,7 +126,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			m_LastNullTime = Time;
 		}
 		
-		if( Time >= m_LastSpamCacheCleaning + 5 && m_AntiSpam )
+		if( m_AntiSpam && Time >= m_LastSpamCacheCleaning + 5  )
 		{
 			m_SpamCache.clear( );
 			m_LastSpamCacheCleaning = Time;
@@ -139,7 +134,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 
 		// refresh the clan vector so it gets updated every 70 seconds
 		
-		if( Time >= m_LastGetClanTime + 70 && m_LoggedIn )
+		if( Time >= m_LastGetClanTime + 70 && m_AntiSpam )
 		{
 			SendGetClanList( );
 			m_LastGetClanTime = Time;
@@ -147,23 +142,23 @@ bool CBNET :: Update( void *fd, void *send_fd )
 
 		// part of !Announce
 		
-		if( ( Time >= m_LastAnnounceTime + m_AnnounceInterval ) && m_Announce  )
+		if( m_Announce && ( Time >= m_LastAnnounceTime + m_AnnounceInterval ) )
 		{
-			QueueChatCommand( m_AnnounceMsg, BNET );
+			QueueChatCommand( m_AnnounceMsg, false );
 			m_LastAnnounceTime = Time;
 		}
 
 		// rejoining the channel when not in the set channel
 		
-		if( Time >= m_LastRejoinTime + m_RejoinInterval && m_LoggedIn && m_Rejoin )
+		if( m_Rejoin && Time >= m_LastRejoinTime + m_RejoinInterval && m_LoggedIn )
 		{
-			SendChatCommandHidden( "/join " + m_CurrentChannel, BNET );
+			SendChatCommandHidden( "/join " + m_CurrentChannel, false );
 			m_LastRejoinTime = Time;
 		}
 
 		// if we didn't accept a clan invitation send a decline after 29 seconds (to be on the safe side it doesn't cross over 30 seconds )
 		
-		if( Time >= ( m_LastInvitationTime + 29 ) && m_ActiveInvitation && m_LoggedIn )
+		if( m_ActiveInvitation && Time >= ( m_LastInvitationTime + 29 ) && m_LoggedIn )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANINVITATIONRESPONSE( m_Protocol->GetClanTag( ), m_Protocol->GetInviter( ), false ) );
 			m_ActiveInvitation = false;
@@ -171,7 +166,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 
 		// wait 5 seconds before accepting the invitation otherwise the clan can get created but you would get an false error
 		
-		if( Time >= ( m_LastInvitationTime + 5 ) && m_ActiveCreation && m_LoggedIn )
+		if( m_ActiveCreation && Time >= ( m_LastInvitationTime + 5 ) && m_LoggedIn )
 		{
 			m_Socket->PutBytes( m_Protocol->SEND_SID_CLANCREATIONINVITATION( m_Protocol->GetClanCreationTag( ), m_Protocol->GetClanCreator( ) ) );
 			m_ActiveCreation = false;
@@ -256,14 +251,14 @@ bool CBNET :: Update( void *fd, void *send_fd )
 				m_ServerIP = m_Socket->GetIPString( );
 				CONSOLE_Print( "[BNET: " + m_ServerAlias + "] resolved and cached server IP address " + m_ServerIP );
 			}
-        }
+        	}
 		else
-        {
+        	{
 			// use cached server IP address since resolving takes time and is blocking
 
 			CONSOLE_Print( "[BNET: " + m_Server + "] using cached server IP address " + m_ServerIP );
 			m_Socket->Connect( string( ), m_ServerIP, 6112 );
-        }
+        	}
 
 		m_WaitingToConnect = false;
 		return m_Exiting;
@@ -424,41 +419,42 @@ inline void CBNET :: ProcessPackets( )
 				else
 				{	
 					// cd keys not accepted
+					
 					switch( UTIL_ByteArrayToUInt32( m_Protocol->m_KeyState, false ) )
 					{
-						case 	CBNETProtocol :: KR_OLD_GAME_VERSION:
+						case CBNETProtocol :: KR_OLD_GAME_VERSION:
 							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Old game version - update your hashes and/or ccbot.cfg" );
 							break;
 
-						case 	CBNETProtocol :: KR_INVALID_VERSION:
+						case CBNETProtocol :: KR_INVALID_VERSION:
 							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid game version - update your hashes and/or ccbot.cfg" );
 							break;
 
-						case 	CBNETProtocol :: KR_INVALID_ROC_KEY:
+						case CBNETProtocol :: KR_INVALID_ROC_KEY:
 							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid RoC key" );
 							break;
 
-						case 	CBNETProtocol :: KR_ROC_KEY_IN_USE:
+						case CBNETProtocol :: KR_ROC_KEY_IN_USE:
 							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] RoC key is being used by someone else" );
 							break;
 							
-						case 	CBNETProtocol :: KR_ROC_KEY_BANNED:
+						case CBNETProtocol :: KR_ROC_KEY_BANNED:
 							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Banned RoC key" );
 							break;
 
-						case 	CBNETProtocol :: KR_WRONG_PRODUCT:
+						case CBNETProtocol :: KR_WRONG_PRODUCT:
 							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Wrong product key" );
 							break;
 
-						case 	CBNETProtocol :: KR_INVALID_TFT_KEY:
+						case CBNETProtocol :: KR_INVALID_TFT_KEY:
 							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid TFT key" );
 							break;
 
-						case 	CBNETProtocol :: KR_TFT_KEY_BANNED:
+						case CBNETProtocol :: KR_TFT_KEY_BANNED:
 							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Banned TFT key" );
 							break;
 
-						case 	CBNETProtocol :: KR_TFT_KEY_IN_USE:
+						case CBNETProtocol :: KR_TFT_KEY_IN_USE:
 							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] TFT key is being used by someone else" );
 							break;
 					}				
@@ -475,7 +471,7 @@ inline void CBNET :: ProcessPackets( )
 				{
 					// pvpgn logon
 					m_BNCSUtil->HELP_PvPGNPasswordHash( m_UserPassword );
-					m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_ACCOUNTLOGONPROOF( m_BNCSUtil->GetPvPGNPasswordHash( ) ) );					
+					m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_ACCOUNTLOGONPROOF( m_BNCSUtil->GetPvPGNPasswordHash( ) ) );
 				}
 				else
 				{
@@ -515,24 +511,24 @@ inline void CBNET :: ProcessPackets( )
 				switch( m_Protocol->RECEIVE_SID_CLANINVITATION( Packet->GetData( ) ) )
 				{
 					case 9:
-						QueueChatCommand( m_ClanTag + " is currently full, please contact a shaman/chieftain.", BNET );
+						QueueChatCommand( m_ClanTag + " is currently full, please contact a shaman/chieftain.", false );
 						break;
 								
 					case 5:
-						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", BNET );
+						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", false );
 						break;
 
 					case 0:					
-						QueueChatCommand( m_LastKnown + " has successfully joined " + m_ClanTag + ".", BNET );
+						QueueChatCommand( m_LastKnown + " has successfully joined " + m_ClanTag + ".", false );
 						SendGetClanList( );					
 						break;
 
 					case 4:
-						QueueChatCommand( m_LastKnown + " has rejected a clan invitation for " + m_ClanTag + ".", BNET );
+						QueueChatCommand( m_LastKnown + " has rejected a clan invitation for " + m_ClanTag + ".", false );
 						break;
 
 					case 8:
-						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", BNET );
+						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", false );
 						break;
 
 					default:
@@ -543,8 +539,8 @@ inline void CBNET :: ProcessPackets( )
 			case CBNETProtocol :: SID_CLANINVITATIONRESPONSE:
 				if( m_Protocol->RECEIVE_SID_CLANINVITATIONRESPONSE( Packet->GetData( ) ) )
 				{
-					QueueChatCommand( "Clan invitation received for [" + m_Protocol->GetClanName( ) + "] from [" + m_Protocol->GetInviterStr( ) + "].", BNET );
-					QueueChatCommand( "Type " + m_CommandTrigger + "accept to accept the clan invitation.", BNET );
+					QueueChatCommand( "Clan invitation received for [" + m_Protocol->GetClanName( ) + "] from [" + m_Protocol->GetInviterStr( ) + "].", false );
+					QueueChatCommand( "Type " + m_CommandTrigger + "accept to accept the clan invitation.", false );
 
 					m_ActiveInvitation = true;
 					m_LastInvitationTime = GetTime( );										
@@ -554,7 +550,7 @@ inline void CBNET :: ProcessPackets( )
 			case CBNETProtocol :: SID_CLANCREATIONINVITATION:
 				if( m_Protocol->RECEIVE_SID_CLANCREATIONINVITATION( Packet->GetData( ) ) )
 				{
-					QueueChatCommand( "Clan creation of [" + m_Protocol->GetClanCreationName( ) + "] by [" + m_Protocol->GetClanCreatorStr( ) + "] received - accepting...", BNET );
+					QueueChatCommand( "Clan creation of [" + m_Protocol->GetClanCreationName( ) + "] by [" + m_Protocol->GetClanCreatorStr( ) + "] received - accepting...", false );
 
 					m_ActiveCreation = true;
 					m_LastInvitationTime = GetTime( );
@@ -565,12 +561,12 @@ inline void CBNET :: ProcessPackets( )
 				switch( m_Protocol->RECEIVE_SID_CLANMAKECHIEFTAIN( Packet->GetData( ) ) )
 				{
 					case 0:
-						QueueChatCommand( m_LastKnown + " successfuly promoted to chieftain.", BNET );
+						QueueChatCommand( m_LastKnown + " successfuly promoted to chieftain.", false );
 						SendGetClanList( );
 						break;
 
 					default:
-						QueueChatCommand( "Error setting user to Chieftain.", BNET );					
+						QueueChatCommand( "Error setting user to Chieftain.", false );					
 				}
 				break;
 
@@ -578,28 +574,28 @@ inline void CBNET :: ProcessPackets( )
 				switch( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( Packet->GetData( ) ) )
 				{
 					case 1:
-						QueueChatCommand( "Error: " + m_Removed + " - removal failed by " + m_UsedRemove + ".", BNET );
+						QueueChatCommand( "Error: " + m_Removed + " - removal failed by " + m_UsedRemove + ".", false );
 						m_Removed = "Unknown User";
 						break;
 			
 					case 2:
-						QueueChatCommand( "Error: " + m_Removed + " - can't be removed yet from " + m_ClanTag + ".", BNET );
+						QueueChatCommand( "Error: " + m_Removed + " - can't be removed yet from " + m_ClanTag + ".", false );
 						m_Removed = "Unknown User";
 						break;
 
 					case 0:
-						QueueChatCommand( m_Removed + " has been kicked from " + m_ClanTag + " by " + m_UsedRemove + ".", BNET );
+						QueueChatCommand( m_Removed + " has been kicked from " + m_ClanTag + " by " + m_UsedRemove + ".", false );
 						m_Removed = "Unknown User";
 						SendGetClanList( );
 						break;
 
 					case 7:
-						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, bot not authorised to remove.", BNET );
+						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, bot not authorised to remove.", false );
 						m_Removed = "Unknown User";
 						break;
 
 					case 8:
-						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, not allowed.", BNET );
+						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, not allowed.", false );
 						m_Removed = "Unknown User";
                                 		break;
 
@@ -625,13 +621,13 @@ inline void CBNET :: ProcessPackets( )
 	}
 }
 
-void CBNET :: SendChatCommand( const string &chatCommand, unsigned char destination )
+void CBNET :: SendChatCommand( const string &chatCommand, bool console )
 {
 	// don't call this function directly, use QueueChatCommand instead to prevent getting kicked for flooding
+	
 	if( m_LoggedIn )
 	{
-
-		if( destination == BNET )
+		if( !console )
 		{
 			if( chatCommand.size( ) > 200 )					
 				m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand.substr( 0, 200 ) ) );
@@ -646,13 +642,10 @@ void CBNET :: SendChatCommand( const string &chatCommand, unsigned char destinat
 			else
 				CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 		}
-		else if( destination == CONSOLE )
+		else if( console )
 		{
-			if( chatCommand.substr( 0, 3 ) == "/w " )
-				{
-					string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
-					CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
-				}
+			if( chatCommand.substr( 0, 3 ) == "/w " )			
+				CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand.substr( 4 + m_RootAdmin.size( ) ) );
 			else
 				CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 		}
@@ -660,91 +653,85 @@ void CBNET :: SendChatCommand( const string &chatCommand, unsigned char destinat
 
 }
 
-void CBNET :: SendChatCommandHidden( const string &chatCommand, unsigned char destination )
+void CBNET :: SendChatCommandHidden( const string &chatCommand, bool console )
 {
 	// don't call this function directly, use QueueChatCommand instead to prevent getting kicked for flooding
-	if( m_LoggedIn )
+	
+	if( m_LoggedIn && !console )
 	{
-		if( destination == BNET )
-		{
-			if( chatCommand.size( ) > 200 )
-				m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand.substr( 0, 200 ) ) );
-			else				
-				m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
-		}
+		if( chatCommand.size( ) > 200 )
+			m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand.substr( 0, 200 ) ) );
+		else				
+			m_Socket->PutBytes( m_Protocol->SEND_SID_CHATCOMMAND( chatCommand ) );
 	}
 }
 
-void CBNET :: QueueChatCommand( const string &chatCommand, unsigned char destination )
+void CBNET :: QueueChatCommand( const string &chatCommand, bool console )
 {
 	if( chatCommand.empty( ) )
 		return;
 	
-	if( destination == BNET )
+	if( !console )
 		m_ChatCommands.push( chatCommand );
 }
 
-void CBNET :: QueueChatCommand( const string &chatCommand, string user, bool whisper, unsigned char destination )
+void CBNET :: QueueChatCommand( const string &chatCommand, string user, bool whisper, bool console )
 {
 	if( chatCommand.empty( ) )
 		return;
 
 	// if whisper is true send the chat command as a whisper to user, otherwise just queue the chat command
 
-	if( whisper && destination == BNET )
-		QueueChatCommand( "/w " + user + " " + chatCommand, destination );
-	else if( destination == BNET )
-		QueueChatCommand( chatCommand, destination );
-	else if ( whisper && destination == CONSOLE )
+	if( !console )
+		QueueChatCommand( chatCommand, console );
+	else if( whisper && !console )
+		QueueChatCommand( "/w " + user + " " + chatCommand, console );
+	else if ( console )
 	{
-		string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
-		CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
+		if( whisper )
+		{
+			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand.substr( 4 + m_RootAdmin.size( ) ) );
+		}	
+		else
+			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 	}
-	else if ( destination == CONSOLE )
-		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 }
 
-void CBNET :: QueueWhisperCommand( const string &chatCommand, string user, unsigned char destination )
+void CBNET :: QueueWhisperCommand( const string &chatCommand, string user, bool console )
 {
 	if( chatCommand.empty( ) )
 		return;
 
-	if( destination == BNET )
+	if( !console )
 		m_ChatCommands.push( "/w " + user + " " + chatCommand );
-	else if( destination == CONSOLE )
-	{
-		string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
-		CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
+	else if( console )
+	{		
+		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand.substr( 4 + m_RootAdmin.size( ) ) );
 	}
 }
 
-void CBNET :: ImmediateChatCommand( const string &chatCommand, unsigned char destination )
+void CBNET :: ImmediateChatCommand( const string &chatCommand, bool console )
 {
 	if( chatCommand.empty( ) )
 		return;
 
 	if( GetTicks( ) >= m_LastChatCommandTicks + 1000 )
 	{
-		SendChatCommand( chatCommand, destination );
+		SendChatCommand( chatCommand, console );
 		m_LastChatCommandTicks = GetTicks( );
 	}	
 }
 
-void CBNET :: ImmediateChatCommand( const string &chatCommand, string user, bool whisper, unsigned char destination )
+void CBNET :: ImmediateChatCommand( const string &chatCommand, string user, bool whisper, bool console )
 {
 	if( chatCommand.empty( ) )
 		return;
 
-	if( whisper && destination == BNET )
-		ImmediateChatCommand( "/w " + user + " " + chatCommand, destination );
-	else if( destination == BNET )
-		ImmediateChatCommand( chatCommand, destination );
-	else if ( whisper && destination == CONSOLE )
-	{
-		string chatCommandWhisper = chatCommand.substr( 3, chatCommand.size( ) -3 );
-		CONSOLE_Print( "[WHISPER: " + m_ServerAlias + "] to " + chatCommandWhisper.substr( 0, chatCommandWhisper.find_first_of(" ") ) +": " + chatCommandWhisper.substr( chatCommandWhisper.find_first_of(" ")+1 , chatCommandWhisper.size( ) - chatCommandWhisper.find_first_of(" ") - 1 ) );
-	}
-	else if ( destination == CONSOLE )
+	if( !console )
+		ImmediateChatCommand( chatCommand, console );
+	else if( whisper && !console )
+		ImmediateChatCommand( "/w " + user + " " + chatCommand, console );
+	else if ( console )
 		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 }
 
@@ -815,8 +802,8 @@ bool CBNET :: IsInChannel( string name )
 {
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 
-	for( map<string,  CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
-		if( (*i).first == name )
+	for( vector<CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+		if( (*i)->GetLowerUser( ) == name )
 			return true;
 
 	return false;
@@ -851,12 +838,12 @@ string CBNET :: GetUserFromNamePartial( string name )
 
 	// try to match each username with the passed string (e.g. "Varlock" would be matched with "lock")
 
-	for( map<string,  CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+	for( vector<CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 	{
-		if( (*i).first.find( name ) != string :: npos )
+		if( (*i)->GetLowerUser( ).find( name ) != string :: npos )
 		{
 			++Matches;
-			User = (*i).first;
+			User = (*i)->GetLowerUser( );
 		
 			if( User == name )
 				return User;
@@ -874,9 +861,9 @@ string CBNET :: GetUserFromNamePartial( string name )
 // CUser
 //
 
-CUser :: CUser( const string &nUser, int nPing, uint32_t nUserflags ) : m_User ( nUser ), m_Ping( nPing ), m_UserFlags( nUserflags )
+CUser :: CUser( const string &nUser, const string &nLowerUser, int nPing, uint32_t nUserflags ) : m_User ( nUser ), m_LowerUser( nLowerUser ), m_Ping( nPing ), m_UserFlags( nUserflags )
 {
-
+	
 }
 
 CUser :: ~CUser( )
@@ -888,10 +875,10 @@ CUser* CBNET :: GetUserByName( string name )
 {
 	transform( name.begin( ), name.end( ), name.begin( ), (int(*)(int))tolower );
 
-	for( map<string, CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
+	for( vector<CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
 	{
-		if( name == (*i).first )
-			return i->second;
+		if( name == (*i)->GetLowerUser( ) )
+			return *i;
 	}
 
 	return NULL;
