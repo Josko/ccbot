@@ -683,15 +683,16 @@ void CBNET :: QueueChatCommand( const string &chatCommand, string user, bool whi
 	// if whisper is true send the chat command as a whisper to user, otherwise just queue the chat command
 
 	if( !console )
-		QueueChatCommand( chatCommand, console );
-	else if( whisper && !console )
-		QueueChatCommand( "/w " + user + " " + chatCommand, console );
+	{
+		if( !whisper )
+			QueueChatCommand( chatCommand, console );
+		else
+			QueueChatCommand( "/w " + user + " " + chatCommand, console );
+	}
 	else if ( console )
 	{
 		if( whisper )
-		{
-			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand.substr( 4 + m_RootAdmin.size( ) ) );
-		}	
+			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand.substr( 4 + m_RootAdmin.size( ) ) );	
 		else
 			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 	}
@@ -704,7 +705,7 @@ void CBNET :: QueueWhisperCommand( const string &chatCommand, string user, bool 
 
 	if( !console )
 		m_ChatCommands.push( "/w " + user + " " + chatCommand );
-	else if( console )
+	else
 	{		
 		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand.substr( 4 + m_RootAdmin.size( ) ) );
 	}
@@ -728,9 +729,12 @@ void CBNET :: ImmediateChatCommand( const string &chatCommand, string user, bool
 		return;
 
 	if( !console )
-		ImmediateChatCommand( chatCommand, console );
-	else if( whisper && !console )
-		ImmediateChatCommand( "/w " + user + " " + chatCommand, console );
+	{
+		if( !whisper )
+			ImmediateChatCommand( chatCommand, console );
+		else		
+			ImmediateChatCommand( "/w " + user + " " + chatCommand, console );
+	}
 	else if ( console )
 		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 }

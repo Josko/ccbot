@@ -1402,9 +1402,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 				CONSOLE_Print( "[ACCESS: " + m_ServerAlias + "] Setting [" + User + "] access to clan default of " + UTIL_ToString( m_ClanDefaultAccess ) ); 
 			}
 			
-			m_Channel.push_back( user );
+			CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + ":" + m_CurrentChannel + "] user [" + User + "] joined the channel." );
 			
-			CONSOLE_Print( "[CHANNEL: " + m_ServerAlias + ":" + m_CurrentChannel + "] user [" +User + "] joined the channel." );
+			m_Channel.push_back( user );			
 			CONSOLE_ChannelWindowChanged( );			
 		}		
 	}
@@ -1474,8 +1474,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			user->SetClan( Message.substr( 0, Message.find_first_of(" ") ) );			
 		}
 		
-		m_Channel.push_back( user );
-				
+		m_Channel.push_back( user );				
 		CONSOLE_ChannelWindowChanged( );
 	}
 	
