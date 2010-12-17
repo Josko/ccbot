@@ -1316,7 +1316,13 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 
 			else if( Command == "restart" && Access >= m_CCBot->m_DB->CommandAccess( "restart" ) )
 			{
-				m_CCBot->Restart( );	
+				m_Exiting = true;
+				
+				// gRestart is defined in ccbot.cpp
+				
+				extern bool gRestart;
+				gRestart = true;
+				return;	
 			}				
 		}		
 	}

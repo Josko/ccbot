@@ -706,9 +706,7 @@ void CBNET :: QueueWhisperCommand( const string &chatCommand, string user, bool 
 	if( !console )
 		m_ChatCommands.push( "/w " + user + " " + chatCommand );
 	else
-	{		
 		CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand.substr( 4 + m_RootAdmin.size( ) ) );
-	}
 }
 
 void CBNET :: ImmediateChatCommand( const string &chatCommand, bool console )

@@ -111,8 +111,7 @@ public:
 	void UpdateCommandAccess( );
 
 	// other functions
-
-	void Restart( );
+	
 	void SetConfigs( CConfig *CFG );
 	void ReloadConfigs( );
 	void UpdateSwearList( );

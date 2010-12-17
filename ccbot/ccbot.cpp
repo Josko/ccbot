@@ -46,6 +46,7 @@
  #include <mach/mach_time.h>
 #endif
 
+bool gRestart = false;
 bool gCurses = false;
 vector<string> gMainBuffer;
 string gInputBuffer;
@@ -506,6 +507,15 @@ int main( )
 	// shutdown curses
 
 	endwin( );
+	
+	if( gRestart )
+	{
+#ifdef WIN32
+	_spawnl( _P_OVERLAY, "ccbot.exe", "ccbot.exe", NULL );
+#else		
+	execl( "ccbot++", "ccbot++", NULL );				
+#endif
+	}
 
 	return 0;
 }
@@ -650,27 +660,6 @@ bool CCCBot :: Update( long usecBlock )
 	}
 
 	return m_Exiting || BNETExit;
-}
-
-void CCCBot :: Restart ( )
-{
-	// shutdown ghost
-
-	CONSOLE_Print( "[CCBOT] restarting" );
-	delete gCCBot;
-	gCCBot = NULL;	
-
-#ifdef WIN32
-	// shutdown winsock
-
-	CONSOLE_Print( "[CCBOT] shutting down winsock" );
-	WSACleanup( );
-
-	_spawnl( _P_OVERLAY, "ccbot.exe", "ccbot.exe", NULL );
-#else		
-	execl( "ccbot++", "ccbot++", NULL );				
-#endif	
-
 }
 
 void CCCBot :: ReloadConfigs( )
