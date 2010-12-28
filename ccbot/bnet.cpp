@@ -134,7 +134,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 
 		// refresh the clan vector so it gets updated every 70 seconds
 		
-		if( Time >= m_LastGetClanTime + 70 && m_AntiSpam )
+		if( Time >= m_LastGetClanTime + 70 && m_LoggedIn )
 		{
 			SendGetClanList( );
 			m_LastGetClanTime = Time;
