@@ -188,7 +188,6 @@ void CConfig :: CreateConfig( )
 		file << "# Starting here are the global variables which are valid for every bnet\n" << endl;
 		file << "bot_log = 1" << endl;		
 		file << "bot_war3path = C:\\Program Files\\Warcraft III\\" << endl;
-		file << "db_type = sqlite3" << endl;
 		file << "db_sqlite3_file = ccbot.dbs\n" << endl;
 		file << "# These variables are required\n" << endl;
 		file << "bnet_server = server.eurobattle.net" << endl;

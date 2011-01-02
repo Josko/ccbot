@@ -22,51 +22,129 @@
 #ifndef CCBOTDB_H
 #define CCBOTDB_H
 
+/**************
+ *** SCHEMA ***
+ **************
+
+CREATE TABLE bans (
+	id INTEGER PRIMARY KEY,
+	server TEXT NOT NULL,
+	name TEXT NOT NULL,
+	date TEXT NOT NULL,
+	admin TEXT NOT NULL,
+	reason TEXT
+)
+
+CREATE TABLE safelist (
+	id INTEGER PRIMARY KEY,
+	name TEXT NOT NULL,
+	server TEXT NOT NULL DEFAULT ""
+)
+
+CREATE TABLE access (
+	id INTEGER PRIMARY KEY,
+	name TEXT NOT NULL,
+	server TEXT NOT NULL DEFAULT "",
+	access INTEGER
+)
+
+CREATE TABLE config (
+	name TEXT NOT NULL PRIMARY KEY,
+	value TEXT NOT NULL
+)
+
+CREATE TABLE commands (
+	id INTEGER PRIMARY KEY,
+	name TEXT NOT NULL,
+	access INTEGER NOT NULL
+)
+
+
+ **************
+ *** SCHEMA ***
+ **************/
+
+//
+// CSQLITE3 (wrapper class)
+//
+
+class CSQLITE3
+{
+private:
+	void *m_DB;
+	bool m_Ready;
+	vector<string> m_Row;
+
+public:
+	CSQLITE3( const string &filename );
+	~CSQLITE3( );
+
+	bool GetReady( )					{ return m_Ready; }
+	vector<string> *GetRow( )				{ return &m_Row; }
+	string GetError( );
+
+	int Prepare( const string &query, void **Statement );
+	int Step( void *Statement );
+	int Finalize( void *Statement );
+	int Reset( void *Statement );
+	int Exec( const string &query );
+};
+
 //
 // CCCBotDB
 //
-class CDBBan;
-class CCCBotDB
 
+class CDBBan;
+
+class CCCBotDB
 {
+private:
+	string m_File;
+	CSQLITE3 *m_DB;
+        
 protected:
 	bool m_HasError;
 	string m_Error;
 
 public:
 	CCCBotDB( CConfig *CFG );
-	virtual ~CCCBotDB( );
+	~CCCBotDB( );
 
-	bool HasError( )		{ return m_HasError; }
+        bool HasError( )		{ return m_HasError; }
 	string GetError( )		{ return m_Error; }
 
-	virtual bool Begin( );
-	virtual bool Commit( );
+	void Upgrade1_2( );
+	void Upgrade2_3( );
+	void Upgrade3_4( );
+
+	bool Begin( );
+	bool Commit( );
 
 	// safelist
-	virtual uint32_t SafelistCount( const string &server );
-	virtual bool SafelistCheck( const string &server, string &user );
-	virtual bool SafelistAdd( const string &server, string &user );
-	virtual bool SafelistRemove( const string &server, string &user );
+	uint32_t SafelistCount( const string &server );
+	bool SafelistCheck( const string &server, string &user );
+	bool SafelistAdd( const string &server, string &user );
+	bool SafelistRemove( const string &server, string &user );
 
 	// bans
-	virtual uint32_t BanCount( const string &server );
-	virtual CDBBan *BanCheck( const string &server, string &user );
-	virtual bool BanAdd( const string &server, string &user, const string &admin, const string &reason );
-	virtual bool BanRemove( const string &server, string &user );
+	uint32_t BanCount( const string &server );
+	CDBBan *BanCheck( const string &server, string user );
+	bool BanAdd( const string &server, string &user, const string &admin, const string &reason );
+	bool BanRemove( const string &server, string &user );
 
 	// access
-	virtual bool AccessSet( const string &server, string &user, unsigned char access );
-	virtual unsigned char AccessCheck( const string &server, string &user );
-	virtual uint32_t AccessCount( const string &server, unsigned char access );
-	virtual bool AccessRemove( string &user );
+	bool AccessSet( const string &server, string &user, unsigned char access );
+	unsigned char AccessCheck( const string &server, string &user );
+	uint32_t AccessCount( const string &server, unsigned char access );
+	bool AccessRemove( string &user );
 
-	// command
-	virtual unsigned char CommandAccess( const string &command );
-	virtual bool CommandSetAccess( const string &command, unsigned char access );
-	virtual vector<string> CommandList( unsigned char access );
-	
+	// commands
+	unsigned char CommandAccess( const string &command );
+	bool CommandSetAccess( const string &command, unsigned char access );
+	vector<string> CommandList( unsigned char access );
+
 };
+
 //
 // CDBBan
 //

@@ -25,7 +25,6 @@
 #include "language.h"
 #include "socket.h"
 #include "ccbotdb.h"
-#include "ccbotdbsqlite.h"
 #include "bnet.h"
 #include "bnetprotocol.h"
 
@@ -528,7 +527,7 @@ CCCBot :: CCCBot( CConfig *CFG ) : m_Exiting( false), m_Version( "1.04" )
 {
 	CONSOLE_Print( "[CCBOT] Channel && Clan Bot - " + m_Version + ", based on GHost++" );
 			
-	m_DB = new CCCBotDBSQLite( CFG );
+	m_DB = new CCCBotDB( CFG );
 	m_Language = new CLanguage( LanguageFile );
 	m_Warcraft3Path = CFG->GetString( "bot_war3path", "C:\\Program Files\\Warcraft III\\" );
 
