@@ -68,7 +68,7 @@ uint64_t GetTime( )
     // don't use QueryPerformanceCounter anymore because it isn't guaranteed to be strictly increasing on some systems and thus requires "smoothing" code
     // use timeGetTime instead, which typically has a high resolution (5ms or more) but we request a lower resolution on startup
 
-    return timeGetTime( ) * 1000;
+    return timeGetTime( ) / 1000;
 #elif __APPLE__
         uint64_t current = mach_absolute_time( );
         static mach_timebase_info_data_t info = { 0, 0 };
