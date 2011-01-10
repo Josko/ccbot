@@ -56,7 +56,6 @@ commandpacket.o: ccbot.h
 config.o: ccbot.h config.h
 ccbot.o: ccbot.h util.h config.h language.h socket.h ccbotdb.h bnet.h
 ccbotdb.o: ccbot.h config.h ccbotdb.h
-ccbotdbsqlite.o: ccbot.h util.h config.h ccbotdb.h
 language.o: ccbot.h config.h language.h
 socket.o: ccbot.h util.h socket.h
 util.o: ccbot.h util.h
