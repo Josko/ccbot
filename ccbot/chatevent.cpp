@@ -23,7 +23,6 @@
 #include "socket.h"
 #include "util.h"
 #include "language.h"
-#include "commandpacket.h"
 #include "ccbotdb.h"
 #include "bnetprotocol.h"
 #include "bnet.h"
@@ -43,7 +42,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 		Access = 0;
 	
 	bool Output = ( Event == CBNETProtocol :: CONSOLE_INPUT );			
-	bool Whisper = ( Event == CBNETProtocol :: EID_WHISPER ), ClanMember = IsClanMember( m_UserName );
+	bool Whisper = ( Event == CBNETProtocol :: EID_WHISPER );
+        bool ClanMember = IsClanMember( m_UserName );
 
 	if( Event == CBNETProtocol :: EID_TALK )
 			CONSOLE_Print( "[LOCAL: " + m_ServerAlias + ":" + m_CurrentChannel + "][" + User + "] " + Message );

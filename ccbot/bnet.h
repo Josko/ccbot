@@ -29,7 +29,6 @@
 //
 
 class CTCPClient;
-class CCommandPacket;
 class CBNCSUtilInterface;
 class CBNETProtocol;
 class CIncomingChatEvent;
@@ -43,7 +42,6 @@ public:
 private:
 	CTCPClient *m_Socket;						// the connection to battle.net
 	CBNETProtocol *m_Protocol;					// battle.net protocol
-	queue<CCommandPacket *> m_Packets;				// queue of incoming packets
 	queue<BYTEARRAY> m_OutPackets;					// queue of outgoing packets to be sent (to prevent getting kicked for flooding)
 	CBNCSUtilInterface *m_BNCSUtil;					// the bncs utility (used for logging into battle.net)
 	queue<string> m_ChatCommands;					// queue of chat commands waiting to be sent (to prevent getting kicked for flooding)
@@ -138,8 +136,6 @@ public:
 
 	unsigned int SetFD( void *fd, void *send_fd, int *nfds );
 	bool Update( void *fd, void *send_fd );
-	inline void ExtractPackets( );
-	inline void ProcessPackets( );
 	void ProcessChatEvent( CIncomingChatEvent *chatEvent );
 
 	// functions to send packets to battle.net

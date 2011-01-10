@@ -259,13 +259,16 @@ CHANGELOG
 Version 1.04 ( 15.12.2010. )
 
 - Improved the BNET and CONSOLE output systems
-- Optimized the CBNET::Update a bit
+- Optimized the CBNET::Update
 - Removed disabling Nagle's algorithm
 - Improved code reability and quality in several places
 - Fixed a bug when kicking a player on channel join
 - Fixed channel list having users in lowercase
 - Fixed !ping returning users in lowercase
 - Removed unnecessary checks on channel join
+- Update block time increased to 50ms (strangely it was 50ms)
+- Removed commandpacket.h and commandpacket.cpp
+- Added "make install" to the Makefile
 
 Version 1.03 ( 6.12.2010. )
 

@@ -62,48 +62,60 @@ bool gLog = false;
 CCCBot *gCCBot = NULL;
 
 uint64_t GetTime( )
-{	
+{
 #ifdef WIN32
-	return GetTickCount( ) / 1e3;
+    // don't use GetTickCount anymore because it's not accurate enough (~16ms resolution)
+    // don't use QueryPerformanceCounter anymore because it isn't guaranteed to be strictly increasing on some systems and thus requires "smoothing" code
+    // use timeGetTime instead, which typically has a high resolution (5ms or more) but we request a lower resolution on startup
+
+    return timeGetTime( ) * 1000;
 #elif __APPLE__
-	uint64_t current = mach_absolute_time( );
-	static mach_timebase_info_data_t info = { 0, 0 };
-	// get timebase info
-	if( info.denom == 0 )
-		mach_timebase_info( &info );
-	uint64_t elapsednano = current * ( info.numer / info.denom );
-	// convert ns to s
-	return elapsednano / 1e9;
+        uint64_t current = mach_absolute_time( );
+        static mach_timebase_info_data_t info = { 0, 0 };
+
+        // get timebase info
+
+        if( info.denom == 0 )
+                mach_timebase_info( &info );
+
+        uint64_t elapsednano = current * ( info.numer / info.denom );
+
+        // convert ns to s
+
+        return elapsednano / 1000000000;
 #else
-	uint64_t ticks;
-	struct timespec t;
-	clock_gettime(CLOCK_MONOTONIC, &t);
-	ticks = t.tv_sec;
-	ticks += t.tv_nsec / 1e9;
-	return ticks;
+    struct timespec t;
+    clock_gettime( CLOCK_MONOTONIC, &t );
+    return t.tv_sec;
 #endif
 }
 
 uint64_t GetTicks( )
 {
 #ifdef WIN32
-	return GetTickCount( );
+    // don't use GetTickCount anymore because it's not accurate enough (~16ms resolution)
+    // don't use QueryPerformanceCounter anymore because it isn't guaranteed to be strictly increasing on some systems and thus requires "smoothing" code
+    // use timeGetTime instead, which typically has a high resolution (5ms or more) but we request a lower resolution on startup
+
+    return timeGetTime( );
 #elif __APPLE__
-	uint64_t current = mach_absolute_time( );
-	static mach_timebase_info_data_t info = { 0, 0 };
-	// get timebase info
-	if( info.denom == 0 )
-		mach_timebase_info( &info );
-	uint64_t elapsednano = current * ( info.numer / info.denom );
-	// convert ns to ms
-	return elapsednano / 1e6;
+        uint64_t current = mach_absolute_time( );
+        static mach_timebase_info_data_t info = { 0, 0 };
+
+        // get timebase info
+
+        if( info.denom == 0 )
+                mach_timebase_info( &info );
+
+        uint64_t elapsednano = current * ( info.numer / info.denom );
+
+        // convert ns to ms
+
+        return elapsednano / 1000000;
 #else
-	uint64_t ticks;
-	struct timespec t;
-	clock_gettime(CLOCK_MONOTONIC, &t);
-	ticks = t.tv_sec * 1e3;
-	ticks += t.tv_nsec / 1e6;
-	return ticks;
+    struct timespec t;
+    clock_gettime( CLOCK_MONOTONIC, &t );
+    return t.tv_sec * 1000 + t.tv_nsec / 1000000;
 #endif
 }
 
@@ -390,10 +402,10 @@ int main( )
 
 	while( true )
 	{
-		// block for 100ms on all sockets - if you intend to perform any timed actions more frequently you should change this
+		// block for 50ms on all sockets - if you intend to perform any timed actions more frequently you should change this
 		// that said it's likely we'll loop more often than this due to there being data waiting on one of the sockets but there aren't any guarantees
 
-		if( gCCBot->Update( 10000 ) )
+		if( gCCBot->Update( 50000 ) )
 			break;
 
 		bool Quit = false;

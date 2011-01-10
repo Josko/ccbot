@@ -24,7 +24,6 @@
 #include "config.h"
 #include "language.h"
 #include "socket.h"
-#include "commandpacket.h"
 #include "ccbotdb.h"
 #include "bncsutilinterface.h"
 #include "bnetprotocol.h"
@@ -69,13 +68,6 @@ CBNET :: ~CBNET( )
 {
 	delete m_Socket;
 	delete m_Protocol;
-
-	while( !m_Packets.empty( ) )
-	{
-		delete m_Packets.front( );
-		m_Packets.pop( );
-	}
-
 	delete m_BNCSUtil;
 
 	for( vector<CUser *> :: iterator i = m_Channel.begin( ); i != m_Channel.end( ); ++i )
@@ -105,8 +97,335 @@ bool CBNET :: Update( void *fd, void *send_fd )
 		// the socket is connected and everything appears to be working properly
 
 		m_Socket->DoRecv( (fd_set *)fd );
-		ExtractPackets( );
-		ProcessPackets( );	
+
+                // extract as many packets as possible from the socket's receive buffer and put them in the m_Packets queue
+
+                string *RecvBuffer = m_Socket->GetBytes( );
+                BYTEARRAY Bytes = UTIL_CreateByteArray( (unsigned char *)RecvBuffer->c_str( ), RecvBuffer->size( ) );
+                CIncomingChatEvent *ChatEvent = NULL;
+
+                // a packet is at least 4 bytes so loop as long as the buffer contains 4 bytes
+
+                while( Bytes.size( ) >= 4 )
+                {
+                        // byte 0 is always 255
+
+                        if( Bytes[0] == BNET_HEADER_CONSTANT )
+                        {
+                                // bytes 2 and 3 contain the length of the packet
+
+                                uint16_t Length = UTIL_ByteArrayToUInt16( Bytes, false, 2 );
+
+                                if( Length >= 4 )
+                                {
+                                        if( Bytes.size( ) >= Length )
+                                        {
+                                                switch( Bytes[1] )
+                                                {
+                                                case CBNETProtocol :: SID_NULL:
+
+                                                        // warning: we do not respond to NULL packets with a NULL packet of our own
+                                                        // this is because PVPGN servers are programmed to respond to NULL packets so it will create a vicious cycle of useless traffic
+                                                        // official battle.net servers do not respond to NULL packets
+
+                                                        m_Protocol->RECEIVE_SID_NULL( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) );
+                                                        break;
+
+                                                case CBNETProtocol :: SID_ENTERCHAT:
+                                                        if( m_Protocol->RECEIVE_SID_ENTERCHAT( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] joining channel [" + m_FirstChannel + "]" );
+                                                                m_InChat = true;
+                                                                m_Socket->PutBytes( m_Protocol->SEND_SID_JOINCHANNEL( m_FirstChannel ) );
+                                                        }
+
+                                                        break;
+
+                                                case CBNETProtocol :: SID_CHATEVENT:
+                                                        ChatEvent = m_Protocol->RECEIVE_SID_CHATEVENT( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) );
+
+                                                        if( ChatEvent )
+                                                                ProcessChatEvent( ChatEvent );
+
+                                                        delete ChatEvent;
+                                                        ChatEvent = NULL;
+                                                        break;
+
+                                                case CBNETProtocol :: SID_FLOODDETECTED:
+                                                        if( m_Protocol->RECEIVE_SID_FLOODDETECTED( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                // we're disced for flooding, exit so we don't prolong the temp IP ban
+                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] flood detected - exiting" );
+                                                                m_Exiting = true;
+                                                        }
+                                                        return m_Exiting;
+
+                                                case CBNETProtocol :: SID_PING:
+                                                        m_Socket->PutBytes( m_Protocol->SEND_SID_PING( m_Protocol->RECEIVE_SID_PING( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) ) );
+                                                        break;
+
+                                                case CBNETProtocol :: SID_AUTH_INFO:
+                                                        if( m_Protocol->RECEIVE_SID_AUTH_INFO( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                if( m_BNCSUtil->HELP_SID_AUTH_CHECK( m_CCBot->m_Warcraft3Path, m_CDKeyROC, m_CDKeyTFT, m_Protocol->GetValueStringFormulaString( ), m_Protocol->GetIX86VerFileNameString( ), m_Protocol->GetClientToken( ), m_Protocol->GetServerToken( ) ) )
+                                                                {
+
+                                                                        if( m_CDKeyTFT.empty( ) )
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] attempting to auth as Warcraft III: Reign of Chaos" );
+                                                                        else
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] attempting to auth as Warcraft III: The Frozen Throne" );
+
+                                                                        // override the exe information generated by bncsutil if specified in the config file
+                                                                        // apparently this is useful for pvpgn users
+
+                                                                        if( m_EXEVersion.size( ) == 4 )
+                                                                        {
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] using custom exe version bnet_custom_exeversion = " + UTIL_ToString( m_EXEVersion[0] ) + " " + UTIL_ToString( m_EXEVersion[1] ) + " " + UTIL_ToString( m_EXEVersion[2] ) + " " + UTIL_ToString( m_EXEVersion[3] ) );
+                                                                                m_BNCSUtil->SetEXEVersion( m_EXEVersion );
+                                                                        }
+
+                                                                        if( m_EXEVersionHash.size( ) == 4 )
+                                                                        {
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] using custom exe version hash bnet_custom_exeversionhash = " + UTIL_ToString( m_EXEVersionHash[0] ) + " " + UTIL_ToString( m_EXEVersionHash[1] ) + " " + UTIL_ToString( m_EXEVersionHash[2] ) + " " + UTIL_ToString( m_EXEVersionHash[3] ) );
+                                                                                m_BNCSUtil->SetEXEVersionHash( m_EXEVersionHash );
+                                                                        }
+
+                                                                        m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_CHECK( m_Protocol->GetClientToken( ), m_BNCSUtil->GetEXEVersion( ), m_BNCSUtil->GetEXEVersionHash( ), m_BNCSUtil->GetKeyInfoROC( ), m_BNCSUtil->GetKeyInfoTFT( ), m_BNCSUtil->GetEXEInfo( ), "CCBot" ) );
+                                                                }
+                                                                else
+                                                                {
+                                                                        CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon failed - bncsutil key hash failed (check your Warcraft 3 path and cd keys), disconnecting" );
+                                                                        m_Socket->Disconnect( );
+                                                                        return m_Exiting;
+                                                                }
+                                                        }
+                                                        break;
+
+                                                case CBNETProtocol :: SID_AUTH_CHECK:
+                                                        if( m_Protocol->RECEIVE_SID_AUTH_CHECK( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                // cd keys accepted
+
+                                                                m_BNCSUtil->HELP_SID_AUTH_ACCOUNTLOGON( );
+                                                                m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_ACCOUNTLOGON( m_BNCSUtil->GetClientKey( ), m_UserName ) );
+                                                        }
+                                                        else
+                                                        {
+                                                                // cd keys not accepted
+
+                                                                switch( UTIL_ByteArrayToUInt32( m_Protocol->m_KeyState, false ) )
+                                                                {
+                                                                        case CBNETProtocol :: KR_OLD_GAME_VERSION:
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Old game version - update your hashes and/or ccbot.cfg" );
+                                                                                break;
+
+                                                                        case CBNETProtocol :: KR_INVALID_VERSION:
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid game version - update your hashes and/or ccbot.cfg" );
+                                                                                break;
+
+                                                                        case CBNETProtocol :: KR_INVALID_ROC_KEY:
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid RoC key" );
+                                                                                break;
+
+                                                                        case CBNETProtocol :: KR_ROC_KEY_IN_USE:
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] RoC key is being used by someone else" );
+                                                                                break;
+
+                                                                        case CBNETProtocol :: KR_ROC_KEY_BANNED:
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Banned RoC key" );
+                                                                                break;
+
+                                                                        case CBNETProtocol :: KR_WRONG_PRODUCT:
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Wrong product key" );
+                                                                                break;
+
+                                                                        case CBNETProtocol :: KR_INVALID_TFT_KEY:
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid TFT key" );
+                                                                                break;
+
+                                                                        case CBNETProtocol :: KR_TFT_KEY_BANNED:
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Banned TFT key" );
+                                                                                break;
+
+                                                                        case CBNETProtocol :: KR_TFT_KEY_IN_USE:
+                                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] TFT key is being used by someone else" );
+                                                                                break;
+                                                                }
+
+                                                                m_Socket->Disconnect( );
+                                                                return m_Exiting;
+                                                        }
+
+                                                        break;
+
+                                                case CBNETProtocol :: SID_AUTH_ACCOUNTLOGON:
+                                                        if( m_Protocol->RECEIVE_SID_AUTH_ACCOUNTLOGON( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                // pvpgn logon
+                                                                m_BNCSUtil->HELP_PvPGNPasswordHash( m_UserPassword );
+                                                                m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_ACCOUNTLOGONPROOF( m_BNCSUtil->GetPvPGNPasswordHash( ) ) );
+                                                        }
+                                                        else
+                                                        {
+                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon failed - invalid username, disconnecting" );
+                                                                m_Socket->Disconnect( );
+                                                                return m_Exiting;
+                                                        }
+
+                                                        break;
+
+                                                case CBNETProtocol :: SID_AUTH_ACCOUNTLOGONPROOF:
+                                                        if( m_Protocol->RECEIVE_SID_AUTH_ACCOUNTLOGONPROOF( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                // logon successful
+
+                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon successful" );
+                                                                m_LoggedIn = true;
+                                                                m_Socket->PutBytes( m_Protocol->SEND_SID_ENTERCHAT( ) );
+                                                                m_Socket->PutBytes( m_Protocol->SEND_SID_CLANMEMBERLIST( ) );
+
+                                                                /* for( vector<CIncomingChannelEvent *> :: iterator i = m_Event.begin( ); i != m_Event.end( ); ++i )
+                                                                delete *i; */
+                                                        }
+                                                        else
+                                                        {
+                                                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon failed - invalid password, disconnecting" );
+                                                                m_Socket->Disconnect( );
+                                                                return m_Exiting;
+                                                        }
+
+                                                        break;
+
+                                                case CBNETProtocol :: SID_CLANINVITATION:
+                                                        switch( m_Protocol->RECEIVE_SID_CLANINVITATION( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                case 9:
+                                                                        QueueChatCommand( m_ClanTag + " is currently full, please contact a shaman/chieftain.", false );
+                                                                        break;
+
+                                                                case 5:
+                                                                        QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", false );
+                                                                        break;
+
+                                                                case 0:
+                                                                        QueueChatCommand( m_LastKnown + " has successfully joined " + m_ClanTag + ".", false );
+                                                                        SendGetClanList( );
+                                                                        break;
+
+                                                                case 4:
+                                                                        QueueChatCommand( m_LastKnown + " has rejected a clan invitation for " + m_ClanTag + ".", false );
+                                                                        break;
+
+                                                                case 8:
+                                                                        QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", false );
+                                                                        break;
+
+                                                                default:
+                                                                        CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANINVITATION value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANINVITATION( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) ) + "]" );
+                                                                        break;
+                                                        }
+
+                                                case CBNETProtocol :: SID_CLANINVITATIONRESPONSE:
+                                                        if( m_Protocol->RECEIVE_SID_CLANINVITATIONRESPONSE( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                QueueChatCommand( "Clan invitation received for [" + m_Protocol->GetClanName( ) + "] from [" + m_Protocol->GetInviterStr( ) + "].", false );
+                                                                QueueChatCommand( "Type " + m_CommandTrigger + "accept to accept the clan invitation.", false );
+
+                                                                m_ActiveInvitation = true;
+                                                                m_LastInvitationTime = GetTime( );
+                                                        }
+                                                        break;
+
+                                                case CBNETProtocol :: SID_CLANCREATIONINVITATION:
+                                                        if( m_Protocol->RECEIVE_SID_CLANCREATIONINVITATION( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                QueueChatCommand( "Clan creation of [" + m_Protocol->GetClanCreationName( ) + "] by [" + m_Protocol->GetClanCreatorStr( ) + "] received - accepting...", false );
+
+                                                                m_ActiveCreation = true;
+                                                                m_LastInvitationTime = GetTime( );
+                                                        }
+                                                        break;
+
+                                                case CBNETProtocol :: SID_CLANMAKECHIEFTAIN:
+                                                        switch( m_Protocol->RECEIVE_SID_CLANMAKECHIEFTAIN( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                case 0:
+                                                                        QueueChatCommand( m_LastKnown + " successfuly promoted to chieftain.", false );
+                                                                        SendGetClanList( );
+                                                                        break;
+
+                                                                default:
+                                                                        QueueChatCommand( "Error setting user to Chieftain.", false );
+                                                        }
+                                                        break;
+
+                                                case CBNETProtocol :: SID_CLANREMOVEMEMBER:
+                                                        switch( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) )
+                                                        {
+                                                                case 1:
+                                                                        QueueChatCommand( "Error: " + m_Removed + " - removal failed by " + m_UsedRemove + ".", false );
+                                                                        m_Removed = "Unknown User";
+                                                                        break;
+
+                                                                case 2:
+                                                                        QueueChatCommand( "Error: " + m_Removed + " - can't be removed yet from " + m_ClanTag + ".", false );
+                                                                        m_Removed = "Unknown User";
+                                                                        break;
+
+                                                                case 0:
+                                                                        QueueChatCommand( m_Removed + " has been kicked from " + m_ClanTag + " by " + m_UsedRemove + ".", false );
+                                                                        m_Removed = "Unknown User";
+                                                                        SendGetClanList( );
+                                                                        break;
+
+                                                                case 7:
+                                                                        QueueChatCommand( "Error: " + m_Removed + " - can't be removed, bot not authorised to remove.", false );
+                                                                        m_Removed = "Unknown User";
+                                                                        break;
+
+                                                                case 8:
+                                                                        QueueChatCommand( "Error: " + m_Removed + " - can't be removed, not allowed.", false );
+                                                                        m_Removed = "Unknown User";
+                                                                        break;
+
+                                                                default:
+                                                                        CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANREMOVEMEMBER value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) ) + "]" );
+                                                                        break;
+                                                        }
+
+                                                case CBNETProtocol :: SID_CLANMEMBERLIST:
+                                                        {
+                                                                vector<CIncomingClanList *> Clans = m_Protocol->RECEIVE_SID_CLANMEMBERLIST( BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) );
+
+                                                                for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
+                                                                        delete *i;
+
+                                                                m_Clans = Clans;
+                                                        }
+                                                        break;
+                                                }
+
+
+                                                *RecvBuffer = RecvBuffer->substr( Length );
+                                                Bytes = BYTEARRAY( Bytes.begin( ) + Length, Bytes.end( ) );
+                                        }
+                                        else
+                                                break;
+                                }
+                                else
+                                {
+                                        CONSOLE_Print( "[BNET: " + m_ServerAlias + "] error - received invalid packet from battle.net (bad length), disconnecting" );
+                                        m_Socket->Disconnect( );
+                                        return m_Exiting;
+                                }
+                        }
+                        else
+                        {
+                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] error - received invalid packet from battle.net (bad header constant), disconnecting" );
+                                m_Socket->Disconnect( );
+                                return m_Exiting;
+                        }
+                }
 		
 		if( !m_ChatCommands.empty( ) && Ticks >= m_LastChatCommandTicks + m_Delay )
 		{			
@@ -265,360 +584,6 @@ bool CBNET :: Update( void *fd, void *send_fd )
 	}
 
 	return m_Exiting;
-}
-
-inline void CBNET :: ExtractPackets( )
-{
-	// extract as many packets as possible from the socket's receive buffer and put them in the m_Packets queue
-
-        string *RecvBuffer = m_Socket->GetBytes( );
-        BYTEARRAY Bytes = UTIL_CreateByteArray( (unsigned char *)RecvBuffer->c_str( ), RecvBuffer->size( ) );
-
-        // a packet is at least 4 bytes so loop as long as the buffer contains 4 bytes
-
-        while( Bytes.size( ) >= 4 )
-        {
-                // byte 0 is always 255
-
-                if( Bytes[0] == BNET_HEADER_CONSTANT )
-                {
-                        // bytes 2 and 3 contain the length of the packet
-
-                        uint16_t Length = UTIL_ByteArrayToUInt16( Bytes, false, 2 );
-
-                        if( Length >= 4 )
-                        {
-                                if( Bytes.size( ) >= Length )
-                                {
-                                        m_Packets.push( new CCommandPacket( BNET_HEADER_CONSTANT, Bytes[1], BYTEARRAY( Bytes.begin( ), Bytes.begin( ) + Length ) ) );
-                                        *RecvBuffer = RecvBuffer->substr( Length );
-                                        Bytes = BYTEARRAY( Bytes.begin( ) + Length, Bytes.end( ) );
-                                }
-                                else
-                                        return;
-                        }
-                        else
-                        {
-                                CONSOLE_Print( "[BNET: " + m_ServerAlias + "] error - received invalid packet from battle.net (bad length), disconnecting" );
-                                m_Socket->Disconnect( );
-                                return;
-                        }
-                }
-                else
-                {
-                        CONSOLE_Print( "[BNET: " + m_ServerAlias + "] error - received invalid packet from battle.net (bad header constant), disconnecting" );
-                        m_Socket->Disconnect( );
-                        return;
-                }
-        }
-}
-
-inline void CBNET :: ProcessPackets( )
-{
-	CIncomingChatEvent *ChatEvent = NULL;
-
-	// process all the received packets in the m_Packets queue
-	// this normally means sending some kind of response
-
-	while( !m_Packets.empty( ) )
-	{
-		CCommandPacket *Packet = m_Packets.front( );
-		m_Packets.pop( );
-
-		if( Packet->GetPacketType( ) == BNET_HEADER_CONSTANT )
-		{
-			switch( Packet->GetID( ) )
-			{
-			case CBNETProtocol :: SID_NULL:
-
-				// warning: we do not respond to NULL packets with a NULL packet of our own
-				// this is because PVPGN servers are programmed to respond to NULL packets so it will create a vicious cycle of useless traffic
-				// official battle.net servers do not respond to NULL packets
-
-				m_Protocol->RECEIVE_SID_NULL( Packet->GetData( ) );
-				break;
-
-			case CBNETProtocol :: SID_ENTERCHAT:
-				if( m_Protocol->RECEIVE_SID_ENTERCHAT( Packet->GetData( ) ) )
-				{
-					CONSOLE_Print( "[BNET: " + m_ServerAlias + "] joining channel [" + m_FirstChannel + "]" );
-					m_InChat = true;
-					m_Socket->PutBytes( m_Protocol->SEND_SID_JOINCHANNEL( m_FirstChannel ) );
-				}
-
-				break;
-
-			case CBNETProtocol :: SID_CHATEVENT:
-				ChatEvent = m_Protocol->RECEIVE_SID_CHATEVENT( Packet->GetData( ) );
-
-				if( ChatEvent )
-					ProcessChatEvent( ChatEvent );
-
-				delete ChatEvent;
-				ChatEvent = NULL;
-				break;
-	
-			case CBNETProtocol :: SID_FLOODDETECTED:
-				if( m_Protocol->RECEIVE_SID_FLOODDETECTED( Packet->GetData( ) ) )
-				{
-					// we're disced for flooding, exit so we don't prolong the temp IP ban
-					m_Exiting = true;
-				}
-				break;
-			
-			case CBNETProtocol :: SID_PING:
-				m_Socket->PutBytes( m_Protocol->SEND_SID_PING( m_Protocol->RECEIVE_SID_PING( Packet->GetData( ) ) ) );
-				break;
-
-			case CBNETProtocol :: SID_AUTH_INFO:
-				if( m_Protocol->RECEIVE_SID_AUTH_INFO( Packet->GetData( ) ) )
-				{
-					if( m_BNCSUtil->HELP_SID_AUTH_CHECK( m_CCBot->m_Warcraft3Path, m_CDKeyROC, m_CDKeyTFT, m_Protocol->GetValueStringFormulaString( ), m_Protocol->GetIX86VerFileNameString( ), m_Protocol->GetClientToken( ), m_Protocol->GetServerToken( ) ) )
-					{
-
-						if( m_CDKeyTFT.empty( ) )
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] attempting to auth as Warcraft III: Reign of Chaos" );
-						else
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] attempting to auth as Warcraft III: The Frozen Throne" );
-
-						// override the exe information generated by bncsutil if specified in the config file
-						// apparently this is useful for pvpgn users
-
-						if( m_EXEVersion.size( ) == 4 )
-						{
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] using custom exe version bnet_custom_exeversion = " + UTIL_ToString( m_EXEVersion[0] ) + " " + UTIL_ToString( m_EXEVersion[1] ) + " " + UTIL_ToString( m_EXEVersion[2] ) + " " + UTIL_ToString( m_EXEVersion[3] ) );
-							m_BNCSUtil->SetEXEVersion( m_EXEVersion );
-						}
-
-						if( m_EXEVersionHash.size( ) == 4 )
-						{
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] using custom exe version hash bnet_custom_exeversionhash = " + UTIL_ToString( m_EXEVersionHash[0] ) + " " + UTIL_ToString( m_EXEVersionHash[1] ) + " " + UTIL_ToString( m_EXEVersionHash[2] ) + " " + UTIL_ToString( m_EXEVersionHash[3] ) );
-							m_BNCSUtil->SetEXEVersionHash( m_EXEVersionHash );
-						}
-
-						m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_CHECK( m_Protocol->GetClientToken( ), m_BNCSUtil->GetEXEVersion( ), m_BNCSUtil->GetEXEVersionHash( ), m_BNCSUtil->GetKeyInfoROC( ), m_BNCSUtil->GetKeyInfoTFT( ), m_BNCSUtil->GetEXEInfo( ), "CCBot" ) );
-					}
-					else
-					{
-						CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon failed - bncsutil key hash failed (check your Warcraft 3 path and cd keys), disconnecting" );
-						m_Socket->Disconnect( );
-						delete Packet;
-						return;
-					}
-				}
-				break;
-	
-			case CBNETProtocol :: SID_AUTH_CHECK:
-				if( m_Protocol->RECEIVE_SID_AUTH_CHECK( Packet->GetData( ) ) )
-				{
-					// cd keys accepted
-
-					m_BNCSUtil->HELP_SID_AUTH_ACCOUNTLOGON( );
-					m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_ACCOUNTLOGON( m_BNCSUtil->GetClientKey( ), m_UserName ) );
-				}
-				else
-				{	
-					// cd keys not accepted
-					
-					switch( UTIL_ByteArrayToUInt32( m_Protocol->m_KeyState, false ) )
-					{
-						case CBNETProtocol :: KR_OLD_GAME_VERSION:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Old game version - update your hashes and/or ccbot.cfg" );
-							break;
-
-						case CBNETProtocol :: KR_INVALID_VERSION:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid game version - update your hashes and/or ccbot.cfg" );
-							break;
-
-						case CBNETProtocol :: KR_INVALID_ROC_KEY:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid RoC key" );
-							break;
-
-						case CBNETProtocol :: KR_ROC_KEY_IN_USE:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] RoC key is being used by someone else" );
-							break;
-							
-						case CBNETProtocol :: KR_ROC_KEY_BANNED:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Banned RoC key" );
-							break;
-
-						case CBNETProtocol :: KR_WRONG_PRODUCT:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Wrong product key" );
-							break;
-
-						case CBNETProtocol :: KR_INVALID_TFT_KEY:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Invalid TFT key" );
-							break;
-
-						case CBNETProtocol :: KR_TFT_KEY_BANNED:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] Banned TFT key" );
-							break;
-
-						case CBNETProtocol :: KR_TFT_KEY_IN_USE:
-							CONSOLE_Print( "[BNET: " + m_ServerAlias + "] TFT key is being used by someone else" );
-							break;
-					}				
-
-					m_Socket->Disconnect( );
-					delete Packet;
-					return;
-				}
-
-				break;
-
-			case CBNETProtocol :: SID_AUTH_ACCOUNTLOGON:
-				if( m_Protocol->RECEIVE_SID_AUTH_ACCOUNTLOGON( Packet->GetData( ) ) )
-				{
-					// pvpgn logon
-					m_BNCSUtil->HELP_PvPGNPasswordHash( m_UserPassword );
-					m_Socket->PutBytes( m_Protocol->SEND_SID_AUTH_ACCOUNTLOGONPROOF( m_BNCSUtil->GetPvPGNPasswordHash( ) ) );
-				}
-				else
-				{
-					CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon failed - invalid username, disconnecting" );
-					m_Socket->Disconnect( );
-					delete Packet;
-					return;
-				}
-
-				break;
-
-			case CBNETProtocol :: SID_AUTH_ACCOUNTLOGONPROOF:
-				if( m_Protocol->RECEIVE_SID_AUTH_ACCOUNTLOGONPROOF( Packet->GetData( ) ) )
-				{
-					// logon successful
-
-					CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon successful" );
-					m_LoggedIn = true;
-					m_Socket->PutBytes( m_Protocol->SEND_SID_ENTERCHAT( ) );
-					m_Socket->PutBytes( m_Protocol->SEND_SID_CLANMEMBERLIST( ) );
-
-					/* for( vector<CIncomingChannelEvent *> :: iterator i = m_Event.begin( ); i != m_Event.end( ); ++i )
-					delete *i; */
-					
-       				}
-				else
-				{
-					CONSOLE_Print( "[BNET: " + m_ServerAlias + "] logon failed - invalid password, disconnecting" );
-					m_Socket->Disconnect( );
-					delete Packet;
-					return;
-				}
-
-				break;
-
-			case CBNETProtocol :: SID_CLANINVITATION:
-				switch( m_Protocol->RECEIVE_SID_CLANINVITATION( Packet->GetData( ) ) )
-				{
-					case 9:
-						QueueChatCommand( m_ClanTag + " is currently full, please contact a shaman/chieftain.", false );
-						break;
-								
-					case 5:
-						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", false );
-						break;
-
-					case 0:					
-						QueueChatCommand( m_LastKnown + " has successfully joined " + m_ClanTag + ".", false );
-						SendGetClanList( );					
-						break;
-
-					case 4:
-						QueueChatCommand( m_LastKnown + " has rejected a clan invitation for " + m_ClanTag + ".", false );
-						break;
-
-					case 8:
-						QueueChatCommand( "Error: " + m_LastKnown + " is using a Chat client or already in clan.", false );
-						break;
-
-					default:
-						CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANINVITATION value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANINVITATION( Packet->GetData( ) ) ) + "]" );
-						break;
-				}				
-
-			case CBNETProtocol :: SID_CLANINVITATIONRESPONSE:
-				if( m_Protocol->RECEIVE_SID_CLANINVITATIONRESPONSE( Packet->GetData( ) ) )
-				{
-					QueueChatCommand( "Clan invitation received for [" + m_Protocol->GetClanName( ) + "] from [" + m_Protocol->GetInviterStr( ) + "].", false );
-					QueueChatCommand( "Type " + m_CommandTrigger + "accept to accept the clan invitation.", false );
-
-					m_ActiveInvitation = true;
-					m_LastInvitationTime = GetTime( );										
-				}
-				break;
-
-			case CBNETProtocol :: SID_CLANCREATIONINVITATION:
-				if( m_Protocol->RECEIVE_SID_CLANCREATIONINVITATION( Packet->GetData( ) ) )
-				{
-					QueueChatCommand( "Clan creation of [" + m_Protocol->GetClanCreationName( ) + "] by [" + m_Protocol->GetClanCreatorStr( ) + "] received - accepting...", false );
-
-					m_ActiveCreation = true;
-					m_LastInvitationTime = GetTime( );
-				}
-				break;
-
-			case CBNETProtocol :: SID_CLANMAKECHIEFTAIN:
-				switch( m_Protocol->RECEIVE_SID_CLANMAKECHIEFTAIN( Packet->GetData( ) ) )
-				{
-					case 0:
-						QueueChatCommand( m_LastKnown + " successfuly promoted to chieftain.", false );
-						SendGetClanList( );
-						break;
-
-					default:
-						QueueChatCommand( "Error setting user to Chieftain.", false );					
-				}
-				break;
-
-			case CBNETProtocol :: SID_CLANREMOVEMEMBER:
-				switch( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( Packet->GetData( ) ) )
-				{
-					case 1:
-						QueueChatCommand( "Error: " + m_Removed + " - removal failed by " + m_UsedRemove + ".", false );
-						m_Removed = "Unknown User";
-						break;
-			
-					case 2:
-						QueueChatCommand( "Error: " + m_Removed + " - can't be removed yet from " + m_ClanTag + ".", false );
-						m_Removed = "Unknown User";
-						break;
-
-					case 0:
-						QueueChatCommand( m_Removed + " has been kicked from " + m_ClanTag + " by " + m_UsedRemove + ".", false );
-						m_Removed = "Unknown User";
-						SendGetClanList( );
-						break;
-
-					case 7:
-						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, bot not authorised to remove.", false );
-						m_Removed = "Unknown User";
-						break;
-
-					case 8:
-						QueueChatCommand( "Error: " + m_Removed + " - can't be removed, not allowed.", false );
-						m_Removed = "Unknown User";
-                                		break;
-
-					default:
-						CONSOLE_Print( "[CLAN: " + m_ServerAlias + "] received unknown SID_CLANREMOVEMEMBER value [" + UTIL_ToString( m_Protocol->RECEIVE_SID_CLANREMOVEMEMBER( Packet->GetData( ) ) ) + "]" );
-						break;
-				}
-
-			case CBNETProtocol :: SID_CLANMEMBERLIST:
-				{
-					vector<CIncomingClanList *> Clans = m_Protocol->RECEIVE_SID_CLANMEMBERLIST( Packet->GetData( ) );
-
-					for( vector<CIncomingClanList *> :: iterator i = m_Clans.begin( ); i != m_Clans.end( ); ++i )
-						delete *i;
-
-					m_Clans = Clans;
-				}			
-				break;				
-			}
-		}
-
-		delete Packet;
-	}
 }
 
 void CBNET :: SendChatCommand( const string &chatCommand, bool console )
