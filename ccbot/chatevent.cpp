@@ -1183,11 +1183,9 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					Payload = GetUserFromNamePartial( Payload );
 
 				if( Payload == User )					
-					Payload = "himself";
-								
-				int Random = ( rand( ) % 6 );					
+					Payload = "himself";	
 
-				switch( Random )
+				switch( rand( ) % 6 )
 				{
 					case 0: QueueChatCommand( User + " slaps " + Payload + " around a bit with a large trout.", false );
 						break;
@@ -1204,7 +1202,7 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 					case 4: QueueChatCommand( User + " finds " + Payload + " on uglypeople.com.", false );
 						break;
 
-					case 5: Random = rand( ); QueueChatCommand( User + " searches google.com for \"goatsex + " + Payload + "\". " + UTIL_ToString( Random ) + " hits WEEE!", false );	
+					case 5: QueueChatCommand( User + " searches google.com for \"goatsex + " + Payload + "\". " + UTIL_ToString( rand( ) ) + " hits WEEE!", false );	
 						break; 
 				}
 			}
@@ -1217,10 +1215,8 @@ void CBNET :: ProcessChatEvent( CIncomingChatEvent *chatEvent )
 			{
 				if ( GetUserFromNamePartial( Payload ).size( ) )
 					Payload = GetUserFromNamePartial( Payload );
-					
-				int Random = ( rand( ) % 6 );
 
-				switch( Random )
+				switch( rand( ) % 6 )
 				{
 					case 0: QueueChatCommand( User + " spits " + Payload + " but misses completely!", false );
 						break;
