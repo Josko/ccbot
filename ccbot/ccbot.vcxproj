@@ -109,8 +109,6 @@
     <ClInclude Include="bnetprotocol.h" />
     <ClInclude Include="ccbot.h" />
     <ClInclude Include="ccbotdb.h" />
-    <ClInclude Include="ccbotdbsqlite.h" />
-    <ClInclude Include="commandpacket.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="language.h" />
     <ClInclude Include="ms_stdint.h" />
@@ -125,9 +123,7 @@
     <ClCompile Include="bnetprotocol.cpp" />
     <ClCompile Include="ccbot.cpp" />
     <ClCompile Include="ccbotdb.cpp" />
-    <ClCompile Include="ccbotdbsqlite.cpp" />
     <ClCompile Include="chatevent.cpp" />
-    <ClCompile Include="commandpacket.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="language.cpp" />
     <ClCompile Include="socket.cpp" />

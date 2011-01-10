@@ -24,9 +24,6 @@
     <ClCompile Include="bnetprotocol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="commandpacket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -34,9 +31,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ccbotdb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ccbotdbsqlite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="language.cpp">
@@ -65,16 +59,10 @@
     <ClInclude Include="bnetprotocol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="commandpacket.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ccbot.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ccbotdbsqlite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="language.h">
