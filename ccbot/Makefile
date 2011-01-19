@@ -5,7 +5,7 @@ CC = gcc
 DFLAGS = -DSQLITE_THREADSAFE=0
 OFLAGS = -O3
 LFLAGS = -L. -L../bncsutil/src/bncsutil/ -lbncsutil -lpthread -ldl -lrt -lnsl -lcurses
-CFLAGS = -Wall
+CFLAGS = -Wall -Wextra
 
 ifeq ($(SYSTEM),Darwin)
 DFLAGS += -D__APPLE__
@@ -36,8 +36,7 @@ clean:
 	rm -f $(OBJS) $(COBJS) $(PROGS)
 	
 install: $(PROGS)
-	cp $(PROGS) ../
-	rm -f $(PROGS)
+	cp $(PROGS) ..
 
 $(OBJS): %.o: %.cpp
 	$(C++) -o $@ $(CFLAGS) -c $<
@@ -46,17 +45,3 @@ $(COBJS): %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c $<
 
 ./ccbot: $(OBJS) $(COBJS)
-
-all: $(PROGS)
-
-bncsutilinterface.o: ccbot.h util.h bncsutilinterface.h
-bnet.o: ccbot.h util.h config.h language.h socket.h ccbotdb.h bncsutilinterface.h bnetprotocol.h bnet.h
-bnetprotocol.o: ccbot.h util.h bnetprotocol.h
-commandpacket.o: ccbot.h
-config.o: ccbot.h config.h
-ccbot.o: ccbot.h util.h config.h language.h socket.h ccbotdb.h bnet.h
-ccbotdb.o: ccbot.h config.h ccbotdb.h
-language.o: ccbot.h config.h language.h
-socket.o: ccbot.h util.h socket.h
-util.o: ccbot.h util.h
-chatevent.o: ccbot.h util.h config.h language.h socket.h ccbotdb.h bncsutilinterface.h bnetprotocol.h bnet.h

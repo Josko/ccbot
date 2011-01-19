@@ -107,7 +107,7 @@ public:
 
 	// processing functions
 
-	bool Update( long usecBlock );	
+	bool Update( );	
 	void UpdateCommandAccess( );
 
 	// other functions

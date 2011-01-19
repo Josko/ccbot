@@ -1,6 +1,6 @@
 /*
 
-   Copyright [2009] [Joško Nikolić]
+   Copyright [2009] [JoÅ¡ko NikoliÄ‡]
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -95,85 +95,49 @@
 #endif
 
 //
-// CSocket
-//
-
-class CSocket
-{
-protected:
-	SOCKET m_Socket;
-	struct sockaddr_in m_SIN;
-	bool m_HasError;
-	int m_Error;
-
-public:
-	CSocket( );
-	CSocket( SOCKET nSocket, struct sockaddr_in nSIN );
-	~CSocket( );
-
-	virtual BYTEARRAY GetPort( );
-	virtual BYTEARRAY GetIP( );
-	virtual string GetIPString( );
-	virtual bool HasError( )						{ return m_HasError; }
-	virtual int GetError( )							{ return m_Error; }
-	virtual string GetErrorString( );
-	virtual void SetFD( fd_set *fd, fd_set *send_fd, int *nfds );
-	virtual void Allocate( int type );
-	virtual void Reset( );
-};
-
-//
-// CTCPSocket
-//
-
-class CTCPSocket : public CSocket
-{
-protected:
-	bool m_Connected;
-
-private:
-	string m_RecvBuffer;
-	string m_SendBuffer;
-	uint64_t m_LastRecv;
-	uint64_t m_LastSend;
-
-public:
-	CTCPSocket( );
-	CTCPSocket( SOCKET nSocket, struct sockaddr_in nSIN );
-	virtual ~CTCPSocket( );
-
-	virtual void Reset( );
-	virtual void SetFD( fd_set *fd, fd_set *send_fd, int *nfds );
-	virtual bool GetConnected( )						{ return m_Connected; }
-	virtual string *GetBytes( )						{ return &m_RecvBuffer; }
-	virtual void PutBytes( const string &bytes );
-	virtual void PutBytes( const BYTEARRAY &bytes );
-	virtual uint64_t GetLastRecv( )						{ return m_LastRecv; }
-	virtual uint64_t GetLastSend( )						{ return m_LastSend; }
-	virtual void DoRecv( fd_set *fd );
-	virtual void DoSend( fd_set *fd );
-	virtual void Disconnect( );
-};
-
-//
 // CTCPClient
 //
 
-class CTCPClient : public CTCPSocket
+class CTCPClient
 {
 protected:
-	bool m_Connecting;
+    SOCKET m_Socket;
+    struct sockaddr_in m_SIN;
+    int m_Error;
+    bool m_HasError;
+    bool m_Connected;
+    bool m_Connecting;
+
+private:
+    string m_RecvBuffer;
+    string m_SendBuffer;
 
 public:
-	CTCPClient( );
-	virtual ~CTCPClient( );
+    CTCPClient( );
+    ~CTCPClient( );
 
-	virtual void Reset( );
-	virtual void Disconnect( );
-	virtual bool GetConnecting( )						{ return m_Connecting; }
-	virtual void Connect( const string &localaddress, const string &address, uint16_t port );
-	virtual bool CheckConnect( );
+    BYTEARRAY GetPort( );
+    BYTEARRAY GetIP( );
+
+    string GetIPString( );
+    string GetErrorString( );
+    string *GetBytes( )                                                 { return &m_RecvBuffer; }
+
+    bool CheckConnect( );
+    bool HasError( )                                                    { return m_HasError; }
+    bool GetConnected( )                                                { return m_Connected; }
+    bool GetConnecting( )                                               { return m_Connecting; }
+
+    int GetError( )                                                     { return m_Error; }
+
+    void SetFD( fd_set *fd, fd_set *send_fd, int *nfds );
+    void Reset( );
+    void PutBytes( const string &bytes );
+    void PutBytes( const BYTEARRAY &bytes );
+    void DoRecv( fd_set *fd );
+    void DoSend( fd_set *send_fd );
+    void Disconnect( );
+    void Connect( const string &address, uint16_t port );
 };
 
 #endif
-

@@ -121,9 +121,6 @@ uint64_t GetTicks( )
 
 void SignalCatcher( int signal )
 {
-	// signal( SIGABRT, SignalCatcher );
-	// signal( SIGINT, SignalCatcher );
-
 	CONSOLE_Print( "[!!!] caught signal, shutting down" );
 
 	if( gCCBot )
@@ -405,7 +402,7 @@ int main( )
 		// block for 50ms on all sockets - if you intend to perform any timed actions more frequently you should change this
 		// that said it's likely we'll loop more often than this due to there being data waiting on one of the sockets but there aren't any guarantees
 
-		if( gCCBot->Update( 50000 ) )
+		if( gCCBot->Update( ) )
 			break;
 
 		bool Quit = false;
@@ -625,7 +622,7 @@ CCCBot :: ~CCCBot( )
         delete m_DB;
 }
 
-bool CCCBot :: Update( long usecBlock )
+bool CCCBot :: Update( )
 {
 	unsigned int NumFDs = 0;
 
@@ -644,7 +641,7 @@ bool CCCBot :: Update( long usecBlock )
 
 	struct timeval tv;
 	tv.tv_sec = 0;
-	tv.tv_usec = usecBlock;
+	tv.tv_usec = 50000;
 
 #ifdef WIN32
 	select( 1, &fd, &send_fd, NULL, &tv );
@@ -660,17 +657,15 @@ bool CCCBot :: Update( long usecBlock )
 		MILLISLEEP( 200 );
 	}
 
-	bool BNETExit = false;
-
 	// update battle.net connections
 
 	for( vector<CBNET *> :: iterator i = m_BNETs.begin( ); i != m_BNETs.end( ); ++i )
 	{
 		if( (*i)->Update( &fd, &send_fd ) )
-			BNETExit = true;
+			m_Exiting = true;
 	}
 
-	return m_Exiting || BNETExit;
+	return m_Exiting;
 }
 
 void CCCBot :: ReloadConfigs( )

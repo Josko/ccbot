@@ -563,7 +563,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 
 		if( m_ServerIP.empty( ) )
 		{
-			m_Socket->Connect( string( ), m_Server, 6112 );
+			m_Socket->Connect( m_Server, 6112 );
 			
 			if( !m_Socket->HasError( ) )
 			{
@@ -576,7 +576,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 			// use cached server IP address since resolving takes time and is blocking
 
 			CONSOLE_Print( "[BNET: " + m_Server + "] using cached server IP address " + m_ServerIP );
-			m_Socket->Connect( string( ), m_ServerIP, 6112 );
+			m_Socket->Connect( m_ServerIP, 6112 );
         	}
 
 		m_WaitingToConnect = false;
@@ -615,7 +615,6 @@ void CBNET :: SendChatCommand( const string &chatCommand, bool console )
 				CONSOLE_Print( "[LOCAL: " + m_ServerAlias + "] " + chatCommand );
 		}
 	}
-
 }
 
 void CBNET :: SendChatCommandHidden( const string &chatCommand, bool console )
