@@ -92,6 +92,20 @@ bool CBNET :: Update( void *fd, void *send_fd )
 	
 	uint64_t Time = GetTime( ), Ticks = GetTicks( );
 
+        if( m_Socket->HasError( ) )
+	{
+		// the socket has an error
+
+		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket error" );
+		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
+		m_Socket->Reset( );
+		m_NextConnectTime = Time + 11;
+		m_LoggedIn = false;
+		m_InChat = false;
+		m_WaitingToConnect = true;
+		return m_Exiting;
+	}
+
 	if( m_Socket->GetConnected( ) )
 	{
 		// the socket is connected and everything appears to be working properly
@@ -493,21 +507,7 @@ bool CBNET :: Update( void *fd, void *send_fd )
 
 		m_Socket->DoSend( (fd_set*)send_fd );
 		return m_Exiting;
-	}
-
-	if( m_Socket->HasError( ) )
-	{
-		// the socket has an error
-
-		CONSOLE_Print( "[BNET: " + m_ServerAlias + "] disconnected from battle.net due to socket error" );
-		m_BNCSUtil->Reset( m_UserName, m_UserPassword );
-		m_Socket->Reset( );
-		m_NextConnectTime = Time + 11;
-		m_LoggedIn = false;
-		m_InChat = false;
-		m_WaitingToConnect = true;
-		return m_Exiting;
-	}
+        }
 
 	if( !m_Socket->GetConnecting( ) && !m_Socket->GetConnected( ) && !m_WaitingToConnect )
 	{
