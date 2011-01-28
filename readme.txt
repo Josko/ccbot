@@ -137,7 +137,7 @@ In battle.net (via local chat or whisper at any time).
 
 Parameters in angled brackets <like this> are required and parameters in square brackets [like this] are optional.
 
-!addaccess <access <name>	sets the users access from 0-10
+!setaccess <access <name>	sets the users access from 0-10
 !countaccess <access>		counts how many people have # access
 !checkaccess <name>		checks the users access
 !delaccess <name>		sets the users access to 0
